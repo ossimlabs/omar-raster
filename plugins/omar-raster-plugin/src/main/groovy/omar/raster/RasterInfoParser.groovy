@@ -2,7 +2,7 @@ package omar.raster
 
 import groovy.util.slurpersupport.GPathResult
 import omar.core.Repository
-import omar.oms.OmsInfoParser
+import omar.stager.OmsInfoParser
 
 /**
  * Created by IntelliJ IDEA.
