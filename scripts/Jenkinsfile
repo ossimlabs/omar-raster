@@ -15,7 +15,7 @@ node(""){
     def appName = "omar-raster"
     def omarCommonProjName = "omar-common"
     env.OMAR_COMMON_PROPERTIES="${workspaceDir}/${omarCommonProjName}/omar-common-properties.gradle"
-
+    env.O2_DEV_HOME = pwd()
     stage("Checkout"){
         dir("ossim-ci") {
             git branch: "${OSSIM_GIT_BRANCH}", url: "https://github.com/ossimlabs/ossim-ci.git"
@@ -32,20 +32,21 @@ node(""){
     }
 
     try {
-        stage ("Publish Plugin Artifactory")
-        {
-            withCredentials([[$class: 'UsernamePasswordMultiBinding',
+      stage ("Publish Artifactory")
+      {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', 
                             credentialsId: 'artifactoryCredentials',
-                            usernameVariable: 'ARTIFACTORY_USER',
+                            usernameVariable: 'ARTIFACTORY_USER', 
                             passwordVariable: 'ARTIFACTORY_PASSWORD']])
             {
-                sh """
-                pushd ${workspaceDir}/${appName}/plugins/${appName}-plugin
-                ./gradlew artifactoryPublish
-                popd
-                """
+                    sh """
+                    source ${env.HOME}/.sdkman/bin/sdkman-init.sh
+                    pushd ${workspaceDir}/${appName}
+                    gradle :${appName}-plugin:artifactoryPublish
+                    popd
+                    """
             }
-        }
+      }
     }
     catch(e){
         echo e.toString()
