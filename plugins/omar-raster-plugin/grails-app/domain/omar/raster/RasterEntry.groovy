@@ -498,7 +498,7 @@ class RasterEntry
       {
         def name = tagNode.name().toString().trim()
         def value = tagNode.text().toString().trim()
-
+println "NAME === ${name} \n VALUE ==== ${value}"
 // Need to add following check in there
 //        if ( !key.startsWith("LINE_NUM") &&
 //            !key.startsWith("LINE_DEN") &&
@@ -642,6 +642,7 @@ class RasterEntry
               }
               break
             case "azimuthangle":
+            case "azimuth_angle":
               if ( value && value != "nan" )
               {
                 rasterEntry.azimuthAngle = value as Double
@@ -737,6 +738,7 @@ class RasterEntry
               }
               break;
             case "niirs":
+            case "predicted_niirs":
               if ( value && value != "nan" && !rasterEntry.niirs )
               {
                 rasterEntry.niirs = value as Double
@@ -773,6 +775,8 @@ class RasterEntry
               }
               break;
             case "sunazimuth":
+            case "sun_azimuth":
+            case "sunaz":
               if(value )
               {
                 try{
@@ -785,6 +789,8 @@ class RasterEntry
               }
               break;
             case "sunelevation":
+            case "sun_elevation":
+            case "sunel":
               if(value )
               {
                 try{
