@@ -660,6 +660,16 @@ println "NAME === ${name} \n VALUE ==== ${value}"
                 rasterEntry.grazingAngle = value as Double
               }
               break;
+            case "cloud":
+            case "cloud_cover":
+            case "cloud_cvr":
+            case "cloudcvr":
+            case "cloudcover":
+              if ( value && (value != "nan") )
+              {
+                rasterEntry.cloudCover = value as Double
+              }
+              break;
             case "elevation_angle":
               if ( value && (value != "nan") &&(rasterEntry.grazingAngle==null))
               {
