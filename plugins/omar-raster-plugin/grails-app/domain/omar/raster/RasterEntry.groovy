@@ -645,19 +645,19 @@ println "NAME === ${name} \n VALUE ==== ${value}"
             case "azimuth_angle":
               if ( value && value != "nan" )
               {
-                rasterEntry.azimuthAngle = value as Double
+                rasterEntry.azimuthAngle = value.toDouble().round( 2 )
               }
               break
             case "angletonorth":
               if ( value && value != "nan" && !rasterEntry.azimuthAngle )
               {
-                rasterEntry.azimuthAngle = ( ( value as Double ) + 90.0 ) % 360.0;
+                rasterEntry.azimuthAngle = (( ( value as Double ) + 90.0 ) % 360.0).round( 2 );
               }
               break;
             case "grazingangle":
               if ( value && (value != "nan") )
               {
-                rasterEntry.grazingAngle = value as Double
+                rasterEntry.grazingAngle = value.toDouble().round( 2 )
               }
               break;
             case "cloud":
@@ -673,13 +673,13 @@ println "NAME === ${name} \n VALUE ==== ${value}"
             case "elevation_angle":
               if ( value && (value != "nan") &&(rasterEntry.grazingAngle==null))
               {
-                rasterEntry.grazingAngle = value as Double
+                rasterEntry.grazingAngle = value.toDouble().round( 2 )
               }
               break;
             case "oblang":
               if ( value && value != "nan" && !rasterEntry.grazingAngle )
               {
-                rasterEntry.grazingAngle = 90 - ( value as Double )
+                rasterEntry.grazingAngle = (90 - ( value as Double )).round( 2 )
               }
               break;
 
