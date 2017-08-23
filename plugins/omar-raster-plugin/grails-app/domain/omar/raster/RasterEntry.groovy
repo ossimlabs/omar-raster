@@ -498,7 +498,6 @@ class RasterEntry
       {
         def name = tagNode.name().toString().trim()
         def value = tagNode.text().toString().trim()
-println "NAME === ${name} \n VALUE ==== ${value}"
 // Need to add following check in there
 //        if ( !key.startsWith("LINE_NUM") &&
 //            !key.startsWith("LINE_DEN") &&
@@ -580,6 +579,12 @@ println "NAME === ${name} \n VALUE ==== ${value}"
                 rasterEntry.sensorId = value
               }
               break;
+            case ~/.*sensor.*/:
+              if(value && !rasterEntry.sensorId )
+              {
+                rasterEntry.sensorId = value
+              }
+              break;
             case "sensor_type":
               if ( value && !rasterEntry.sensorId )
               {
@@ -654,6 +659,7 @@ println "NAME === ${name} \n VALUE ==== ${value}"
                 rasterEntry.azimuthAngle = (( ( value as Double ) + 90.0 ) % 360.0).round( 2 );
               }
               break;
+            case ~/.*graz_ang.*/:
             case "grazingangle":
               if ( value && (value != "nan") )
               {
