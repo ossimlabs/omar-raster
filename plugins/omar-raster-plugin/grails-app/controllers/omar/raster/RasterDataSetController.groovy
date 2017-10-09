@@ -122,6 +122,8 @@ class RasterDataSetController
 	])
 	def removeRaster()
 	{
+		log.info "removeRaster: ${params}"
+
 		def httpStatusMessage = new HttpStatusMessage()
 		def status = rasterDataSetService.removeRaster( httpStatusMessage, params )
 
@@ -138,6 +140,8 @@ class RasterDataSetController
 	 ] )
 	def getRasterFilesProcessing()
 	{
+		log.info "getRasterFilesProcessing: ${params}"
+
 		def jsonData = request.JSON?request.JSON as HashMap:null
 		def requestParams = params - params.subMap( ['controller', 'action'] )
 		def cmd = new GetRasterFilesProcessingCommand()
@@ -173,6 +177,8 @@ class RasterDataSetController
 	] )
 	def getRasterFiles()
 	{
+		log.info "getRasterFiles: ${params}"
+
 		def jsonData = request.JSON?request.JSON as HashMap:null
 		def requestParams = params - params.subMap( ['controller', 'action'] )
 		def cmd = new GetRasterFilesCommand()
@@ -203,6 +209,8 @@ class RasterDataSetController
 		)
 	])
 	def getDistinctValues() {
+		log.info "getDistinctValues: ${params}"
+
 		def results = []
 		switch (params.property) {
 			case "countryCode" :
