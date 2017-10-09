@@ -108,6 +108,7 @@ class RasterEntry
 
   static mapping = {
     cache true
+    autowire true    
     id generator: 'identity'
     accessDate index: 'raster_entry_access_date_idx', sqlType: "timestamp with time zone" /*, type: PersistentDateTime*/
     acquisitionDate index: 'raster_entry_acquisition_date_idx' , sqlType: "timestamp with time zone"
