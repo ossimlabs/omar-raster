@@ -1,9 +1,7 @@
 package omar.raster
 
-import com.wordnik.swagger.annotations.Api
-import com.wordnik.swagger.annotations.ApiImplicitParam
-import com.wordnik.swagger.annotations.ApiImplicitParams
-import com.wordnik.swagger.annotations.ApiOperation
+import io.swagger.annotations.*
+
 import grails.converters.JSON
 import omar.core.HttpStatusMessage
 import omar.core.BindUtil
