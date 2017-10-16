@@ -77,13 +77,13 @@ to the URL.  The format supported:
             """)
 	@ApiImplicitParams( [
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', required = true ),
-			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="[true,false]", defaultValue="true", dataType = "boolean",  required = false),
-			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="[true,false]", defaultValue="true", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="[true,false]", defaultValue="true", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="[true,false]", defaultValue="false", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="[true,false]", defaultValue="false", dataType = "boolean", required = false),
+			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="true,false", defaultValue="true", dataType = "boolean",  required = false),
+			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="true,false", defaultValue="true", dataType = "boolean", required = false),
+			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", required = false),
+			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="true,false", defaultValue="false", dataType = "boolean", required = false),
+			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="true,false", defaultValue="false", dataType = "boolean", required = false),
 			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="[ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k]", defaultValue = "ossim_tiff_box", dataType = "string", required = false),
-			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="[NONE,JPEG,PACKBITS,DEFLATE]", defaultValue="NONE", dataType = "string", required = false),
+			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="NONE,JPEG,PACKBITS,DEFLATE", defaultValue="NONE", dataType = "string", required = false),
 	] )
 	def addRaster()
 	{
@@ -105,7 +105,7 @@ to the URL.  The format supported:
 
 	@ApiOperation( value = "Remove a Raster from the database", produces = 'text/plain', httpMethod = 'POST' )
 	@ApiImplicitParams([
-			@ApiImplicitParam( name = 'deleteFiles', value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', allowableValues="[true,false]", defaultValue="false", dataType = "boolean",  required = false),
+			@ApiImplicitParam( name = 'deleteFiles', value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', allowableValues="true,false", defaultValue="false", dataType = "boolean",  required = false),
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to remove', dataType = 'string', required = true ),
 	])
 	def removeRaster()
@@ -182,7 +182,7 @@ The service api **getRasterFiles**
 	)
 	@ApiImplicitParams([
 		@ApiImplicitParam(
-			allowableValues = "[countryCode, missionId, sensorId, targetId]",
+			allowableValues = "countryCode, missionId, sensorId, targetId",
  			dataType = 'string',
 			defaultValue = "countryCode",
 			name = 'property',
