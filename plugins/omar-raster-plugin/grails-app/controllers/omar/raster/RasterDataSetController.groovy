@@ -23,70 +23,58 @@ class RasterDataSetController
 			produces = 'text/plain',
 			httpMethod = 'POST',
 			notes = """
-    The service api <b>addRaster</b>
-    <br><br>
-    <H2>Parameter List</H2>
-    <br><br>
-    <ul>
-        <li>
-            <b>filename</b><p/>
-				Pass the filename to be added and indexed into the database
-        </li>
-        <br>
-        <li>
-            <b>background</b><p/>
-            If the parameter is true it will indicate to submit the process as a background job.
-        </li>
-        <br>
-        <li>
-            <b>buildOverviews</b><p/>
-            If the parameter is true it will indicate to build overviews for the image.  Also
-            known as reduced resolution sets.
-        </li>
-        <br>
-        <li>
-            <b>buildHistograms</b><p/>
-            If the parameter is true it will indicate to build histograms for the image.
-        </li>
-        <br>
-        <li>
-            <b>buildHistogramsWithR0</b><p/>
-            If the parameter is true and buildHistograms is true then it will use the full resolution
-            to build the histograms.  Ususally this is specified if you have images with internal overviews.
-            If internal overviews are found and buildHistograms is true and  buildHistogramsWithR0 is false then it will
-            build using the first iteration of the overview and that is whatever the last level the internal overviews
-            end.  So if you have an image with internal 5 levels then it will use the 5th level for the histogram.  If
-        </li>
-        <br>
-        <li>
-            <b>useFastHistogramStaging</b><p/>
-            If enabled it will only use a few tiles in the image to calculate the histogram
-        </li>
-        <br>
-        <li>
-            <b>overviewType</b><p/>
-            Indicates the overview type to use.
-        </li>
-        <br>
-        <li>
-            <b>overviewCompressionType</b><p/>
-            Indicates the type of compression to use during the building of the overviews.
-        </li>
-        <br><br>
-        <b>Additional Notes</b><br><br>
-        You can also pass the arguments as a JSON string and post to the URL.  The format supported:
-        <pre>
-        {
-          "filename": "",
-          "background: "",
-          "buildOverviews": "",
-          "buildHistograms": "",
-          "overviewType": "",
-          "overviewCompressionType":""
-        }
-        </pre>
-    <ul>
-    """)
+The service api **addRaster**
+
+## Parameter List
+
+*   **filename**
+
+    Pass the filename to be added and indexed into the database
+
+*   **background**
+
+    If the parameter is true it will indicate to submit the process as a background job.
+
+*   **buildOverviews**
+
+    If the parameter is true it will indicate to build overviews for the image. Also known as reduced resolution sets.
+
+*   **buildHistograms**
+
+    If the parameter is true it will indicate to build histograms for the image.
+
+*   **buildHistogramsWithR0**
+
+    If the parameter is true and buildHistograms is true then it will use the full resolution to build the histograms. Ususally this is specified if you have images with internal overviews. If internal overviews are found and buildHistograms is true and buildHistogramsWithR0 is false then it will build using the first iteration of the overview and that is whatever the last level the internal overviews end. So if you have an image with internal 5 levels then it will use the 5th level for the histogram. If
+
+*   **useFastHistogramStaging**
+
+    If enabled it will only use a few tiles in the image to calculate the histogram
+
+*   **overviewType**
+
+    Indicates the overview type to use.
+
+*   **overviewCompressionType**
+
+    Indicates the type of compression to use during the building of the overviews.
+
+**Additional Notes**
+
+You can also pass the arguments as a JSON string and post 
+to the URL.  The format supported:
+
+```        
+{
+   "filename": "",
+   "background: "",
+   "buildOverviews": "",
+   "buildHistograms": "",
+   "overviewType": "",
+   "overviewCompressionType":""
+}
+```
+            """)
 	@ApiImplicitParams( [
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', required = true ),
 			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="[true,false]", defaultValue="true", dataType = "boolean",  required = false),
@@ -155,23 +143,18 @@ class RasterDataSetController
 		render contentType: "application/json", text: result as JSON
 	}
 
-
 	@ApiOperation( value = "Returns the Files assoicated with a given raster ID",
 			produces = 'application/json',
 			httpMethod = 'GET',
 			notes = """
-    The service api <b>getRasterFiles</b>
-    <br><br>
-    <H2>Parameter List</H2>
-    <br><br>
-    <ul>
-        <li>
-            <b>id</b><p/>
-				This can be the record ID, image ID, or the indexId for a entry to search for
-        </li>
-        <br>
-    <ul>
-""")
+The service api **getRasterFiles**  
+
+## Parameter List
+
+*   **id**
+
+    This can be the record ID, image ID, or the indexId for a entry to search for
+    """)
 	@ApiImplicitParams( [
 			@ApiImplicitParam(name = 'id', value = 'Search Id', required=false, paramType = 'query', dataType = 'string'),
 	] )
