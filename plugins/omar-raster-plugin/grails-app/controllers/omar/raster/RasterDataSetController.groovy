@@ -8,20 +8,21 @@ import omar.core.BindUtil
 import groovy.json.JsonOutput
 
 @Api( value = "dataManager",
+     produces = 'application/json',
+     consumes = 'application/json',
 		description = "DataManager Support"
 )
 class RasterDataSetController
 {
 	static allowedMethods = [
-			addRaster: 'POST',
+			addRaster: 'GET',
 			removeRaster: 'POST' ,
 			getRasterFilesProcessing: 'GET'
 	]
 
 	def rasterDataSetService
 	@ApiOperation( value = "Add a Raster to the database",
-			produces = 'text/plain',
-			httpMethod = 'POST',
+			httpMethod = "GET",
 			notes = """
 The service api **addRaster**
 
@@ -77,13 +78,13 @@ to the URL.  The format supported:
             """)
 	@ApiImplicitParams( [
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', required = true ),
-			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="true,false", defaultValue="true", dataType = "boolean",  required = false),
-			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="true,false", defaultValue="true", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="true,false", defaultValue="false", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="true,false", defaultValue="false", dataType = "boolean", required = false),
-			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="[ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k]", defaultValue = "ossim_tiff_box", dataType = "string", required = false),
-			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="NONE,JPEG,PACKBITS,DEFLATE", defaultValue="NONE", dataType = "string", required = false),
+			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="[ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k]", defaultValue = "ossim_tiff_box", dataType = "string", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="NONE,JPEG,PACKBITS,DEFLATE", defaultValue="NONE", dataType = "string", paramType = "query", required = false),
 	] )
 	def addRaster()
 	{
@@ -105,8 +106,14 @@ to the URL.  The format supported:
 
 	@ApiOperation( value = "Remove a Raster from the database", produces = 'text/plain', httpMethod = 'POST' )
 	@ApiImplicitParams([
-			@ApiImplicitParam( name = 'deleteFiles', value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', allowableValues="true,false", defaultValue="false", dataType = "boolean",  required = false),
-			@ApiImplicitParam( name = 'filename', value = 'Path to file to remove', dataType = 'string', required = true ),
+			@ApiImplicitParam( name = 'deleteFiles', 
+				                value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', 
+				                allowableValues="true,false", 
+				                defaultValue="false", 
+				                dataType = "boolean", 
+				                paramType = 'query',
+				                required = false),
+			@ApiImplicitParam( name = 'filename', value = 'Path to file to remove', dataType = 'string', paramType = 'query',required = true ),
 	])
 	def removeRaster()
 	{
@@ -121,7 +128,7 @@ to the URL.  The format supported:
 
 	@ApiOperation( value = "Returns the processing status of the raster files",
 			         produces = 'application/json',
-			httpMethod = 'GET' )
+			         httpMethod = 'GET' )
 	@ApiImplicitParams( [
 			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
 			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
@@ -156,7 +163,11 @@ The service api **getRasterFiles**
     This can be the record ID, image ID, or the indexId for a entry to search for
     """)
 	@ApiImplicitParams( [
-			@ApiImplicitParam(name = 'id', value = 'Search Id', required=false, paramType = 'query', dataType = 'string'),
+			@ApiImplicitParam(name = 'id', 
+				               value = 'Search Id', 
+				               required=false, 
+				               paramType = 'query', 
+				               dataType = 'string'),
 	] )
 	def getRasterFiles()
 	{
