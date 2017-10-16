@@ -67,7 +67,7 @@ to the URL.  The format supported:
 ```        
 {
    "filename": "",
-   "background: "",
+   "background": "",
    "buildOverviews": "",
    "buildHistograms": "",
    "overviewType": "",
