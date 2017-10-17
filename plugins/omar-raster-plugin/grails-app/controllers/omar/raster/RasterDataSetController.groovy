@@ -15,14 +15,14 @@ import groovy.json.JsonOutput
 class RasterDataSetController
 {
 	static allowedMethods = [
-			addRaster: 'GET',
+			addRaster: 'POST',
 			removeRaster: 'POST' ,
 			getRasterFilesProcessing: 'GET'
 	]
 
 	def rasterDataSetService
 	@ApiOperation( value = "Add a Raster to the database",
-			httpMethod = "GET",
+			httpMethod = "POST",
 			notes = """
 The service api **addRaster**
 
@@ -104,7 +104,9 @@ to the URL.  The format supported:
 		render( httpStatusMessage.message )
 	}
 
-	@ApiOperation( value = "Remove a Raster from the database", produces = 'text/plain', httpMethod = 'POST' )
+	@ApiOperation( value = "Remove a Raster from the database", 
+		            produces = 'text/plain', 
+		            httpMethod = 'POST' )
 	@ApiImplicitParams([
 			@ApiImplicitParam( name = 'deleteFiles', 
 				                value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', 
