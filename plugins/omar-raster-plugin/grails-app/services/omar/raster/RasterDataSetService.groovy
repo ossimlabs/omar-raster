@@ -123,6 +123,7 @@ class RasterDataSetService implements ApplicationContextAware {
 									log.info(httpStatusMessage?.message)
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 									httpStatusMessage?.message = "Added raster ${ids}:${filename}"
+									log.info "added raster\n"
 								}
 								else {
 									savedRaster = false
