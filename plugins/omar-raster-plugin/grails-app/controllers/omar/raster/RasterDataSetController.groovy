@@ -77,7 +77,7 @@ to the URL.  The format supported:
 ```
             """)
 	@ApiImplicitParams( [
-			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', required = true ),
+			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', paramType = "query", required = true ),
 			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
