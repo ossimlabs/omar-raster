@@ -43,6 +43,8 @@ class RasterDataSetService implements ApplicationContextAware {
 		String scheme = uri.scheme?.toLowerCase()
 
 		println "got to add raster"
+		log.info "got to LOG OF add raster"
+
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -233,6 +235,7 @@ def updateRaster(def httpStatusMessage, def params)
 		String filename = params?.filename //as File
 
 		println "got to remove raster"
+		log.info "got to LOG OF remove raster"
 
 		def rasterFile = RasterFile.findByNameAndType( filename, "main" )
 		if ( rasterFile ) {
