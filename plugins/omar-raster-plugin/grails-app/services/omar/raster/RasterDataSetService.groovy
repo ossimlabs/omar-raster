@@ -66,7 +66,6 @@ class RasterDataSetService implements ApplicationContextAware {
 		{
 			def xml = dataInfoService.getInfo(filename)
 			def background = false;
-			// TEMPORARY CHANGE FOR TESTING ONLY
 			try { background = params?.background }
 			catch (Exception e) { log.error(e) }
 
@@ -75,7 +74,6 @@ class RasterDataSetService implements ApplicationContextAware {
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
-				println "not xml"
 			}
 			else if (background)
 			{
@@ -97,10 +95,6 @@ class RasterDataSetService implements ApplicationContextAware {
 				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
 				parserPool?.returnObject(parser)
-
-				// TEMPORRARY CHANGES FOR TESTING ONLY
-				//params.buildOverviews = 0
-				//params.buildHistograms  = 0
 
 				if(params.buildOverviews||params.buildHistograms) {
 					def result = stagerService.stageFileJni([filename:params.filename,
@@ -140,9 +134,20 @@ class RasterDataSetService implements ApplicationContextAware {
 									def missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
 									def imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
 									def sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+									def fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+									def acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
+									def ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+									def filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+
 									println "missionids " + missionids
 									println "imageids " + imageids
 									println "sensorids " + sensorids
+									println "filetypes" + fileTypes
+									println "acquisitionDates" + acquisitionDates
+									println "ingestDates" + ingestDates
+									println "filenames" + filenames
+									
+
 
 								}
 								else {
