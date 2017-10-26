@@ -44,13 +44,12 @@ class RasterDataSetService implements ApplicationContextAware {
 		String scheme = uri.scheme?.toLowerCase()
 		def raster_logs
 
-		println "got to add raster"
+		log.info "got to add raster"
 
 		if(!scheme || (scheme=="file"))
 		{
 			File testFile = filename as File
 			if (!testFile?.exists()) {
-				println new Date()
 				httpStatusMessage?.status = HttpStatus.NOT_FOUND
 				httpStatusMessage?.message = "Not Found: ${filename}"
 				log.error(httpStatusMessage?.message)
@@ -72,7 +71,6 @@ class RasterDataSetService implements ApplicationContextAware {
 			if (!xml) {
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
 			}
 			else if (background)
@@ -81,14 +79,12 @@ class RasterDataSetService implements ApplicationContextAware {
 
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
-				println httpStatusMessage?.message
 				//log.info( "submitting ${ filename } for background processing" )
 
 				//httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
 
 				//DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
 				//		true );
-				println "background"
 			}
 			else {
 				def parser = parserPool?.borrowObject()
@@ -113,7 +109,6 @@ class RasterDataSetService implements ApplicationContextAware {
 					def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
 					def repository = ingestService?.findRepositoryForFile(filename)
 					def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
-					println "rasterDataSets?.size() " + rasterDataSets?.size()
 
 					if (rasterDataSets?.size() < 1) {
 						httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
@@ -137,14 +132,6 @@ class RasterDataSetService implements ApplicationContextAware {
 									def acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
 									def ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 									def filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
-
-									println "missionids " + missionids
-									println "imageids " + imageids
-									println "sensorids " + sensorids
-									println "filetypes" + fileTypes
-									println "acquisitionDates" + acquisitionDates
-									println "ingestDates" + ingestDates
-									println "filenames" + filenames
 
 									raster_logs = new JsonBuilder(filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 											ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
@@ -260,7 +247,7 @@ def updateRaster(def httpStatusMessage, def params)
 		def status = false
 		String filename = params?.filename //as File
 
-		println "got to remove raster"
+		log.info "got to remove raster"
 
 		def rasterFile = RasterFile.findByNameAndType( filename, "main" )
 		if ( rasterFile ) {
