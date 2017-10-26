@@ -66,8 +66,8 @@ class RasterDataSetService implements ApplicationContextAware {
 		{
 			def xml = dataInfoService.getInfo(filename)
 			def background = false;
-			try { background = params?.background }
-			catch (Exception e) { log.error(e) }
+//			try { background = params?.background }
+//			catch (Exception e) { log.error(e) }
 
 			if (!xml) {
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
@@ -89,13 +89,14 @@ class RasterDataSetService implements ApplicationContextAware {
 
 				//DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
 				//		true );
-				println "not background"
+				println "background"
 			}
 			else {
 				def parser = parserPool?.borrowObject()
 				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
 				parserPool?.returnObject(parser)
+				println "got to else"
 
 				if(params.buildOverviews||params.buildHistograms) {
 					def result = stagerService.stageFileJni([filename:params.filename,
@@ -131,6 +132,10 @@ class RasterDataSetService implements ApplicationContextAware {
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 									httpStatusMessage?.message = "Added raster ${ids}:${filename}"
 									println "added raster\n"
+									def missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+									def imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+									def sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+
 								}
 								else {
 									savedRaster = false
