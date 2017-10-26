@@ -43,8 +43,6 @@ class RasterDataSetService implements ApplicationContextAware {
 		String scheme = uri.scheme?.toLowerCase()
 
 		println "got to add raster"
-		log.info "got to LOG OF add raster"
-
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -53,11 +51,13 @@ class RasterDataSetService implements ApplicationContextAware {
 				println new Date()
 				httpStatusMessage?.status = HttpStatus.NOT_FOUND
 				httpStatusMessage?.message = "Not Found: ${filename}"
+				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
 			}
 			else if (!testFile?.canRead()) {
 				httpStatusMessage?.status = HttpStatus.FORBIDDEN
 				httpStatusMessage?.message = "Not Readable ${filename}"
+				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
 			}
 		}
@@ -72,7 +72,9 @@ class RasterDataSetService implements ApplicationContextAware {
 			if (!xml) {
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
+				println "not xml"
 			}
 			else if (background)
 			{
@@ -80,13 +82,14 @@ class RasterDataSetService implements ApplicationContextAware {
 
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
-
+				println httpStatusMessage?.message
 				//log.info( "submitting ${ filename } for background processing" )
 
 				//httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
 
 				//DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
 				//		true );
+				println "not background"
 			}
 			else {
 				def parser = parserPool?.borrowObject()
@@ -127,7 +130,7 @@ class RasterDataSetService implements ApplicationContextAware {
 									log.info(httpStatusMessage?.message)
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 									httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-									log.info "added raster\n"
+									println "added raster\n"
 								}
 								else {
 									savedRaster = false
