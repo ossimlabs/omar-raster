@@ -7,6 +7,7 @@ import omar.core.HttpStatus
 import omar.stager.OmarStageFile
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import groovy.json.JsonBuilder
 
 
 class RasterDataSetService implements ApplicationContextAware {
@@ -41,6 +42,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		httpStatusMessage?.message = "Added raster ${filename}"
 		URI uri = new URI(filename.toString())
 		String scheme = uri.scheme?.toLowerCase()
+		def raster_logs
 
 		println "got to add raster"
 
@@ -51,13 +53,11 @@ class RasterDataSetService implements ApplicationContextAware {
 				println new Date()
 				httpStatusMessage?.status = HttpStatus.NOT_FOUND
 				httpStatusMessage?.message = "Not Found: ${filename}"
-				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
 			}
 			else if (!testFile?.canRead()) {
 				httpStatusMessage?.status = HttpStatus.FORBIDDEN
 				httpStatusMessage?.message = "Not Readable ${filename}"
-				println httpStatusMessage?.message
 				log.error(httpStatusMessage?.message)
 			}
 		}
@@ -113,7 +113,6 @@ class RasterDataSetService implements ApplicationContextAware {
 					def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
 					def repository = ingestService?.findRepositoryForFile(filename)
 					def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
-					println "got to else"
 					println "rasterDataSets?.size() " + rasterDataSets?.size()
 
 					if (rasterDataSets?.size() < 1) {
@@ -146,7 +145,13 @@ class RasterDataSetService implements ApplicationContextAware {
 									println "acquisitionDates" + acquisitionDates
 									println "ingestDates" + ingestDates
 									println "filenames" + filenames
-									
+
+									raster_logs = new JsonBuilder(filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+											ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+
+									log.info raster_logs.toString()
+
+
 
 
 								}
@@ -256,7 +261,6 @@ def updateRaster(def httpStatusMessage, def params)
 		String filename = params?.filename //as File
 
 		println "got to remove raster"
-		log.info "got to LOG OF remove raster"
 
 		def rasterFile = RasterFile.findByNameAndType( filename, "main" )
 		if ( rasterFile ) {
