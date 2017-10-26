@@ -67,8 +67,8 @@ class RasterDataSetService implements ApplicationContextAware {
 			def xml = dataInfoService.getInfo(filename)
 			def background = false;
 			// TEMPORARY CHANGE FOR TESTING ONLY
-//			try { background = params?.background }
-//			catch (Exception e) { log.error(e) }
+			try { background = params?.background }
+			catch (Exception e) { log.error(e) }
 
 			if (!xml) {
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
@@ -99,8 +99,8 @@ class RasterDataSetService implements ApplicationContextAware {
 				parserPool?.returnObject(parser)
 
 				// TEMPORRARY CHANGES FOR TESTING ONLY
-				params.buildOverviews = 0
-				params.buildHistograms  = 0
+				//params.buildOverviews = 0
+				//params.buildHistograms  = 0
 
 				if(params.buildOverviews||params.buildHistograms) {
 					def result = stagerService.stageFileJni([filename:params.filename,
