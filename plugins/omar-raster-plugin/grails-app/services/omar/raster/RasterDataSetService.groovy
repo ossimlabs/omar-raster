@@ -66,6 +66,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		{
 			def xml = dataInfoService.getInfo(filename)
 			def background = false;
+			// TEMPORARY CHANGE FOR TESTING ONLY
 //			try { background = params?.background }
 //			catch (Exception e) { log.error(e) }
 
@@ -83,12 +84,12 @@ class RasterDataSetService implements ApplicationContextAware {
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
 				println httpStatusMessage?.message
-				//log.info( "submitting ${ filename } for background processing" )
+				log.info( "submitting ${ filename } for background processing" )
 
-				//httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
+				httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
 
-				//DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
-				//		true );
+				DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
+						true );
 				println "background"
 			}
 			else {
@@ -96,7 +97,10 @@ class RasterDataSetService implements ApplicationContextAware {
 				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
 				parserPool?.returnObject(parser)
-				println "got to else"
+
+				// TEMPORRARY CHANGES FOR TESTING ONLY
+				params.buildOverviews = 0
+				params.buildHistograms  = 0
 
 				if(params.buildOverviews||params.buildHistograms) {
 					def result = stagerService.stageFileJni([filename:params.filename,
@@ -115,6 +119,8 @@ class RasterDataSetService implements ApplicationContextAware {
 					def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
 					def repository = ingestService?.findRepositoryForFile(filename)
 					def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
+					println "got to else"
+					println "rasterDataSets?.size() " + rasterDataSets?.size()
 
 					if (rasterDataSets?.size() < 1) {
 						httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
@@ -131,10 +137,12 @@ class RasterDataSetService implements ApplicationContextAware {
 									log.info(httpStatusMessage?.message)
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 									httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-									println "added raster\n"
 									def missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
 									def imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
 									def sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+									println "missionids " + missionids
+									println "imageids " + imageids
+									println "sensorids " + sensorids
 
 								}
 								else {
