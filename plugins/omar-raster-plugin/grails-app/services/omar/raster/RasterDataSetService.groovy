@@ -84,12 +84,12 @@ class RasterDataSetService implements ApplicationContextAware {
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
 				println httpStatusMessage?.message
-				log.info( "submitting ${ filename } for background processing" )
+				//log.info( "submitting ${ filename } for background processing" )
 
-				httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
+				//httpStatusMessage?.message = "submitting ${ filename } for background processing".toString()
 
-				DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
-						true );
+				//DataManagerQueueItem.addItem( [ file: "${ filename }", dataManagerAction: "addRaster" ],
+				//		true );
 				println "background"
 			}
 			else {
