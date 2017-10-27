@@ -83,7 +83,7 @@ to the URL.  The format supported:
 			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
-			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="[ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k]", defaultValue = "ossim_tiff_box", dataType = "string", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k", defaultValue = "ossim_tiff_box", dataType = "string", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="NONE,JPEG,PACKBITS,DEFLATE", defaultValue="NONE", dataType = "string", paramType = "query", required = false),
 	] )
 	def addRaster()
