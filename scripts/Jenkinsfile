@@ -38,11 +38,6 @@ node(""){
         dir("omar-openlayers") {
             git branch: "${OSSIM_GIT_BRANCH}", url: "https://github.com/ossimlabs/omar-openlayers.git"
         }
-
-        dir("omar-geoscript") {
-            git branch: "${OSSIM_GIT_BRANCH}", url: "https://github.com/ossimlabs/omar-geoscript.git"
-        }
-
         dir("omar-ingest-metrics") {
             git branch: "${OSSIM_GIT_BRANCH}", url: "https://github.com/ossimlabs/omar-ingest-metrics.git"
         }
