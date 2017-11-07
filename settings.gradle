@@ -7,7 +7,6 @@ if ( O2_DEV_HOME ) {
            'omar-core-plugin',
            'omar-oms-plugin',
            'omar-openlayers-plugin',
-           'omar-geoscript-plugin',
            'omar-ingest-metrics-plugin',
            'omar-stager-plugin'
 
