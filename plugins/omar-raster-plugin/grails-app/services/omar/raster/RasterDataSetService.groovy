@@ -42,6 +42,10 @@ class RasterDataSetService implements ApplicationContextAware {
 		URI uri = new URI(filename.toString())
 		String scheme = uri.scheme?.toLowerCase()
 		def raster_logs
+		def requestType = "GET"
+		def requestMethod = "addRaster"
+		Date startTime = new Date()
+
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -123,7 +127,9 @@ class RasterDataSetService implements ApplicationContextAware {
 									def ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 									def filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 
-									raster_logs = new JsonBuilder(filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+									raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
+											requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+											filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 											ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
 									log.info raster_logs.toString()
