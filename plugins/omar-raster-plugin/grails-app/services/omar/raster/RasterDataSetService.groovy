@@ -46,6 +46,8 @@ class RasterDataSetService implements ApplicationContextAware {
 		def requestMethod = "addRaster"
 		Date startTime = new Date()
 
+		log.info "Got to add raster\n"
+
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -62,6 +64,9 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 		}
 
+
+		log.info "status" + httpStatusMessage?.status
+
 		if(httpStatusMessage?.status == HttpStatus.OK)
 		{
 			def xml = dataInfoService.getInfo(filename)
@@ -70,24 +75,29 @@ class RasterDataSetService implements ApplicationContextAware {
 			catch (Exception e) { log.error(e) }
 
 			if (!xml) {
+				log.info "not xml\n"
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 				log.error(httpStatusMessage?.message)
 			}
 			else if (background)
 			{
+				log.info "background\n"
 				def result = stagerService.addFileToStage(filename, params.properties)
 
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
 			}
 			else {
+				log.info "FIRST ELSE\n"
+
 				def parser = parserPool?.borrowObject()
 				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
 				parserPool?.returnObject(parser)
 
 				if(params.buildOverviews||params.buildHistograms) {
+					log.info "overviews or histograms"
 					def result = stagerService.stageFileJni([filename:params.filename,
 						  buildOverviews: params.buildOverviews,
 						  buildHistograms:params.buildHistograms,
@@ -101,6 +111,7 @@ class RasterDataSetService implements ApplicationContextAware {
 					httpStatusMessage.message = result.message
 				}
 				else {
+					log.info "SECOND ELSE\n"
 					def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
 					def repository = ingestService?.findRepositoryForFile(filename)
 					def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
@@ -111,10 +122,14 @@ class RasterDataSetService implements ApplicationContextAware {
 						log.error(httpStatusMessage?.message)
 					}
 					else {
+						log.info "THIRD ELSE\n"
+
 						rasterDataSets?.each { rasterDataSet ->
 							def savedRaster = true
 							try {
+								log.info "INSIDE TRY\n"
 								if (rasterDataSet.save()) {
+									log.info "INSIDE FINAL IF\n"
 									//stagerHandler.processSuccessful(filename, xml)
 									httpStatusMessage?.status = HttpStatus.OK
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
