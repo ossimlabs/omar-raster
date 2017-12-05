@@ -87,6 +87,10 @@ class RasterDataSetService implements ApplicationContextAware {
 			def repository = ingestService?.findRepositoryForFile(filename)
 			def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
 
+
+			def parser = parserPool?.borrowObject()
+			def oms = new XmlSlurper(parser)?.parseText(xml)
+
 			if (!xml) {
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
@@ -122,8 +126,6 @@ class RasterDataSetService implements ApplicationContextAware {
 
 			}
 			else {
-				def parser = parserPool?.borrowObject()
-				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
 				parserPool?.returnObject(parser)
 
