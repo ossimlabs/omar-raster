@@ -46,6 +46,15 @@ class RasterDataSetService implements ApplicationContextAware {
 		def requestMethod = "addRaster"
 		Date startTime = new Date()
 
+		def missionids
+		def imageids
+		def sensorids
+		def fileTypes
+		def acquisitionDates
+		def ingestDates
+		def filenames
+
+
 		log.info "Got to add raster\n"
 
 
@@ -74,23 +83,45 @@ class RasterDataSetService implements ApplicationContextAware {
 			try { background = params?.background }
 			catch (Exception e) { log.error(e) }
 
+			def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
+			def repository = ingestService?.findRepositoryForFile(filename)
+			def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
+
 			if (!xml) {
-				log.info "not xml\n"
 				httpStatusMessage?.message = "Unable to get information on file ${filename}"
 				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 				log.error(httpStatusMessage?.message)
 			}
 			else if (background)
 			{
-				log.info "background\n"
 				def result = stagerService.addFileToStage(filename, params.properties)
 
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
+
+				if(rasterDataSets?.size() > 1) {
+					rasterDataSets?.each { rasterDataSet ->
+						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+						missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+						imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+						sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+						fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+						acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
+						ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+						filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+					}
+					raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
+							requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+							filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+							ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+
+					log.info raster_logs.toString()
+
+				}
+
+
 			}
 			else {
-				log.info "FIRST ELSE\n"
-
 				def parser = parserPool?.borrowObject()
 				def oms = new XmlSlurper(parser)?.parseText(xml)
 				Boolean fileStaged = false
@@ -109,38 +140,51 @@ class RasterDataSetService implements ApplicationContextAware {
 					if(result?.status >= 300) { log.error(result?.message) }
 					httpStatusMessage.status = result.status
 					httpStatusMessage.message = result.message
+
+					if(rasterDataSets?.size() > 1) {
+						rasterDataSets?.each { rasterDataSet ->
+							httpStatusMessage?.status = HttpStatus.OK
+							def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+							httpStatusMessage?.message = "Added raster ${ids}:${filename}"
+							missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+							imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+							sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+							fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+							acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
+							ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+							filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+						}
+						raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
+								requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+								filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+								ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+
+						log.info raster_logs.toString()
+
+					}
 				}
 				else {
-					log.info "SECOND ELSE\n"
-					def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
-					def repository = ingestService?.findRepositoryForFile(filename)
-					def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
-
 					if (rasterDataSets?.size() < 1) {
 						httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 						httpStatusMessage?.message = "Not a raster file: ${filename}"
 						log.error(httpStatusMessage?.message)
 					}
 					else {
-						log.info "THIRD ELSE\n"
-
 						rasterDataSets?.each { rasterDataSet ->
 							def savedRaster = true
 							try {
-								log.info "INSIDE TRY\n"
 								if (rasterDataSet.save()) {
-									log.info "INSIDE FINAL IF\n"
 									//stagerHandler.processSuccessful(filename, xml)
 									httpStatusMessage?.status = HttpStatus.OK
 									def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 									httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-									def missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
-									def imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
-									def sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
-									def fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
-									def acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
-									def ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
-									def filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+									missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+									imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+									sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+									fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+									acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
+									ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+									filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 
 									raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
 											requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
