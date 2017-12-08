@@ -69,7 +69,7 @@ dependencies {
   }
 */
 
-  compile "org.springframework.cloud:spring-cloud-starter-zipkin"
+  //compile "org.springframework.cloud:spring-cloud-starter-zipkin"
 
   compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
 
