@@ -163,7 +163,7 @@ class RasterDataSetService implements ApplicationContextAware {
 						httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 						httpStatusMessage?.message = "Not a raster file: ${filename}"
 						log.error(httpStatusMessage?.message)
-R					}
+					}
 					else {
 						rasterDataSets?.each { rasterDataSet ->
 							def savedRaster = true
