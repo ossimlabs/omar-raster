@@ -1,4 +1,4 @@
-htpackage omar.raster
+package omar.raster
 
 import omar.core.Repository
 import omar.core.HttpStatus
