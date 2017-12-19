@@ -245,17 +245,17 @@ class RasterDataSetService implements ApplicationContextAware {
 							}
 							if (!fileToRemove.exists()) 
 							{ 
-								log.info("Deleted ${file}") 
+//								log.info("Deleted ${file}")
 							}
 							else 
 							{ 
-								log.info("Unable to delete ${file}") 
+//								log.info("Unable to delete ${file}")
 							}
 						}
 					}
 					else 
 					{ 
-						log.info("Don't have permissions to delete ${file}") 
+//						log.info("Don't have permissions to delete ${file}")
 					}
 				}
 			}

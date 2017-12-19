@@ -119,7 +119,7 @@ to the URL.  The format supported:
 	])
 	def removeRaster()
 	{
-		log.info "removeRaster: ${params}"
+//		log.info "removeRaster: ${params}"
 
 		def httpStatusMessage = new HttpStatusMessage()
 		def status = rasterDataSetService.removeRaster( httpStatusMessage, params )
@@ -137,7 +137,7 @@ to the URL.  The format supported:
 	 ] )
 	def getRasterFilesProcessing()
 	{
-		log.info "getRasterFilesProcessing: ${params}"
+//		log.info "getRasterFilesProcessing: ${params}"
 
 		def jsonData = request.JSON?request.JSON as HashMap:null
 		def requestParams = params - params.subMap( ['controller', 'action'] )
@@ -173,7 +173,7 @@ The service api **getRasterFiles**
 	] )
 	def getRasterFiles()
 	{
-		log.info "getRasterFiles: ${params}"
+//		log.info "getRasterFiles: ${params}"
 
 		def jsonData = request.JSON?request.JSON as HashMap:null
 		def requestParams = params - params.subMap( ['controller', 'action'] )
