@@ -1,4 +1,4 @@
-package omar.raster
+htpackage omar.raster
 
 import omar.core.Repository
 import omar.core.HttpStatus
@@ -55,9 +55,6 @@ class RasterDataSetService implements ApplicationContextAware {
 		def filenames
 
 
-		log.info "Got to add raster\n"
-
-
 		if(!scheme || (scheme=="file"))
 		{
 			File testFile = filename as File
@@ -73,8 +70,6 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 		}
 
-
-		log.info "status" + httpStatusMessage?.status
 
 		if(httpStatusMessage?.status == HttpStatus.OK)
 		{
@@ -129,7 +124,6 @@ class RasterDataSetService implements ApplicationContextAware {
 				parserPool?.returnObject(parser)
 
 				if(params.buildOverviews||params.buildHistograms) {
-					log.info "overviews or histograms"
 					def result = stagerService.stageFileJni([filename:params.filename,
 						  buildOverviews: params.buildOverviews,
 						  buildHistograms:params.buildHistograms,
@@ -169,7 +163,7 @@ class RasterDataSetService implements ApplicationContextAware {
 						httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 						httpStatusMessage?.message = "Not a raster file: ${filename}"
 						log.error(httpStatusMessage?.message)
-					}
+R					}
 					else {
 						rasterDataSets?.each { rasterDataSet ->
 							def savedRaster = true
