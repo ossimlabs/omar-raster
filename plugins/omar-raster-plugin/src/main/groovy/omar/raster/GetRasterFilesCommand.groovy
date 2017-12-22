@@ -7,4 +7,5 @@ import groovy.transform.ToString
 class GetRasterFilesCommand  implements Validateable
 {
    String id
+   def ids
 }
