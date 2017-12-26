@@ -54,11 +54,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		def ingestDates
 		def filenames
 
-		println "got to add raster\n"
-		println "parms" + params
-		println "DEBUG: ${params.logs}"
-
-		println "httpStatusMessage" + httpStatusMessage
+		println "DEBUG param.logs: ${params.logs}"
 
 		if(!scheme || (scheme=="file"))
 		{
