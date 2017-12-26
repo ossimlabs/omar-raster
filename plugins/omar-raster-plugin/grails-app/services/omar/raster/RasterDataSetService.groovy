@@ -82,18 +82,24 @@ class RasterDataSetService implements ApplicationContextAware {
 			catch (Exception e) { log.error(e) }
 
 			def parser = parserPool?.borrowObject()
-			def oms = new XmlSlurper(parser)?.parseText(xml)
 
-			def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
-			def repository = ingestService?.findRepositoryForFile(filename)
-			def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
+         // We will add a return here temporarily but we need to refactor
+         // and put the hashmap generator in a method and anything 
+         // else we can put in a method that makes sense
+         if (!xml) {
+            httpStatusMessage?.message = "Unable to get information on file ${filename}"
+            httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+            log.error(httpStatusMessage?.message)
 
-			if (!xml) {
-				httpStatusMessage?.message = "Unable to get information on file ${filename}"
-				httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-				log.error(httpStatusMessage?.message)
-			}
-			else if (background)
+            return httpStatusMessage
+         }
+
+         def oms = new XmlSlurper(parser)?.parseText(xml)
+         def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
+         def repository = ingestService?.findRepositoryForFile(filename)
+         def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
+
+			if (background)
 			{
 				def result = stagerService.addFileToStage(filename, params.properties)
 
