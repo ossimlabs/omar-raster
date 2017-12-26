@@ -14,6 +14,7 @@ class AddRasterCommand implements Validateable
    Boolean useFastHistogramStaging = false
    String overviewCompressionType = "NONE"
    String overviewType = "ossim_tiff_box"
+   String logs
 
    static contraints = {
       filename nullable: false
@@ -24,5 +25,6 @@ class AddRasterCommand implements Validateable
       useFastHistogramStaging nullable: false
       overviewCompressionType nullable: false
       overviewType nullable: false
+      logs nullable: true
    }
 }

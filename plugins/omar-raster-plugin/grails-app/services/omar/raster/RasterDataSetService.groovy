@@ -56,6 +56,7 @@ class RasterDataSetService implements ApplicationContextAware {
 
 		println "got to add raster\n"
 		println "parms" + params
+		println "DEBUG: ${params.logs}"
 
 		println "httpStatusMessage" + httpStatusMessage
 
