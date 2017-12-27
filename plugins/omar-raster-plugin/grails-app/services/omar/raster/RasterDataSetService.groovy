@@ -267,10 +267,13 @@ class RasterDataSetService implements ApplicationContextAware {
 	private static void addTotalStageTimeToLogs(logsJson) {
 		// Calculate stage time (total time in all three apps)
 		Date pipelineFinishTime = new Date()
+		println "\npipelineFinishTime" + pipelineFinishTime
 
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
 			Date pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
-		    TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
+			println "\npipelineStartTime" + pipelineStartTime
+			TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
+			println "\ntotalStagingTime" + totalStagingTime
 		    logsJson["stagingTime"] = getPrettyStringFromTimeDuration(totalStagingTime)
 		}
 	}
