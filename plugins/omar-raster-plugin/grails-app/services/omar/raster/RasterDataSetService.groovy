@@ -270,7 +270,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		println "\npipelineFinishTime" + pipelineFinishTime
 
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
-			Date pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
+			Date pipelineStartTime = new Date().parse("yyyy-MM-dd HH:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
 			println "\npipelineStartTime" + pipelineStartTime
 			TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
 			println "\ntotalStagingTime" + totalStagingTime
