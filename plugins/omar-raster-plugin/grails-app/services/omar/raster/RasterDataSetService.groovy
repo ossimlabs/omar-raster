@@ -54,7 +54,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		def ingestDates
 		def filenames
 
-		println "DEBUG param.logs: ${params.logs}"
+		println ${params.logs}
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -76,8 +76,8 @@ class RasterDataSetService implements ApplicationContextAware {
 		{
 			def xml = dataInfoService.getInfo(filename)
 			def background = true;
-//			try { background = params?.background }
-//			catch (Exception e) { log.error(e) }
+			try { background = params?.background }
+			catch (Exception e) { log.error(e) }
 
 			def parser = parserPool?.borrowObject()
 
