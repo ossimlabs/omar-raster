@@ -227,7 +227,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		logsJson["ingestStatus"] = httpStatusMessage?.status
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
-		println logsJson.toString()
+		println new JsonBuilder(logsJson).toString()
 
 
       httpStatusMessage
