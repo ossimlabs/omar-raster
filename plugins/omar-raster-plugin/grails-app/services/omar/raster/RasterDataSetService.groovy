@@ -55,7 +55,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		def ingestDates
 		def filenames
 
-		println ${params.logs}
+		println params.logs
 
 		if(!scheme || (scheme=="file"))
 		{
