@@ -227,7 +227,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		logsJson["ingestStatus"] = httpStatusMessage?.status
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
-		println logsJson.toString()
+		println new JsonBuilder(logsJson).toString()
 
 
       httpStatusMessage
@@ -269,7 +269,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		Date pipelineFinishTime = new Date()
 
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
-			Date pipelineStartTime = new Date().parse("yyyy-MM-dd HH:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
+			Date pipelineStartTime = new Date().parse("yyyy-MM-dd HH:mm:ss.SSS", logsJson[PIPELINE_START_DATE_KEY])
 			TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
 		    logsJson["stagingTime"] = getPrettyStringFromTimeDuration(totalStagingTime)
 		}
