@@ -55,7 +55,9 @@ class RasterDataSetService implements ApplicationContextAware {
 		def ingestDates
 		def filenames
 
-		println params.logs
+//		println params.logs
+		if(!params.logs)
+		 params.logs = "{}"
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -221,13 +223,13 @@ class RasterDataSetService implements ApplicationContextAware {
 		logsJson["ingestStatus"] = httpStatusMessage?.status
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
-		println logsJson.toString()
+		println "logsJson" + logsJson.toString()
 
 
       httpStatusMessage
 	}
 
-	private static String ACQUISITION_DATE_KEY = "acquisitionDate"
+	private static String ACQUISITION_DATE_KEY = "acquisitiondate"
 	/**
 	 * Adds the total time from when the image was acquired to when the ingest pipeline is completed to the JSON logs object.
 	 * This method assumes the current time is when the pipeline is completed.
