@@ -7,6 +7,7 @@ import omar.stager.OmarStageFile
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 
 
 class RasterDataSetService implements ApplicationContextAware {
