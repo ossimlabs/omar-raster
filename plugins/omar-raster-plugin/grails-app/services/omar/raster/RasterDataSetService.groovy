@@ -236,9 +236,16 @@ class RasterDataSetService implements ApplicationContextAware {
 	private static void addTotalTimeFromAcquisitionToLogs(logsJson) {
 		// Calculate total time (acq-time to now)
 		def pipelineFinishTime = new Date()
-		def imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
-		def totalTimeFromAcquisition = pipelineFinishTime - imageAcquiredTime
-		logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition
+
+		if(logsJson[ACQUISITION_DATE_KEY]) {
+			def imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
+			def totalTimeFromAcquisition = pipelineFinishTime - imageAcquiredTime
+			logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition
+		}
+
+		else {
+			return
+		}
 	}
 
 	private static String PIPELINE_START_DATE_KEY = "ingestdate_sqs"
@@ -250,9 +257,17 @@ class RasterDataSetService implements ApplicationContextAware {
 	private static void addTotalStageTimeToLogs(logsJson) {
 		// Calculate stage time (total time in all three apps)
 		def pipelineFinishTime = new Date()
-		def pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
-		def totalStagingTime = pipelineFinishTime - pipelineStartTime
-		logsJson["stagingTime"] = totalStagingTime
+
+		if(logsJson[PIPELINE_START_DATE_KEY]) {
+			def pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
+		    def totalStagingTime = pipelineFinishTime - pipelineStartTime
+		    logsJson["stagingTime"] = totalStagingTime
+		}
+
+		else {
+			return
+		}
+
 	}
 
 	def removeRaster( def httpStatusMessage, def params ) {
