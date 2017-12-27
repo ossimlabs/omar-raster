@@ -100,8 +100,6 @@ class RasterDataSetService implements ApplicationContextAware {
 			if (background)
 			{
 				def result = stagerService.addFileToStage(filename, params.properties)
-				println "\nparams.properties" + params.properties
-				println "\nparams" + params
 
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
