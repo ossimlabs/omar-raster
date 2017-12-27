@@ -233,6 +233,24 @@ class RasterDataSetService implements ApplicationContextAware {
       httpStatusMessage
 	}
 
+	private static String getPrettyStringFromTimeDuration(TimeDuration duration) {
+		// 30 days 2 hours 1 minute 45 seconds
+		// 2:1:45
+		// total in hours: total in minutes: total in seconds
+
+		// days * 24 + hours : minutes : seconds
+		println "DEBUG duration = $duration"
+
+
+		Int hours = duration.hours
+		Int minutes = duration.minutes
+		Int seconds = duration.seconds
+
+		println "$hours:$minutes:$seconds"
+
+		return "$hours:$minutes:$seconds"
+	}
+
 	private static String ACQUISITION_DATE_KEY = "acquisitiondate"
 	/**
 	 * Adds the total time from when the image was acquired to when the ingest pipeline is completed to the JSON logs object.
@@ -246,7 +264,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		if(logsJson[ACQUISITION_DATE_KEY]) {
 			Date imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
 			TimeDuration totalTimeFromAcquisition = TimeCategory.minus(pipelineFinishTime, imageAcquiredTime)
-			logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition.toString()
+			logsJson["totalTimeFromAcquisition"] = getPrettyStringFromTimeDuration(totalTimeFromAcquisition)
 		}
 	}
 
@@ -263,7 +281,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
 			Date pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
 		    TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
-		    logsJson["stagingTime"] = totalStagingTime.toString()
+		    logsJson["stagingTime"] = getPrettyStringFromTimeDuration(totalStagingTime)
 		}
 	}
 
