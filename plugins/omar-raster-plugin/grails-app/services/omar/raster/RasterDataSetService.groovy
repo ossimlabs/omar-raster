@@ -234,19 +234,9 @@ class RasterDataSetService implements ApplicationContextAware {
 	}
 
 	private static String getPrettyStringFromTimeDuration(TimeDuration duration) {
-		// 30 days 2 hours 1 minute 45 seconds
-		// 2:1:45
-		// total in hours: total in minutes: total in seconds
-
-		// days * 24 + hours : minutes : seconds
-		println "DEBUG duration = $duration"
-
-
-		int hours = duration.hours
+		int hours = duration.hours + (duration.days * 24)
 		int minutes = duration.minutes
 		int seconds = duration.seconds
-
-		println "$hours:$minutes:$seconds"
 
 		return "$hours:$minutes:$seconds"
 	}
