@@ -242,9 +242,9 @@ class RasterDataSetService implements ApplicationContextAware {
 		println "DEBUG duration = $duration"
 
 
-		Int hours = duration.hours
-		Int minutes = duration.minutes
-		Int seconds = duration.seconds
+		int hours = duration.hours
+		int minutes = duration.minutes
+		int seconds = duration.seconds
 
 		println "$hours:$minutes:$seconds"
 
