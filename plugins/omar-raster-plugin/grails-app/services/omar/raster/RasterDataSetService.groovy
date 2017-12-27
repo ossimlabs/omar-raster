@@ -213,7 +213,45 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 		}
 
+		def logsJson = new JsonSlurper().parseText(params.logs)
+		addTotalStageTimeToLogs(logsJson)
+		addTotalTimeFromAcquisitionToLogs(logsJson)
+		// Some images may fail but still need to be logged and differentiated from successes.
+		logsJson["ingestStatus"] = httpStatusMessage?.status
+
+		// Print logs in JSON for ElasticSearch and Kibana parsing
+		println logsJson.toString()
+
+
       httpStatusMessage
+	}
+
+	private static String ACQUISITION_DATE_KEY = "acquisitionDate"
+	/**
+	 * Adds the total time from when the image was acquired to when the ingest pipeline is completed to the JSON logs object.
+	 * This method assumes the current time is when the pipeline is completed.
+	 * @param logsJson This param must be a JSON log containing the {@code ACQUISITION_DATE_KEY}
+	 */
+	private static void addTotalTimeFromAcquisitionToLogs(logsJson) {
+		// Calculate total time (acq-time to now)
+		def pipelineFinishTime = new Date()
+		def imageAcquiredTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[ACQUISITION_DATE_KEY])
+		def totalTimeFromAcquisition = pipelineFinishTime - imageAcquiredTime
+		logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition
+	}
+
+	private static String PIPELINE_START_DATE_KEY = "ingestdate_sqs"
+	/**
+	 * Adds the total time in the ingest pipeline apps (omar-sqs/avro/stager) to the JSON logs object.
+	 * This method assumes the current time is when the pipeline is completed.
+	 * @param logsJson This param must be a JSON log containing the {@code PIPELINE_START_DATE_KEY}
+	 */
+	private static void addTotalStageTimeToLogs(logsJson) {
+		// Calculate stage time (total time in all three apps)
+		def pipelineFinishTime = new Date()
+		def pipelineStartTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[PIPELINE_START_DATE_KEY])
+		def totalStagingTime = pipelineFinishTime - pipelineStartTime
+		logsJson["stagingTime"] = totalStagingTime
 	}
 
 	def removeRaster( def httpStatusMessage, def params ) {
