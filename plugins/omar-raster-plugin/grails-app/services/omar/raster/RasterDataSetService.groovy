@@ -1,5 +1,7 @@
 package omar.raster
 
+import groovy.time.TimeCategory
+import groovy.time.TimeDuration
 import omar.core.Repository
 import omar.core.HttpStatus
 
@@ -56,8 +58,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		def filenames
 
 //		println params.logs
-		if(!params.logs)
-		 params.logs = "{}"
+
 
 		if(!scheme || (scheme=="file"))
 		{
@@ -216,6 +217,9 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 		}
 
+        // Even if there's no logs, we still want to output the status in the logs.
+        if(!params.logs) params.logs = "{}"
+
 		def logsJson = new JsonSlurper().parseText(params.logs)
 		addTotalStageTimeToLogs(logsJson)
 		addTotalTimeFromAcquisitionToLogs(logsJson)
@@ -223,11 +227,18 @@ class RasterDataSetService implements ApplicationContextAware {
 		logsJson["ingestStatus"] = httpStatusMessage?.status
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
-		println "logsJson" + logsJson.toString()
+		println logsJson.toString()
 
 
       httpStatusMessage
 	}
+
+    private static TimeDuration getDifferenceBetweenDates(Date date1, Date date2) {
+        return TimeCategory.minus(
+                date1,
+                date2
+        )
+    }
 
 	private static String ACQUISITION_DATE_KEY = "acquisitiondate"
 	/**
@@ -237,16 +248,12 @@ class RasterDataSetService implements ApplicationContextAware {
 	 */
 	private static void addTotalTimeFromAcquisitionToLogs(logsJson) {
 		// Calculate total time (acq-time to now)
-		def pipelineFinishTime = new Date()
+		Date pipelineFinishTime = new Date()
 
 		if(logsJson[ACQUISITION_DATE_KEY]) {
-			def imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
-			def totalTimeFromAcquisition = pipelineFinishTime - imageAcquiredTime
-			logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition
-		}
-
-		else {
-			return
+			Date imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
+			TimeDuration totalTimeFromAcquisition = getDifferenceBetweenDates(pipelineFinishTime, imageAcquiredTime)
+			logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition.toString()
 		}
 	}
 
@@ -258,18 +265,13 @@ class RasterDataSetService implements ApplicationContextAware {
 	 */
 	private static void addTotalStageTimeToLogs(logsJson) {
 		// Calculate stage time (total time in all three apps)
-		def pipelineFinishTime = new Date()
+		Date pipelineFinishTime = new Date()
 
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
-			def pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
-		    def totalStagingTime = pipelineFinishTime - pipelineStartTime
-		    logsJson["stagingTime"] = totalStagingTime
+			Date pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
+		    TimeDuration totalStagingTime = getDifferenceBetweenDates(pipelineFinishTime, pipelineStartTime)
+		    logsJson["stagingTime"] = totalStagingTime.toString()
 		}
-
-		else {
-			return
-		}
-
 	}
 
 	def removeRaster( def httpStatusMessage, def params ) {
