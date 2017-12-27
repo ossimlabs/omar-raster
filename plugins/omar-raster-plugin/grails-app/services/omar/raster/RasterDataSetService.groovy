@@ -225,6 +225,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		addTotalTimeFromAcquisitionToLogs(logsJson)
 		// Some images may fail but still need to be logged and differentiated from successes.
 		logsJson["ingestStatus"] = httpStatusMessage?.status
+		logsJson["filename"] = filename
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
 		println new JsonBuilder(logsJson).toString()
