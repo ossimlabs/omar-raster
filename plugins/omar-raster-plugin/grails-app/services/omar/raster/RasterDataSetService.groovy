@@ -233,13 +233,6 @@ class RasterDataSetService implements ApplicationContextAware {
       httpStatusMessage
 	}
 
-    private static TimeDuration getDifferenceBetweenDates(Date date1, Date date2) {
-        return TimeCategory.minus(
-                date1,
-                date2
-        )
-    }
-
 	private static String ACQUISITION_DATE_KEY = "acquisitiondate"
 	/**
 	 * Adds the total time from when the image was acquired to when the ingest pipeline is completed to the JSON logs object.
@@ -252,7 +245,7 @@ class RasterDataSetService implements ApplicationContextAware {
 
 		if(logsJson[ACQUISITION_DATE_KEY]) {
 			Date imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
-			TimeDuration totalTimeFromAcquisition = getDifferenceBetweenDates(pipelineFinishTime, imageAcquiredTime)
+			TimeDuration totalTimeFromAcquisition = TimeCategory.minus(pipelineFinishTime, imageAcquiredTime)
 			logsJson["totalTimeFromAcquisition"] = totalTimeFromAcquisition.toString()
 		}
 	}
@@ -269,7 +262,7 @@ class RasterDataSetService implements ApplicationContextAware {
 
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
 			Date pipelineStartTime = new Date().parse("yyyy-MM-dd hh:mm:ss.ms", logsJson[PIPELINE_START_DATE_KEY])
-		    TimeDuration totalStagingTime = getDifferenceBetweenDates(pipelineFinishTime, pipelineStartTime)
+		    TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
 		    logsJson["stagingTime"] = totalStagingTime.toString()
 		}
 	}
