@@ -224,8 +224,8 @@ class RasterDataSetService implements ApplicationContextAware {
 		addTotalStageTimeToLogs(logsJson)
 		addTotalTimeFromAcquisitionToLogs(logsJson)
 		// Some images may fail but still need to be logged and differentiated from successes.
-		logsJson["ingestStatus"] = httpStatusMessage?.status
-		logsJson["filename"] = filename
+		logsJson["ingest_status"] = httpStatusMessage?.status
+		logsJson["file_name"] = filename
 
 		// Print logs in JSON for ElasticSearch and Kibana parsing
 		println new JsonBuilder(logsJson).toString()
@@ -242,7 +242,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		return "$hours:$minutes:$seconds"
 	}
 
-	private static String ACQUISITION_DATE_KEY = "acquisitiondate"
+	private static String ACQUISITION_DATE_KEY = "acquisition_date"
 	/**
 	 * Adds the total time from when the image was acquired to when the ingest pipeline is completed to the JSON logs object.
 	 * This method assumes the current time is when the pipeline is completed.
@@ -255,11 +255,11 @@ class RasterDataSetService implements ApplicationContextAware {
 		if(logsJson[ACQUISITION_DATE_KEY]) {
 			Date imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
 			TimeDuration totalTimeFromAcquisition = TimeCategory.minus(pipelineFinishTime, imageAcquiredTime)
-			logsJson["totalTimeFromAcquisition"] = getPrettyStringFromTimeDuration(totalTimeFromAcquisition)
+			logsJson["time_from_acquisition"] = getPrettyStringFromTimeDuration(totalTimeFromAcquisition)
 		}
 	}
 
-	private static String PIPELINE_START_DATE_KEY = "ingestdate_sqs"
+	private static String PIPELINE_START_DATE_KEY = "ingest_date"
 	/**
 	 * Adds the total time in the ingest pipeline apps (omar-sqs/avro/stager) to the JSON logs object.
 	 * This method assumes the current time is when the pipeline is completed.
@@ -272,7 +272,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		if(logsJson[PIPELINE_START_DATE_KEY]) {
 			Date pipelineStartTime = new Date().parse("yyyy-MM-dd HH:mm:ss.SSS", logsJson[PIPELINE_START_DATE_KEY])
 			TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
-		    logsJson["stagingTime"] = getPrettyStringFromTimeDuration(totalStagingTime)
+		    logsJson["staging_time"] = getPrettyStringFromTimeDuration(totalStagingTime)
 		}
 	}
 
