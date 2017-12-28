@@ -235,11 +235,7 @@ class RasterDataSetService implements ApplicationContextAware {
 	}
 
 	private static String getPrettyStringFromTimeDuration(TimeDuration duration) {
-		int hours = duration.hours + (duration.days * 24)
-		int minutes = duration.minutes
-		int seconds = duration.seconds
-
-		return "$hours:$minutes:$seconds"
+		return "${duration.toMilliseconds()}"
 	}
 
 	private static String ACQUISITION_DATE_KEY = "acquisition_date"
