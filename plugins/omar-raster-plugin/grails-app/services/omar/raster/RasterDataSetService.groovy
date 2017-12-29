@@ -101,8 +101,6 @@ class RasterDataSetService implements ApplicationContextAware {
          def repository = ingestService?.findRepositoryForFile(filename)
          def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
 
-            println "\n*****rasterDataSets?.size() = " + rasterDataSets?.size()
-
 			if (background)
 			{
 				def result = stagerService.addFileToStage(filename, params.properties)
