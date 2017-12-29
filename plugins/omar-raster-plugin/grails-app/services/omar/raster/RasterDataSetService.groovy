@@ -86,7 +86,7 @@ class RasterDataSetService implements ApplicationContextAware {
 			def parser = parserPool?.borrowObject()
 
          // We will add a return here temporarily but we need to refactor
-         // and put the hashmap generator in a method and anything 
+         // and put the hashmap generator in a method and anything
          // else we can put in a method that makes sense
          if (!xml) {
             httpStatusMessage?.message = "Unable to get information on file ${filename}"
@@ -101,6 +101,8 @@ class RasterDataSetService implements ApplicationContextAware {
          def repository = ingestService?.findRepositoryForFile(filename)
          def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
 
+            println "\n*****rasterDataSets?.size() = " + rasterDataSets?.size()
+
 			if (background)
 			{
 				def result = stagerService.addFileToStage(filename, params.properties)
@@ -108,7 +110,7 @@ class RasterDataSetService implements ApplicationContextAware {
 				httpStatusMessage.status = result.status
 				httpStatusMessage.message = result.message
 
-				if(rasterDataSets?.size() > 1) {
+				if(rasterDataSets?.size() > 0) {
 					rasterDataSets?.each { rasterDataSet ->
 						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 						missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
@@ -147,7 +149,7 @@ class RasterDataSetService implements ApplicationContextAware {
 					httpStatusMessage.status = result.status
 					httpStatusMessage.message = result.message
 
-					if(rasterDataSets?.size() > 1) {
+					if(rasterDataSets?.size() > 0) {
 						rasterDataSets?.each { rasterDataSet ->
 							httpStatusMessage?.status = HttpStatus.OK
 							def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
@@ -282,7 +284,7 @@ class RasterDataSetService implements ApplicationContextAware {
 			httpStatusMessage?.status = HttpStatus.OK
 			def ids = rasterFile?.rasterDataSet?.rasterEntries?.collect { it?.id }?.join( "," )
 			httpStatusMessage?.message = "removed raster ${ ids }:${ filename }"
-			
+
 			if (params.deleteFiles?.toBoolean()) {
 				def files = []
 				rasterFile?.rasterDataSet?.fileObjects.each() { files << it.name }
@@ -300,24 +302,24 @@ class RasterDataSetService implements ApplicationContextAware {
 						if (fileToRemove.canWrite()) {
 							if (fileToRemove.isDirectory())
 							{
-								fileToRemove.deleteDir() 
+								fileToRemove.deleteDir()
 							}
-							else 
-							{ 
-								fileToRemove.delete() 
+							else
+							{
+								fileToRemove.delete()
 							}
-							if (!fileToRemove.exists()) 
-							{ 
+							if (!fileToRemove.exists())
+							{
 //								log.info("Deleted ${file}")
 							}
-							else 
-							{ 
+							else
+							{
 //								log.info("Unable to delete ${file}")
 							}
 						}
 					}
-					else 
-					{ 
+					else
+					{
 //						log.info("Don't have permissions to delete ${file}")
 					}
 				}
