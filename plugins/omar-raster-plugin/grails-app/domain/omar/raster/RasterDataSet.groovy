@@ -43,7 +43,10 @@ class RasterDataSet
 
     return rasterDataSet
   }
-
+  def getMainFile()
+  {
+    getFileFromObjects()
+  }
   def getFileFromObjects(def type = "main")
   {
     return fileObjects?.find { it.type == type }
