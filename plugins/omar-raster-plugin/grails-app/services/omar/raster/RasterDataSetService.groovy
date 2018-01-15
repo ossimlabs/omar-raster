@@ -4,6 +4,7 @@ import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import omar.core.Repository
 import omar.core.HttpStatus
+import omar.core.DateUtil
 
 import omar.stager.OmarStageFile
 import org.springframework.context.ApplicationContext
@@ -65,8 +66,8 @@ class RasterDataSetService implements ApplicationContextAware {
 						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
 						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
 						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
-						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
-						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
+						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
 						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
 
