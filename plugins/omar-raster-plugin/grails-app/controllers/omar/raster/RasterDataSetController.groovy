@@ -89,7 +89,15 @@ to the URL.  The format supported:
 	] )
 	def addRaster()
 	{
-		def xml = request.XML
+		def xml
+
+		try{
+			xml = request.XML
+		}
+		catch(e)
+		{
+			xml = null
+		}
 		if(!xml)
 		{
 			def jsonData = request.JSON?request.JSON as HashMap:null
