@@ -4,6 +4,7 @@ import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import omar.core.Repository
 import omar.core.HttpStatus
+import omar.core.DateUtil
 
 import omar.stager.OmarStageFile
 import org.springframework.context.ApplicationContext
@@ -16,7 +17,6 @@ class RasterDataSetService implements ApplicationContextAware {
 
 	static transactional = true
 
-	def parserPool
 	def dataInfoService
 	def ingestService
 	def stagerService
@@ -30,6 +30,82 @@ class RasterDataSetService implements ApplicationContextAware {
 		rasterDataSets?.each { it.delete() }
 	}
 
+	/**
+	* Should for now only call with one embedded raster dataset
+	*/
+	def addRasterXml(def xml)
+	{
+		def requestType = "POST"
+		def requestMethod = "addRasterXml"
+		HashMap result = [status:HttpStatus.OK,
+		                  message:"",
+		                  startTime:new Date(),
+                        endTime:null,
+                        metadata:[:]
+                        ]
+		try 
+		{
+		   Date startTime = new Date()
+	      def oms = new XmlSlurper().parseText(xml)
+	      def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
+	      def repository = ingestService?.findRepositoryForFile("/")
+	      def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
+			String filename
+
+			rasterDataSets?.each { rasterDataSet ->
+				def savedRaster = true
+   			filename = rasterDataSet.mainFile?.name
+   			println filename
+				try {
+					if (rasterDataSet.save()) {
+						//stagerHandler.processSuccessful(filename, xml)
+						result?.status = HttpStatus.OK
+						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+						result?.message                  = "Added raster ${ids}:${filename}"
+						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
+						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
+						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
+
+//						def raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
+//								requestMethod: requestMethod, status: result?.status, message: result?.message,
+//								filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+//								ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+//
+//						log.info raster_logs.toString()
+					}
+					else {
+						savedRaster = false
+						result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+					   result?.message = "Unable to save XML, data probably already exists"
+						log.error(result?.message)
+					}
+				}
+				catch (Exception e) {
+					result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+					result?.message = "Unable to save XML: ${e}"
+					log.error(result?.message)
+				}
+			}
+			oms=null
+		}
+		catch(e) 
+		{
+			result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+			result?.message = "Unable to process XML: ${e}"
+
+		}
+		finally{
+	      result.endTime = new Date()
+	      result.duration = (result.endTime.time-result.startTime.time)
+		}
+
+		result
+	}
 	/**
 	 * This service allows one to add a raster to the omar tables.
 	 *
@@ -83,7 +159,6 @@ class RasterDataSetService implements ApplicationContextAware {
 			try { background = params?.background }
 			catch (Exception e) { log.error(e) }
 
-			def parser = parserPool?.borrowObject()
 
          // We will add a return here temporarily but we need to refactor
          // and put the hashmap generator in a method and anything
@@ -96,7 +171,7 @@ class RasterDataSetService implements ApplicationContextAware {
             return httpStatusMessage
          }
 
-         def oms = new XmlSlurper(parser)?.parseText(xml)
+         def oms = new XmlSlurper().parseText(xml)
          def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
          def repository = ingestService?.findRepositoryForFile(filename)
          def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
@@ -132,7 +207,6 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 			else {
 				Boolean fileStaged = false
-				parserPool?.returnObject(parser)
 
 				if(params.buildOverviews||params.buildHistograms) {
 					def result = stagerService.stageFileJni([filename:params.filename,
@@ -218,7 +292,7 @@ class RasterDataSetService implements ApplicationContextAware {
 		}
 
         // Even if there's no logs, we still want to output the status in the logs.
-        if(!params.logs) params.logs = "{}"
+      if(!params.logs) params.logs = "{}"
 
 		def logsJson = new JsonSlurper().parseText(params.logs)
 		addTotalStageTimeToLogs(logsJson)

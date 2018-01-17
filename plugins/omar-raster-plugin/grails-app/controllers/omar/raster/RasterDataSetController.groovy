@@ -6,6 +6,7 @@ import grails.converters.JSON
 import omar.core.HttpStatusMessage
 import omar.core.BindUtil
 import groovy.json.JsonOutput
+import groovy.xml.XmlUtil
 
 @Api( value = "dataManager",
      produces = 'application/json',
@@ -88,20 +89,41 @@ to the URL.  The format supported:
 	] )
 	def addRaster()
 	{
-		def jsonData = request.JSON?request.JSON as HashMap:null
-		def requestParams = params - params.subMap( ['controller', 'action'] )
-		def cmd = new AddRasterCommand()
+		def xml
 
-		// get map from JSON and merge into parameters
-		if(jsonData) requestParams << jsonData
-		BindUtil.fixParamNames( AddRasterCommand, requestParams )
-		bindData( cmd, requestParams )
+		try{
+			xml = request.XML
+		}
+		catch(e)
+		{
+			xml = null
+		}
+		if(!xml)
+		{
+			def jsonData = request.JSON?request.JSON as HashMap:null
+			def requestParams = params - params.subMap( ['controller', 'action'] )
+			def cmd = new AddRasterCommand()
 
-		def httpStatusMessage = new HttpStatusMessage()
-		def status = rasterDataSetService.addRaster( httpStatusMessage, cmd )
+			// get map from JSON and merge into parameters
+			if(jsonData) requestParams << jsonData
+			BindUtil.fixParamNames( AddRasterCommand, requestParams )
+			bindData( cmd, requestParams )
 
-		response.status = httpStatusMessage.status
-		render( httpStatusMessage.message )
+			def httpStatusMessage = new HttpStatusMessage()
+			def status = rasterDataSetService.addRaster( httpStatusMessage, cmd )
+
+			response.status = httpStatusMessage.status
+			render( httpStatusMessage.message )			
+		}
+		else
+		{
+			def xmlString = groovy.xml.XmlUtil.serialize xml
+
+			//println "CLASS === ${xmlString} "
+			def result = rasterDataSetService.addRasterXml(xmlString)
+   		response.status = result.status
+			render( result.message )			
+		}
 	}
 
 	@ApiOperation( value = "Remove a Raster from the database", 
