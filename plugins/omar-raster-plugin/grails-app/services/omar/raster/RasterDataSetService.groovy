@@ -40,10 +40,10 @@ class RasterDataSetService implements ApplicationContextAware {
 		HashMap result = [status:HttpStatus.OK,
 		                  message:"",
 		                  startTime:new Date(),
-                        endTime:null,
+                        endTime:new Date(),
                         metadata:[:]
                         ]
-		try 
+		try
 		{
 		   Date startTime = new Date()
 	      def oms = new XmlSlurper().parseText(xml)
@@ -71,8 +71,8 @@ class RasterDataSetService implements ApplicationContextAware {
 						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
 
-//						def raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-//								requestMethod: requestMethod, status: result?.status, message: result?.message,
+//						def raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+//								requestMethod: requestMethod, http result?.status, message: result?.message,
 //								filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 //								ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 //
@@ -93,7 +93,7 @@ class RasterDataSetService implements ApplicationContextAware {
 			}
 			oms=null
 		}
-		catch(e) 
+		catch(e)
 		{
 			result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 			result?.message = "Unable to process XML: ${e}"
@@ -194,8 +194,8 @@ class RasterDataSetService implements ApplicationContextAware {
 						ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 						filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 					}
-					raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-							requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+					raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+							requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
 							filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 							ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
@@ -234,8 +234,8 @@ class RasterDataSetService implements ApplicationContextAware {
 							ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 							filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 						}
-						raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-								requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+						raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+								requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
 								filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 								ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
@@ -266,8 +266,8 @@ class RasterDataSetService implements ApplicationContextAware {
 									ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 									filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 
-									raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-											requestMethod: requestMethod, status: httpStatusMessage?.status, message: httpStatusMessage?.message,
+									raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+											requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
 											filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
 											ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
