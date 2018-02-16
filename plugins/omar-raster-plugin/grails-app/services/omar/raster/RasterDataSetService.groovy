@@ -62,9 +62,11 @@ class RasterDataSetService implements ApplicationContextAware {
 						result?.status = HttpStatus.OK
 						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 						result?.message                  = "Added raster ${ids}:${filename}"
-						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+						result.metadata.missionids       = "test,test"
+						//result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
 						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
-						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+						result.metadata.sensorids        = "y,y"
+						//result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
 						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
 						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
 						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
