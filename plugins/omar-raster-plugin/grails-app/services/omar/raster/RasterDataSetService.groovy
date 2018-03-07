@@ -70,6 +70,7 @@ class RasterDataSetService implements ApplicationContextAware {
 						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
 						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
 						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
+						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
 
 //						def raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
 //								requestMethod: requestMethod, httpStatus: result?.status, message: result?.message,
