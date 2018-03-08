@@ -55,29 +55,24 @@ class RasterDataSetService implements ApplicationContextAware
             def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
             String filename
 
-            rasterDataSets?.each { rasterDataSet ->
-                filename = rasterDataSet.mainFile?.name
-                println filename
-                try
-                {
-                    if (rasterDataSet.save())
-                    {
-                        //stagerHandler.processSuccessful(filename, xml)
-                        result?.status = HttpStatus.OK
-                        def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                        result?.message = "Added raster ${ids}:${filename}"
-                        result.metadata.missionids = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
-                        result.metadata.imageids = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
-                        result.metadata.sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
-                        result.metadata.fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
-                        result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect {
-                            it.acquisitionDate ? DateUtil.formatUTC(it.acquisitionDate).toString() : ""
-                        }.join(",")
-                        result.metadata.ingestDates = rasterDataSet?.rasterEntries.collect {
-                            it.ingestDate ? DateUtil.formatUTC(it.ingestDate).toString() : ""
-                        }.join(",")
-                        result.metadata.filenames = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
-                        result.metadata.entryIds = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
+			rasterDataSets?.each { rasterDataSet ->
+   			filename = rasterDataSet.mainFile?.name
+   			println filename
+				try {
+					if (rasterDataSet.save()) {
+						//stagerHandler.processSuccessful(filename, xml)
+						result?.status = HttpStatus.OK
+						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+						result?.message                  = "Added raster ${ids}:${filename}"
+						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }.join(",")
+						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }.join(",")
+						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
+						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
+						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
+						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
+						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
+						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
+						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
 
 //						def raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
 //								requestMethod: requestMethod, httpStatus: result?.status, message: result?.message,
