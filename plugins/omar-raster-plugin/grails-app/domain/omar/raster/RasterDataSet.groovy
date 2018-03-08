@@ -4,51 +4,53 @@ import omar.core.Repository
 
 class RasterDataSet
 {
-  static hasMany = [fileObjects: RasterFile, rasterEntries: RasterEntry]
-  Collection fileObjects
-  Collection rasterEntries
+    static hasMany = [fileObjects: RasterFile, rasterEntries: RasterEntry]
+    Collection fileObjects
+    Collection rasterEntries
 
-  Repository repository
+    Repository repository
 
-  static constraints = {
-    repository( nullable: true )
-  }
-  static mapping = {
-    cache true
-    id generator: 'identity'
-    repository index: 'raster_data_set_repository_idx'
-  }
-
-  static RasterDataSet initRasterDataSet(rasterDataSetNode, rasterDataSet = null)
-  {
-    rasterDataSet = rasterDataSet ?: new RasterDataSet()
-
-    for ( def rasterFileNode in rasterDataSetNode.fileObjects.RasterFile )
-    {
-      RasterFile rasterFile = RasterFile.initRasterFile( rasterFileNode )
-      rasterDataSet.addToFileObjects( rasterFile )
+    static constraints = {
+        repository(nullable: true)
+    }
+    static mapping = {
+        cache true
+        id generator: 'identity'
+        repository index: 'raster_data_set_repository_idx'
     }
 
-    for ( def rasterEntryNode in rasterDataSetNode.rasterEntries.RasterEntry )
+    static RasterDataSet initRasterDataSet(rasterDataSetNode, rasterDataSet = null)
     {
-      RasterEntry rasterEntry = new RasterEntry()
-      rasterEntry.rasterDataSet = rasterDataSet
-      RasterEntry.initRasterEntry( rasterEntryNode, rasterEntry )
+        rasterDataSet = rasterDataSet ?: new RasterDataSet()
 
-      if ( rasterEntry.groundGeom )
-      {
-        rasterDataSet.addToRasterEntries( rasterEntry )
-      }
+        for (def rasterFileNode in rasterDataSetNode.fileObjects.RasterFile)
+        {
+            RasterFile rasterFile = RasterFile.initRasterFile(rasterFileNode)
+            rasterDataSet.addToFileObjects(rasterFile)
+        }
+
+        for (def rasterEntryNode in rasterDataSetNode.rasterEntries.RasterEntry)
+        {
+            RasterEntry rasterEntry = new RasterEntry()
+            rasterEntry.rasterDataSet = rasterDataSet
+            RasterEntry.initRasterEntry(rasterEntryNode, rasterEntry)
+
+            if (rasterEntry.groundGeom && (rasterEntry.entryId.toInteger() == 0 || !rasterEntry.imageRepresentation.equalsIgnoreCase("NODISPLY")))
+            {
+                rasterDataSet.addToRasterEntries(rasterEntry)
+            }
+        }
+
+        return rasterDataSet
     }
 
-    return rasterDataSet
-  }
-  def getMainFile()
-  {
-    getFileFromObjects()
-  }
-  def getFileFromObjects(def type = "main")
-  {
-    return fileObjects?.find { it.type == type }
-  }
+    def getMainFile()
+    {
+        getFileFromObjects()
+    }
+
+    def getFileFromObjects(def type = "main")
+    {
+        return fileObjects?.find { it.type == type }
+    }
 }
