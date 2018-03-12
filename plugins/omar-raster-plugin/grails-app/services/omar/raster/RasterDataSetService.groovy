@@ -498,7 +498,8 @@ class RasterDataSetService implements ApplicationContextAware
         result
     }
 
-    def getRasterFilesAssociationList(GetRasterFilesCommand cmd) {
+    def getRasterFiles(GetRasterFilesCommand cmd)
+    {
         HashMap result = [ results:[] ]
 
         def files = RasterEntry.compositeId(cmd.id)
@@ -513,28 +514,7 @@ class RasterDataSetService implements ApplicationContextAware
                 fileList << [name: fileObject.name, type: fileObject.type]
             }
         }
-        result.results = fileList
-
-        result
-    }
-
-    def getRasterFiles(GetRasterFilesCommand cmd)
-    {
-        HashMap result = [results: []]
-
-        def files = RasterEntry.compositeId(cmd.id)
-
-        RasterEntry entry = files?.get()
-        def fileList = []
-        if (entry)
-        {
-            entry.fileObjects.each { fileObject ->
-                fileList << fileObject.name
-            }
-            entry?.rasterDataSet?.fileObjects.each { fileObject ->
-                fileList << fileObject.name
-            }
-        }
+		fileList << [name: entry.filename, type:"main"]
         result.results = fileList
 
         result
