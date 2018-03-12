@@ -514,7 +514,6 @@ class RasterDataSetService implements ApplicationContextAware
                 fileList << [name: fileObject.name, type: fileObject.type]
             }
         }
-		fileList << [name: entry.filename, type:"main"]
         result.results = fileList
 
         result
