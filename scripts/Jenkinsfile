@@ -10,6 +10,7 @@
 //    OPENSHIFT_PASSWORD: The password to use logging into the docker registry
 //==================================================================================================
 
+def notifyObj
 node(""){
     def workspaceDir = pwd()
     def appName = "omar-raster"
@@ -18,9 +19,6 @@ node(""){
     env.O2_DEV_HOME = pwd()
 
     stage("Checkout"){
-        dir("ossim-ci") {
-            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/ossim-ci.git"
-        }
         dir(appName) {
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/${appName}.git"
         }
@@ -49,16 +47,23 @@ node(""){
         dir(omarCommonProjName) {
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/${omarCommonProjName}.git"
         }
+    }
 
-        notifyObj = load "${workspaceDir}/ossim-ci/jenkins/pipeline/notify.groovy"
+    stage("Download Artifacts"){
+       step ([$class: "CopyArtifact",
+             projectName: "ossim-ci-${OSSIM_GIT_BRANCH}",
+             filter: "ossim-ci-${OSSIM_GIT_BRANCH}.tgz",
+             flatten: true])
+       sh "tar xvfz ossim-ci-${OSSIM_GIT_BRANCH}.tgz"
+       notifyObj = load "${env.WORKSPACE}/ossim-ci/jenkins/pipeline/notify.groovy"
     }
 
     try {
       stage ("Publish Artifactory")
       {
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', 
+          withCredentials([[$class: 'UsernamePasswordMultiBinding',
                             credentialsId: 'artifactoryCredentials',
-                            usernameVariable: 'ARTIFACTORY_USER', 
+                            usernameVariable: 'ARTIFACTORY_USER',
                             passwordVariable: 'ARTIFACTORY_PASSWORD']])
             {
                     sh """
@@ -80,8 +85,8 @@ node(""){
                 // requires SonarQube Scanner for Gradle 2.1+
                 // It's important to add --info because of SONARJNKNS-281
                 sh """
-                  pushd ${workspaceDir}/${appName}/
-                  ./gradlew --info sonarqube -Dsonar.projectKey=${appName}
+                  pushd ${workspaceDir}/${appName}
+                  ./gradlew --info :${appName}-plugin:sonarqube -Dsonar.projectKey=${appName}
                   popd
                 """
             }
@@ -90,7 +95,7 @@ node(""){
     catch (e) {
         echo e.toString()
     }
-    
+
   stage("Clean Workspace"){
      step([$class: 'WsCleanup'])
   }
