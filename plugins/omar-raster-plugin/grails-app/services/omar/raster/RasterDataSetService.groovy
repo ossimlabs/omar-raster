@@ -498,7 +498,7 @@ class RasterDataSetService implements ApplicationContextAware
         result
     }
 
-    def getRasterFileAssociationList(GetRasterFilesCommand cmd) {
+    def getRasterFilesAssociationList(GetRasterFilesCommand cmd) {
         HashMap result = [ results:[] ]
 
         def files = RasterEntry.compositeId(cmd.id)

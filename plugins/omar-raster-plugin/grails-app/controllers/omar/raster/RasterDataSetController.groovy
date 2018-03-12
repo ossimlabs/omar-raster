@@ -228,7 +228,7 @@ The service api **getRasterFiles**
 				               paramType = 'query', 
 				               dataType = 'string'),
 	] )
-	def getRasterFileAssociationList()
+	def getRasterFilesAssociationList()
 	{
 //		log.info "getRasterFiles: ${params}"
 
@@ -240,7 +240,7 @@ The service api **getRasterFiles**
 		if(jsonData) requestParams << jsonData
 		BindUtil.fixParamNames( GetRasterFilesCommand, requestParams )
 		bindData( cmd, requestParams )
-		HashMap result = rasterDataSetService.getRasterFileAssociationList(cmd)
+		HashMap result = rasterDataSetService.getRasterFilesAssociationList(cmd)
 
 		render contentType: "application/json", text: result as JSON
 	}
