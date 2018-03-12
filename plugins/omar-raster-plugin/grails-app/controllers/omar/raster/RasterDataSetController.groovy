@@ -209,6 +209,41 @@ The service api **getRasterFiles**
 
 		render contentType: "application/json", text: result as JSON
 	}
+	@ApiOperation( value = "Returns the Files and types assoicated with a given raster ID",
+			produces = 'application/json',
+			httpMethod = 'GET',
+			notes = """
+The service api **getRasterFiles**  
+
+## Parameter List
+
+*   **id**
+
+    This can be the record ID, image ID, or the indexId for a entry to search for
+    """)
+	@ApiImplicitParams( [
+			@ApiImplicitParam(name = 'id', 
+				               value = 'Search Id', 
+				               required=false, 
+				               paramType = 'query', 
+				               dataType = 'string'),
+	] )
+	def getRasterFileAssociationList()
+	{
+//		log.info "getRasterFiles: ${params}"
+
+		def jsonData = request.JSON?request.JSON as HashMap:null
+		def requestParams = params - params.subMap( ['controller', 'action'] )
+		def cmd = new GetRasterFilesCommand()
+
+		// get map from JSON and merge into parameters
+		if(jsonData) requestParams << jsonData
+		BindUtil.fixParamNames( GetRasterFilesCommand, requestParams )
+		bindData( cmd, requestParams )
+		HashMap result = rasterDataSetService.getRasterFileAssociationList(cmd)
+
+		render contentType: "application/json", text: result as JSON
+	}
 
 	@ApiOperation(
 		value = "Returns an array of distinct values in the Raster Entry table for a given column name",
