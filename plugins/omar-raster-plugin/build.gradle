@@ -77,7 +77,6 @@ dependencies {
 
   compile 'com.vividsolutions:jts:1.13'
 
-  compile "org.springframework.cloud:spring-cloud-starter-zipkin"
   compile "org.springframework.boot:spring-boot-starter-logging"
   compile "org.springframework.boot:spring-boot-autoconfigure"
   compile "org.grails:grails-core"
