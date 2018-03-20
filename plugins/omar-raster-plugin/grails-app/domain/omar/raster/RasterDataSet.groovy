@@ -35,7 +35,7 @@ class RasterDataSet
             rasterEntry.rasterDataSet = rasterDataSet
             RasterEntry.initRasterEntry(rasterEntryNode, rasterEntry)
 
-            if (rasterEntry.groundGeom && (rasterEntry.entryId.toInteger() == 0 || !rasterEntry.imageRepresentation.equalsIgnoreCase("NODISPLY")))
+            if (rasterEntry?.groundGeom && (rasterEntry?.entryId?.toInteger() == 0 || !rasterEntry?.imageRepresentation?.equalsIgnoreCase("NODISPLY")))
             {
                 rasterDataSet.addToRasterEntries(rasterEntry)
             }
