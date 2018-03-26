@@ -227,12 +227,16 @@ class RasterDataSetService implements ApplicationContextAware
                 if (params.buildOverviews || params.buildHistograms)
                 {
                     def result = stagerService.stageFileJni([filename               : params.filename,
+                                                             buildThumbnails        : params.buildThumbnails,
                                                              buildOverviews         : params.buildOverviews,
                                                              buildHistograms        : params.buildHistograms,
                                                              overviewCompressionType: params.overviewCompressionType,
                                                              buildHistogramsWithR0  : params.buildHistogramsWithR0,
                                                              useFastHistogramStaging: params.useFastHistogramStaging,
-                                                             overviewType           : params.overviewType
+                                                             overviewType           : params.overviewType,
+                                                             thumbnailSize          : params.thumbnailSize,
+                                                             thumbnailType          : params.thumbnailType,
+                                                             thumbnailStretchType   : params.thumbnailStretchType
                     ])
                     if (result?.status >= 300)
                     {
@@ -475,12 +479,16 @@ class RasterDataSetService implements ApplicationContextAware
                                 processId              : record.processId,
                                 status                 : record.status.name,
                                 statusMessage          : record.statusMessage,
+                                buildThumbnails        : record.buildThumbnails,
                                 buildOverviews         : record.buildOverviews,
                                 buildHistograms        : record.buildHistograms,
                                 buildHistogramsWithR0  : record.buildHistogramsWithR0,
                                 useFastHistogramStaging: record.useFastHistogramStaging,
                                 overviewCompressionType: record.overviewCompressionType,
                                 overviewType           : record.overviewType,
+                                thumbnailSize          : record.thumbnailSize,
+                                thumbnailType          : record.thumbnailType,
+                                thumbnailStretchType   : record.thumbnailStretchType,
                                 dateCreated            : record.dateCreated,
                         ]
             }

@@ -37,6 +37,10 @@ The service api **addRaster**
 
     If the parameter is true it will indicate to submit the process as a background job.
 
+*   **buildThumbanils**
+
+    If the parameter is true it will indicate to build thumbnails for the image.
+
 *   **buildOverviews**
 
     If the parameter is true it will indicate to build overviews for the image. Also known as reduced resolution sets.
@@ -61,6 +65,15 @@ The service api **addRaster**
 
     Indicates the type of compression to use during the building of the overviews.
 
+*   **thumbnailType**
+
+    Indicates the type of thumbnails to create.  This value can be **jpeg** or **png**.
+
+*   **thumbnailStretchType**
+
+    Indicates the type of stretch to use for thumbnail generation  This can be 
+	 **none**, **auto-minmax**, **auto-percentile**, **std-stretch-1**, **std-stretch-2**, **std-stretch-3**.
+
 **Additional Notes**
 
 You can also pass the arguments as a JSON string and post 
@@ -70,22 +83,31 @@ to the URL.  The format supported:
 {
    "filename": "",
    "background": "",
+	"buildThumbnails": "",
    "buildOverviews": "",
    "buildHistograms": "",
    "overviewType": "",
-   "overviewCompressionType":""
+   "overviewCompressionType":"",
+	"thumbnailSize":"",
+	"thumbnailType":"",
+	"thumbnailStretchType":""
+	
 }
 ```
             """)
 	@ApiImplicitParams( [
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to add', dataType = 'string', paramType = "query", required = true ),
 			@ApiImplicitParam( name = 'background', value = 'Process in the background', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'buildThumbnails', value = 'Build thumbnails', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildOverviews', value = 'Build overviews', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildHistograms', value = 'Build histograms', allowableValues="true,false", defaultValue="true", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'buildHistogramsWithR0', value = 'Build histograms with R0', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'useFastHistogramStaging', value = 'Fast Histogram calculation', allowableValues="true,false", defaultValue="false", dataType = "boolean", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'overviewType', value = 'Overview type', allowableValues="ossim_tiff_box, ossim_tiff_nearest, ossim_kakadu_nitf_j2k", defaultValue = "ossim_tiff_box", dataType = "string", paramType = "query", required = false),
 			@ApiImplicitParam( name = 'overviewCompressionType', value = 'Overview compression type', allowableValues="NONE,JPEG,PACKBITS,DEFLATE", defaultValue="NONE", dataType = "string", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'thumbnailSize', value = 'Thumbnail size', allowableValues="512,256,128,64,32", defaultValue="512", dataType = "integer", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'thumbnailType', value = 'Thumbnail type', allowableValues="jpeg,png", defaultValue="jpeg", dataType = "string", paramType = "query", required = false),
+			@ApiImplicitParam( name = 'thumbnailStretchType', value = 'Thumbnail stretch type', allowableValues="none,auto-minmax,auto-percentile,std-stretch-1,std-stretch-2,std-stretch-3", defaultValue="auto-minmax", dataType = "string", paramType = "query", required = false),
 	] )
 	def addRaster()
 	{
