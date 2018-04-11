@@ -689,6 +689,12 @@ class RasterEntry
                 rasterEntry.grazingAngle = (90 - ( value as Double )).round( 2 )
               }
               break;
+            case "obl_ang":
+              if ( value && value != "nan" && !rasterEntry.grazingAngle )
+              {
+                rasterEntry.grazingAngle = (90 - ( value as Double )).round( 2 )
+              }
+              break;
 
             case "classification":
               if ( value &&!rasterEntry.securityClassification )
