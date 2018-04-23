@@ -610,6 +610,12 @@ class RasterEntry
                 rasterEntry.securityCode = value
               }
               break
+            case "fscltx":
+              if(value &&!rasterEntry.securityCode)
+              {
+                rasterEntry.securityCode = value
+              }
+              break
             case "security_code":
               if ( value && !rasterEntry.securityCode )
               {
