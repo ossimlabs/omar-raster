@@ -604,12 +604,12 @@ class RasterEntry
                 rasterEntry.countryCode = value
               }
               break
-            case "fsctlh":
-              if(value &&!rasterEntry.securityCode)
-              {
-                rasterEntry.securityCode = value
-              }
-              break
+            //case "fsctlh":
+            //  if(value &&!rasterEntry.securityCode)
+            //  {
+            //    rasterEntry.securityCode = value
+            //  }
+            //  break
             case "fscltx":
               if(value &&!rasterEntry.securityCode)
               {
