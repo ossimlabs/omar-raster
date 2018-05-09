@@ -57,7 +57,6 @@ class RasterDataSetService implements ApplicationContextAware
 
 			rasterDataSets?.each { rasterDataSet ->
    			filename = rasterDataSet.mainFile?.name
-   			println filename
 				try {
 					if (rasterDataSet.save()) {
 						//stagerHandler.processSuccessful(filename, xml)
@@ -158,7 +157,6 @@ class RasterDataSetService implements ApplicationContextAware
                 log.error(httpStatusMessage?.message)
             }
         }
-
 
         if (httpStatusMessage?.status == HttpStatus.OK)
         {

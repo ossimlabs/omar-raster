@@ -7,7 +7,8 @@ import omar.core.HttpStatusMessage
 import omar.core.BindUtil
 import groovy.json.JsonOutput
 import groovy.xml.XmlUtil
-
+import groovy.util.XmlSlurper
+import groovy.json.JsonSlurper
 @Api( value = "dataManager",
      produces = 'application/json',
      consumes = 'application/json',
@@ -111,18 +112,36 @@ to the URL.  The format supported:
 	] )
 	def addRaster()
 	{
-		def xml
+		String body = request.reader.text
+		def xmlString
 
-		try{
-			xml = request.XML
-		}
-		catch(e)
+		if(body)
 		{
-			xml = null
+			def xmlCheck
+			try{
+				xmlCheck = new XmlSlurper().parseText(body)
+				//xml = request.XML
+			}
+			catch(e)
+			{
+				xmlCheck = null
+			}
+			if(xmlCheck)
+			{
+				xmlString = body
+			}
 		}
-		if(!xml)
+		if(!xmlString)
 		{
-			def jsonData = request.JSON?request.JSON as HashMap:null
+			def json
+			try{
+				json = body?new JsonSlurper().parseText(body):null
+			} 
+			catch(e)
+			{
+				json = null
+			}
+			def jsonData = json?json as HashMap : null
 			def requestParams = params - params.subMap( ['controller', 'action'] )
 			def cmd = new AddRasterCommand()
 
@@ -139,9 +158,6 @@ to the URL.  The format supported:
 		}
 		else
 		{
-			def xmlString = groovy.xml.XmlUtil.serialize xml
-
-			//println "CLASS === ${xmlString} "
 			def result = rasterDataSetService.addRasterXml(xmlString)
    		response.status = result.status
 			render( result.message )			
