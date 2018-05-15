@@ -283,4 +283,23 @@ The service api **getRasterFiles**
 
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
+
+	@ApiOperation(
+			value = "Updates each last access date of the given rastersEntry IDs if the access date is older than 24 hours",
+			produces = 'application/json',
+			httpMethod = 'POST'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam(
+					dataType = 'string',
+					defaultValue = "",
+					name = 'RasterEntry ID csv',
+					paramType = 'string',
+					required = true,
+					value = 'IDs csv'
+			)
+	])
+	def updateAccessDates() {
+		println params
+	}
 }
