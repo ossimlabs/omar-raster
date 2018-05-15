@@ -7,5 +7,7 @@ class OmarRasterUrlMappings {
         "/dataManager/removeRaster"(controller: 'rasterDataSet', action: 'removeRaster')
         "/dataManager/getDistinctValues"(controller: 'rasterDataSet', action: 'getDistinctValues')
         "/dataManager/getRasterFilesProcessing"(controller: 'rasterDataSet', action: 'getRasterFilesProcessing')
-        "/dataManager/getRasterFiles"(controller: 'rasterDataSet', action: 'getRasterFiles')    }
+        "/dataManager/getRasterFiles"(controller: 'rasterDataSet', action: 'getRasterFiles')
+        "/dataManager/updateAccessDates"(controller: 'rasterDataSet', action: 'updateAccessDates')
+    }
 }
