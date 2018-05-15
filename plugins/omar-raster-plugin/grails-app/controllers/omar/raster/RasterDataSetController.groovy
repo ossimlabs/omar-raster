@@ -290,14 +290,7 @@ The service api **getRasterFiles**
 			httpMethod = 'POST'
 	)
 	@ApiImplicitParams([
-			@ApiImplicitParam(
-					dataType = 'string',
-					defaultValue = '',
-					name = 'RasterEntry ID csv',
-					paramType = 'query',
-					required = true,
-					value = 'IDs csv'
-			)
+			@ApiImplicitParam( name = 'rasterEntries', value = 'CSV of rasterEntry IDs', dataType = 'string', paramType = "query", required = true )
 	])
 	def updateAccessDates() {
 		println "DEBUG: Params = $params"
