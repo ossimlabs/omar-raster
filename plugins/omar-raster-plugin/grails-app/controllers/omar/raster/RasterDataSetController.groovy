@@ -292,14 +292,14 @@ The service api **getRasterFiles**
 	@ApiImplicitParams([
 			@ApiImplicitParam(
 					dataType = 'string',
-					defaultValue = "",
+					defaultValue = '',
 					name = 'RasterEntry ID csv',
-					paramType = 'string',
+					paramType = 'query',
 					required = true,
 					value = 'IDs csv'
 			)
 	])
 	def updateAccessDates() {
-		println params
+		println "DEBUG: Params = $params"
 	}
 }
