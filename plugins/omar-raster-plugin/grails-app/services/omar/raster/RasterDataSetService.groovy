@@ -524,4 +524,8 @@ class RasterDataSetService implements ApplicationContextAware
 
         result
     }
+
+	def updateAccessDates(List<String> rasterEntryIds) {
+		println "DEBUG Raster Entry Ids: $rasterEntryIds"
+	}
 }

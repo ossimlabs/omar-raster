@@ -295,6 +295,11 @@ The service api **getRasterFiles**
 	def updateAccessDates() {
 		println "DEBUG: Params = $params"
 
-        render contentType: "application/json", text: "{ p: \"$params\" }"
+        // Query for RasterEntries
+        // Check and update access dates
+        // Save rasterEntries back
+		println "DEBUG ${rasterDataSetService.updateAccessDates(params.rasterEntries.split(","))}"
+
+        render contentType: "application/json", text: "{ \"p\": \"$params\" }"
 	}
 }
