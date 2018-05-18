@@ -299,7 +299,7 @@ The service api **getRasterFiles**
         // Check and update access dates
         // Save rasterEntries back
         println "Debug rasterEntires: $params.rasterEntries"
-        List<String> rasterEntries = params.rasterEntries
+        List<String> rasterEntries = params.rasterEntries.split(",")
 
 		println "DEBUG ${rasterDataSetService.updateAccessDates(rasterEntries)}"
 
