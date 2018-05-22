@@ -6,8 +6,10 @@ import groovy.util.logging.Slf4j
 import omar.core.Repository
 import omar.core.HttpStatus
 import omar.core.DateUtil
+import omar.raster.RasterEntry
 
 import omar.stager.OmarStageFile
+import org.apache.tools.ant.types.resources.selectors.Date
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import groovy.json.JsonBuilder
@@ -530,5 +532,21 @@ class RasterDataSetService implements ApplicationContextAware
 		println "DEBUG RasterEntry[0] = ${rasterEntryIds[0]}"
 		RasterEntry re = RasterEntry.get(rasterEntryIds[0])
 		println "DEBUG: RE = $re"
+	}
+
+	private static void updateLastAccess(@NotNull RasterEntry re) {
+		if (re.accessDate == null) {
+			println "DEBUG: Updating since it's null"
+			re.accessDate = new Timestamp(System.currentTimeMillis())
+		}
+
+		TimeDuration oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
+		long millisecondsSinceAccessed = new Date().millis - re.accessDate.getTime()
+		println "DEBUG: Millis since accessed = $millisecondsSinceAccessed"
+
+		if (millisecondsSinceAccessed > oneDay) {
+			println "DEBUG: Updating since it's past one day"
+			re.accessDate = new Timestamp(System.currentTimeMillis())
+		}
 	}
 }
