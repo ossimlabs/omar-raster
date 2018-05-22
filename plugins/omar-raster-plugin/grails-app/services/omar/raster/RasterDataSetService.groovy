@@ -530,10 +530,11 @@ class RasterDataSetService implements ApplicationContextAware
 	void updateAccessDates(List<String> rasterEntryIds) {
 		println "DEBUG Raster Entry Ids: $rasterEntryIds"
 		println "DEBUG RasterEntry[0] = ${rasterEntryIds[0]}"
-		RasterEntry re = RasterEntry.get(rasterEntryIds[0])
-		println "DEBUG: RE = $re"
+		RasterEntry r = RasterEntry.get(rasterEntryIds[0])
+		println "DEBUG: RE = $r"
         rasterEntryIds.forEach {
-            updateLastAccess(it)
+            RasterEntry re = RasterEntry.get(it)
+            updateLastAccess(re)
         }
 	}
 
