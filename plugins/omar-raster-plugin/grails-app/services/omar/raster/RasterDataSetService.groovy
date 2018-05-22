@@ -532,6 +532,9 @@ class RasterDataSetService implements ApplicationContextAware
 		println "DEBUG RasterEntry[0] = ${rasterEntryIds[0]}"
 		RasterEntry re = RasterEntry.get(rasterEntryIds[0])
 		println "DEBUG: RE = $re"
+        rasterEntryIds.forEach {
+            updateLastAccess(it)
+        }
 	}
 
 	private static void updateLastAccess(RasterEntry re) {
