@@ -534,7 +534,7 @@ class RasterDataSetService implements ApplicationContextAware
 		println "DEBUG: RE = $re"
 	}
 
-	private static void updateLastAccess(@NotNull RasterEntry re) {
+	private static void updateLastAccess(RasterEntry re) {
 		if (re.accessDate == null) {
 			println "DEBUG: Updating since it's null"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
