@@ -301,8 +301,6 @@ The service api **getRasterFiles**
         println "Debug rasterEntires: $params.rasterEntries"
         List<String> rasterEntries = params.rasterEntries.split(",")
 
-		println "DEBUG ${rasterDataSetService.updateAccessDates(rasterEntries)}"
-
         render contentType: "application/json", text: "{ \"p\": \"$params\" }"
 	}
 }
