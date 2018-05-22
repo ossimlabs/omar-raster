@@ -545,7 +545,7 @@ class RasterDataSetService implements ApplicationContextAware
 		}
 
 		long oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
-		long millisecondsSinceAccessed = new Date().millis - re.accessDate.getTime()
+		long millisecondsSinceAccessed = System.currentTimeMillis() - re.accessDate.getTime()
 		println "DEBUG: Millis since accessed = $millisecondsSinceAccessed"
 
 		if (millisecondsSinceAccessed > oneDay) {
