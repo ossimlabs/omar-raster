@@ -540,7 +540,8 @@ class RasterDataSetService implements ApplicationContextAware
 		if (re.accessDate == null) {
 			println "DEBUG: Updating since it's null"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            re.save()
+            println re.save()
+            println "RE: $re"
 		}
 
 		long oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
@@ -550,7 +551,8 @@ class RasterDataSetService implements ApplicationContextAware
 		if (millisecondsSinceAccessed > oneDay) {
 			println "DEBUG: Updating since it's past one day"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            re.save()
+            println re.save()
+            println "RE: $re"
 		}
 	}
 }
