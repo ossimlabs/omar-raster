@@ -536,11 +536,11 @@ class RasterDataSetService implements ApplicationContextAware
 	}
 
 	private static void updateLastAccess(RasterEntry re) {
-        println "DEBUG: RE image ID = ${re.imageId}"
+        println "DEBUG: RE access date = ${re.accessDate}"
 		if (re.accessDate == null) {
 			println "DEBUG: Updating since it's null"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            println re.save()
+            println re.save(flush: true)
             println "RE: $re"
 		}
 
@@ -551,7 +551,7 @@ class RasterDataSetService implements ApplicationContextAware
 		if (millisecondsSinceAccessed > oneDay) {
 			println "DEBUG: Updating since it's past one day"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            println re.save()
+            println re.save(flush: true)
             println "RE: $re"
 		}
 	}
