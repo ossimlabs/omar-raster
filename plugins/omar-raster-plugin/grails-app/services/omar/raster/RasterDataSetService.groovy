@@ -533,6 +533,7 @@ class RasterDataSetService implements ApplicationContextAware
             RasterEntry re = RasterEntry.get(it)
             if (updateLastAccess(re)) updatedRasters.add(it)
         }
+        println "DEBUG: Updated rasters = $updatedRasters"
         return updatedRasters
 	}
 
