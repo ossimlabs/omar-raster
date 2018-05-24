@@ -286,7 +286,7 @@ The service api **getRasterFiles**
 
 	@ApiOperation(
 			value = "Updates each last access date of the given rastersEntry IDs if their access date is older than 24 hours",
-			produces = 'application/json',
+			produces = 'text/plain',
 			httpMethod = 'GET'
 	)
 	@ApiImplicitParams([
