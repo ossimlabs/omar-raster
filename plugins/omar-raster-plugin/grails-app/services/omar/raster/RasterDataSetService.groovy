@@ -528,7 +528,6 @@ class RasterDataSetService implements ApplicationContextAware
     }
 
 	List<String> updateAccessDates(List<String> rasterEntryIds) {
-		println "DEBUG Raster Entry Ids: $rasterEntryIds"
         List<String> updatedRasters = []
         rasterEntryIds.forEach {
             RasterEntry re = RasterEntry.get(it)
@@ -538,24 +537,18 @@ class RasterDataSetService implements ApplicationContextAware
 	}
 
 	private static boolean updateLastAccess(RasterEntry re) {
-        println "DEBUG: RE access date = ${re.accessDate}"
 		if (re.accessDate == null) {
-			println "DEBUG: Updating since it's null"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            println re.save(flush: true)
-            println "RE: $re"
+            re.save(flush: true)
             return true
 		}
 
 		long oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
 		long millisecondsSinceAccessed = System.currentTimeMillis() - re.accessDate.getTime()
-		println "DEBUG: Millis since accessed = $millisecondsSinceAccessed"
 
 		if (millisecondsSinceAccessed > oneDay) {
-			println "DEBUG: Updating since it's past one day"
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            println re.save(flush: true)
-            println "RE: $re"
+            re.save(flush: true)
             return true
 		}
         return false
