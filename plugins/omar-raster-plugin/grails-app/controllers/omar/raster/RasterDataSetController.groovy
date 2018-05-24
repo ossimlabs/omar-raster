@@ -293,15 +293,10 @@ The service api **getRasterFiles**
 			@ApiImplicitParam( name = 'rasterEntries', value = 'CSV of rasterEntry IDs', dataType = 'string', paramType = "query", required = true )
 	])
 	def updateAccessDates() {
-		println "DEBUG: Params = $params"
-
-        // Query for RasterEntries
-        // Check and update access dates
-        // Save rasterEntries back
         println "Debug rasterEntires: $params.rasterEntries"
         List<String> rasterEntries = params.rasterEntries.split(",")
-		rasterDataSetService.updateAccessDates(rasterEntries)
+		List<String> updatedRasters = rasterDataSetService.updateAccessDates(rasterEntries)
 
-        render contentType: "application/json", text: "{ \"p\": \"$params\" }"
+        render contentType: "application/json", text: "${updatedRasters.join(",")}"
 	}
 }
