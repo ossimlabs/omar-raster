@@ -131,12 +131,6 @@ class RasterDataSetService implements ApplicationContextAware
         def requestType = "GET"
         def requestMethod = "addRaster"
         Date startTime = new Date()
-
-        ArrayList<String> missionids = new ArrayList<String>()
-        ArrayList<String> imageids = new ArrayList<String>()
-        ArrayList<String> sensorids = new ArrayList<String>()
-        ArrayList<String> fileTypes = new ArrayList<String>()
-        ArrayList<String> filenames = new ArrayList<String>()
         def ingestDates
         def acquisitionDates
 
@@ -201,18 +195,18 @@ class RasterDataSetService implements ApplicationContextAware
                 {
                     rasterDataSets?.each { rasterDataSet ->
                         def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                        missionids.add(rasterDataSet?.rasterEntries.collect { it.missionId })
-                        imageids.add(rasterDataSet?.rasterEntries.collect { it.imageId })
-                        sensorids.add(rasterDataSet?.rasterEntries.collect { it.sensorId })
-                        fileTypes.add(rasterDataSet?.rasterEntries.collect { it.fileType })
-                        filenames.add(rasterDataSet?.rasterEntries.collect { it.filename })
+                        missionids = rasterDataSet?.rasterEntries.collect { it.missionId })
+                        imageids = rasterDataSet?.rasterEntries.collect { it.imageId })
+                        sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId })
+                        fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType })
+                        filenames = rasterDataSet?.rasterEntries.collect { it.filename })
                         acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                         ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
                     }
                     raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
                             requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                            filetypes: fileTypes.toArray(), filenames: filenames.toArray(), acquisitionDates: acquisitionDates,
-                            ingestDates: ingestDates, missionids: missionids.toArray(), imageids: imageids.toArray(), sensorids: sensorids.toArray())
+                            filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                            ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
                     log.info raster_logs.toString()
 
@@ -251,18 +245,18 @@ class RasterDataSetService implements ApplicationContextAware
                             httpStatusMessage?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                             httpStatusMessage?.message = "Added raster ${ids}:${filename}"      
-                            missionids.add(rasterDataSet?.rasterEntries.collect { it.missionId })
-                            imageids.add(rasterDataSet?.rasterEntries.collect { it.imageId })
-                            sensorids.add(rasterDataSet?.rasterEntries.collect { it.sensorId })
-                            fileTypes.add(rasterDataSet?.rasterEntries.collect { it.fileType })
-                            filenames.add(rasterDataSet?.rasterEntries.collect { it.filename })
+                            missionids = rasterDataSet?.rasterEntries.collect { it.missionId })
+                            imageids = rasterDataSet?.rasterEntries.collect { it.imageId })
+                            sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId })
+                            fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType })
+                            filenames = rasterDataSet?.rasterEntries.collect { it.filename })
                             acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                             ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
                         }
                         raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
                                 requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                                filetypes: fileTypes.toArray(), filenames: filenames.toArray(), acquisitionDates: acquisitionDates,
-                                ingestDates: ingestDates, missionids: missionids.toArray(), imageids: imageids.toArray(), sensorids: sensorids.toArray())
+                                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
                         log.info raster_logs.toString()
 
@@ -288,11 +282,11 @@ class RasterDataSetService implements ApplicationContextAware
                                     httpStatusMessage?.status = HttpStatus.OK
                                     def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                                     httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                    missionids.add(rasterDataSet?.rasterEntries.collect { it.missionId })
-                                    imageids.add(rasterDataSet?.rasterEntries.collect { it.imageId })
-                                    sensorids.add(rasterDataSet?.rasterEntries.collect { it.sensorId })
-                                    fileTypes.add(rasterDataSet?.rasterEntries.collect { it.fileType })
-                                    filenames.add(rasterDataSet?.rasterEntries.collect { it.filename })
+                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId })
+                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId })
+                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId })
+                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType })
+                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename })
                                     acquisitionDates = rasterDataSet?.rasterEntries.collect {
                                         it.acquisitionDate
                                     }.join(",")
@@ -300,8 +294,8 @@ class RasterDataSetService implements ApplicationContextAware
 
                                     raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
                                             requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                                            filetypes: fileTypes.toArray(), filenames: filenames.toArray(), acquisitionDates: acquisitionDates,
-                                            ingestDates: ingestDates, missionids: missionids.toArray(), imageids: imageids.toArray(), sensorids: sensorids.toArray())
+                                            filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                            ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
                                     log.info raster_logs.toString()
                                 }
