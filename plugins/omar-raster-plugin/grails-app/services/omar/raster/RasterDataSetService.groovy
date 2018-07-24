@@ -57,35 +57,20 @@ class RasterDataSetService implements ApplicationContextAware
             def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
             String filename
 
-            ArrayList<String> missionids = new ArrayList<String>()
-            ArrayList<String> imageids = new ArrayList<String>()
-            ArrayList<String> sensorids = new ArrayList<String>()
-            ArrayList<String> fileTypes = new ArrayList<String>()
-            ArrayList<String> filenames = new ArrayList<String>()
-            ArrayList<String> entryids = new ArrayList<String>()
-
 			rasterDataSets?.each { rasterDataSet ->
    			filename = rasterDataSet.mainFile?.name
 				try {
 					if (rasterDataSet.save()) {
 						//stagerHandler.processSuccessful(filename, xml)
-                        missionids.add(rasterDataSet?.rasterEntries.collect { it.missionId })
-                        imageids.add(rasterDataSet?.rasterEntries.collect { it.imageId })
-                        sensorids.add(rasterDataSet?.rasterEntries.collect { it.sensorId })
-                        fileTypes.add(rasterDataSet?.rasterEntries.collect { it.fileType })
-                        filenames.add(rasterDataSet?.rasterEntries.collect { it.filename })
-                        entryids.add(rasterDataSet?.rasterEntries.collect { it.entryId })
-
-
 						result?.status = HttpStatus.OK
 						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 						result?.message                  = "Added raster ${ids}:${filename}"
-						result.metadata.missionids       = missionids.toArray()
-						result.metadata.imageids         = imageids.toArray()
-						result.metadata.sensorids        = sensorids.toArray()
-						result.metadata.fileTypes        = fileTypes.toArray()
-						result.metadata.filenames        = filenames.toArray()
-						result.metadata.entryIds         = entryids.toArray()
+						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }
+						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }
+						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }
+						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }
+						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }
+						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }
 						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
 						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
 						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
