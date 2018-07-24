@@ -65,12 +65,12 @@ class RasterDataSetService implements ApplicationContextAware
 						result?.status = HttpStatus.OK
 						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
 						result?.message                  = "Added raster ${ids}:${filename}"
-						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }
-						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }
-						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }
-						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }
-						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }
-						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }
+						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }?:[]
 						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
 						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
 						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
@@ -195,11 +195,11 @@ class RasterDataSetService implements ApplicationContextAware
                 {
                     rasterDataSets?.each { rasterDataSet ->
                         def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                        missionids = rasterDataSet?.rasterEntries.collect { it.missionId }
-                        imageids = rasterDataSet?.rasterEntries.collect { it.imageId }
-                        sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }
-                        fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }
-                        filenames = rasterDataSet?.rasterEntries.collect { it.filename }
+                        missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                        imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                        sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                        fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                        filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                         acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                         ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
                     }
@@ -245,11 +245,11 @@ class RasterDataSetService implements ApplicationContextAware
                             httpStatusMessage?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                             httpStatusMessage?.message = "Added raster ${ids}:${filename}"      
-                            missionids = rasterDataSet?.rasterEntries.collect { it.missionId }
-                            imageids = rasterDataSet?.rasterEntries.collect { it.imageId }
-                            sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }
-                            fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }
-                            filenames = rasterDataSet?.rasterEntries.collect { it.filename }
+                            missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                            imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                            sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                            fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                            filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                             acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                             ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
                         }
@@ -282,11 +282,11 @@ class RasterDataSetService implements ApplicationContextAware
                                     httpStatusMessage?.status = HttpStatus.OK
                                     def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                                     httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId }
-                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId }
-                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }
-                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }
-                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename }
+                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                                     acquisitionDates = rasterDataSet?.rasterEntries.collect {
                                         it.acquisitionDate
                                     }.join(",")
