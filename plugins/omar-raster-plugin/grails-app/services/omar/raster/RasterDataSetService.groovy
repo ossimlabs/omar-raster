@@ -133,6 +133,11 @@ class RasterDataSetService implements ApplicationContextAware
         Date startTime = new Date()
         def ingestDates
         def acquisitionDates
+        def missionids
+        def imageids
+        def sensorids   
+        def fileTypes
+        def filenames
 
 //		println params.logs
 
@@ -202,13 +207,14 @@ class RasterDataSetService implements ApplicationContextAware
                         filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                         acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                         ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
-                    }
-                    raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
-                            requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                            filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-                            ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+                    
+                        raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+                                requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
+                                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
-                    log.info raster_logs.toString()
+                        log.info raster_logs.toString()
+                    }
 
                 }
 
@@ -252,14 +258,14 @@ class RasterDataSetService implements ApplicationContextAware
                             filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                             acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                             ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
-                        }
-                        raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
-                                requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-                                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+                        
+                            raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+                                    requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
+                                    filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                    ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
-                        log.info raster_logs.toString()
-
+                            log.info raster_logs.toString()
+                        }    
                     }
                 }
                 else
