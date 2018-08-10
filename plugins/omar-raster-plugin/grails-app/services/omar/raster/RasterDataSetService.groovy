@@ -91,7 +91,7 @@ class RasterDataSetService implements ApplicationContextAware
 						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }.join(",")
 						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }.join(",")
 						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }.join(",")
-						result.metadata.entryIds         = entryids.rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
+						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }.join(",")
 						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
 						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
 						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
