@@ -1,4 +1,4 @@
 # omar-raster
 
-[![Build Status](https://jenkins.radiantbluecloud.com/buildStatus/icon?job=omar-raster-dev)]()
+[![Build Status](https://jenkins.ossim.io/buildStatus/icon?job=omar-raster-dev)]()
 
