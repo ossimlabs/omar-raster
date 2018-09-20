@@ -34,22 +34,30 @@ class RasterDataSetService implements ApplicationContextAware
 
         rasterDataSets?.each { it.delete() }
     }
-
+    private Timestamp convertToTimestamp(def v)
+    {
+      Timestamp result
+      if(v instanceof String)
+      {
+         result = DateUtil.parseDate(v)?.toTimestamp()  
+      }
+      else if(v instanceof Date)
+      {
+         result = v.toTimestamp()
+      }
+      else if(v instanceof Timestamp)
+      {
+         result = v
+      }
+    }
     void applyOverrideToRasterEntry(RasterEntry rasterEntry, HashMap overrides)
     {
         overrides?.each{k,v->
             switch(k)
             {
                 case "receiveDate":
-                    if(v instanceof String)
-                    {
-                        rasterEntry?.receiveDate = DateUtil.parseDate(v)   
-                    }
-                    else
-                    {
-                        rasterEntry?.receiveDate = v
-                    }
-                    break
+                  rasterEntry?.receiveDate = convertToTimestamp(v)
+                  break
                 default:
                    if(rasterEntry?.hasProperty(k))
                    {
