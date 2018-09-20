@@ -214,6 +214,10 @@ class RasterEntry
           indexId = mainFile.omarIndexId;
         }
       }
+      if(!receiveDate)
+      {
+        receiveDate = ingestDate;
+      }
     }
   }
 
@@ -801,6 +805,13 @@ class RasterEntry
               if(value && !rasterEntry.acquisitionDate)
               {
                 rasterEntry.acquisitionDate = DateUtil.parseDate(value)
+              }
+              break;
+            case "receive_date":
+            case "receivedate":
+              if(value && !rasterEntry.receiveDate)
+              {
+                rasterEntry.receiveDate = DateUtil.parseDate(value)
               }
               break;
             case "sunazimuth":
