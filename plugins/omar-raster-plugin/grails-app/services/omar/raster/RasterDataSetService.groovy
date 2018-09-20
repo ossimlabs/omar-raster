@@ -35,10 +35,39 @@ class RasterDataSetService implements ApplicationContextAware
         rasterDataSets?.each { it.delete() }
     }
 
+    void applyOverrideToRasterEntry(RasterEntry rasterEntry, HashMap overrides)
+    {
+        overrides?.each{k,v->
+            switch(k)
+            {
+                case "receiveDate":
+                {
+                    if(v instanceof String)
+                    {
+                        rasterEntry?.receiveDate = DateUtil.parseDate(v)   
+                    }
+                    else
+                    {
+                        rasterEntry?.receiveDate = v
+                    }
+                    break
+                }
+                default:
+                {
+                   if(rasterEntry?.hasProperty(k))
+                   {
+                      rasterEntry?."${k}" = v;
+                   }
+                   break
+                }
+            }
+        }
+
+    }
     /**
      * Should for now only call with one embedded raster dataset
      */
-    def addRasterXml(def xml)
+    def addRasterXml(def xml, HashMap overrides=null)
     {
         def requestType = "POST"
         def requestMethod = "addRasterXml"
@@ -60,6 +89,12 @@ class RasterDataSetService implements ApplicationContextAware
 			rasterDataSets?.each { rasterDataSet ->
    			filename = rasterDataSet.mainFile?.name
 				try {
+                    if(overrides)
+                    {
+                        rasterDataSet.rasterEntries.each{rasterEntry->
+                            applyOverrideToRasterEntry(rasterEntry, overrides)
+                        }
+                    }
 					if (rasterDataSet.save()) {
 						//stagerHandler.processSuccessful(filename, xml)
 						result?.status = HttpStatus.OK
