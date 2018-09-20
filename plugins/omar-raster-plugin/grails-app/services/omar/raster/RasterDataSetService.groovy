@@ -41,7 +41,6 @@ class RasterDataSetService implements ApplicationContextAware
             switch(k)
             {
                 case "receiveDate":
-                {
                     if(v instanceof String)
                     {
                         rasterEntry?.receiveDate = DateUtil.parseDate(v)   
@@ -51,15 +50,12 @@ class RasterDataSetService implements ApplicationContextAware
                         rasterEntry?.receiveDate = v
                     }
                     break
-                }
                 default:
-                {
                    if(rasterEntry?.hasProperty(k))
                    {
                       rasterEntry?."${k}" = v;
                    }
                    break
-                }
             }
         }
 
