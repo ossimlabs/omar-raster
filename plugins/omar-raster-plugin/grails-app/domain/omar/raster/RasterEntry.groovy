@@ -542,6 +542,7 @@ class RasterEntry
               }
               break
             case "imagerepresentation":
+            case "image_representation":
               if ( value  )
               {
                 rasterEntry.imageRepresentation = value
@@ -646,6 +647,7 @@ class RasterEntry
               }
               break;
             case "imagecategory":
+            case "image_category":
               if ( value  )
               {
                 rasterEntry.imageCategory = value
