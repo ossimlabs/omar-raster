@@ -135,7 +135,7 @@ class RasterDataSetService implements ApplicationContextAware
                 else
                 {
                     result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                    result?.message = "No raster entries found for ${rasterDataSet.mainFile?} - check for ground geom!"
+                    result?.message = "No raster entries found for ${filename} - check for ground geom!"
                     log.error(result?.message)
                 }
             }
