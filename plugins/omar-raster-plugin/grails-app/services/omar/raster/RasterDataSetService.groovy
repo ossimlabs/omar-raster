@@ -91,47 +91,50 @@ class RasterDataSetService implements ApplicationContextAware
             String filename
 
 			rasterDataSets?.each { rasterDataSet ->
-   			filename = rasterDataSet.mainFile?.name
-				try {
-                    if(overrides)
+   			    filename = rasterDataSet.mainFile?.name
+                if (rasterDataSet.rasterEntries.size() > 0)
+                {
+                    try 
                     {
-                        rasterDataSet.rasterEntries.each{rasterEntry->
-                            applyOverrideToRasterEntry(rasterEntry, overrides)
+                        if (overrides)
+                        {
+                            rasterDataSet.rasterEntries.each { rasterEntry ->
+                                applyOverrideToRasterEntry(rasterEntry, overrides)
+                            }
+                        }
+                        if (rasterDataSet.save()) {
+                            //stagerHandler.processSuccessful(filename, xml)
+                            result?.status = HttpStatus.OK
+                            def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+                            result?.message                  = "Added raster ${ids}:${filename}"
+                            result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                            result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                            result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                            result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                            result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                            result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }?:[]
+                            result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
+                            result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
+                            result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
+                        }
+                        else
+                        {
+                            result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                            result?.message = "Unable to save XML, data probably already exists"
+                            log.error(result?.message)
                         }
                     }
-					if (rasterDataSet.save()) {
-						//stagerHandler.processSuccessful(filename, xml)
-						result?.status = HttpStatus.OK
-						def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-						result?.message                  = "Added raster ${ids}:${filename}"
-						result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-						result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-						result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-						result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-						result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
-						result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }?:[]
-						result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
-						result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
-						result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
-
-//						def raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
-//								requestMethod: requestMethod, httpStatus: result?.status, message: result?.message,
-//								filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-//								ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
-//
-//						log.info raster_logs.toString()
-                    }
-                    else
+                    catch (Exception e)
                     {
                         result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                        result?.message = "Unable to save XML, data probably already exists"
+                        result?.message = "Unable to save XML: ${e}"
                         log.error(result?.message)
                     }
                 }
-                catch (Exception e)
+                else
                 {
                     result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                    result?.message = "Unable to save XML: ${e}"
+                    result?.message = "No raster entries found for ${rasterDataSet.mainFile?} - check for ground geom!"
                     log.error(result?.message)
                 }
             }
@@ -151,6 +154,7 @@ class RasterDataSetService implements ApplicationContextAware
 
         result
     }
+
     /**
      * This service allows one to add a raster to the omar tables.
      *
