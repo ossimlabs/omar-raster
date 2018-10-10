@@ -89,9 +89,9 @@ class RasterDataSetService implements ApplicationContextAware
             def repository = ingestService?.findRepositoryForFile("/")
             def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
             String filename
-
-			rasterDataSets?.each { rasterDataSet ->
-   			    filename = rasterDataSet.mainFile?.name
+            
+            rasterDataSets?.each { rasterDataSet ->
+		        filename = rasterDataSet.mainFile?.name
                 if (rasterDataSet.rasterEntries.size() > 0)
                 {
                     try 
@@ -102,7 +102,8 @@ class RasterDataSetService implements ApplicationContextAware
                                 applyOverrideToRasterEntry(rasterEntry, overrides)
                             }
                         }
-                        if (rasterDataSet.save()) {
+                        if (rasterDataSet.save()) 
+                        {
                             //stagerHandler.processSuccessful(filename, xml)
                             result?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
