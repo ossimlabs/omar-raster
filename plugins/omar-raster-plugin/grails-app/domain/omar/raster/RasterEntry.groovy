@@ -63,7 +63,7 @@ class RasterEntry
   Boolean crossesDateline
   MultiPolygon groundGeom
   Date acquisitionDate
-  Integer validModel
+  Boolean validModel
 
 
   // DateTime accessDate
@@ -108,7 +108,7 @@ class RasterEntry
 
   static mapping = {
     cache true
-    autowire true    
+    autowire true
     id generator: 'identity'
     accessDate index: 'raster_entry_access_date_idx', sqlType: "timestamp with time zone" /*, type: PersistentDateTime*/
     acquisitionDate index: 'raster_entry_acquisition_date_idx' , sqlType: "timestamp with time zone"
@@ -438,7 +438,7 @@ class RasterEntry
     }
     if ( rasterEntry.validModel == null )
     {
-      rasterEntry.validModel = 1
+      rasterEntry.validModel = false
     }
     return rasterEntry
   }
@@ -799,7 +799,7 @@ class RasterEntry
             case "validmodel":
               if ( value && (rasterEntry.validModel==null ))
               {
-                rasterEntry.validModel = value as Integer
+                rasterEntry.validModel = value as Boolean
               }
               break;
             case "acquisition_date":
