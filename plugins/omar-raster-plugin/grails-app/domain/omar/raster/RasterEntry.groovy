@@ -190,6 +190,7 @@ class RasterEntry
     crossesDateline( nullable: true )
     validModel( nullable: true )
 
+
     fileType( nullable: true )
     className( nullable: true )
 
@@ -561,6 +562,7 @@ class RasterEntry
               }
               break;
             case "productid":
+            case "iid1":
               if ( value )
               {
                 rasterEntry.productId = value
