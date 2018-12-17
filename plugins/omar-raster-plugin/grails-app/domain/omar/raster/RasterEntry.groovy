@@ -422,7 +422,7 @@ class RasterEntry
     def metadataNode = rasterEntryNode.metadata
 
     initRasterEntryMetadata( metadataNode, rasterEntry )
-    if(rasterEntry.grailsApplication.config.stager.includeOtherTags)
+    if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
     {
       initRasterEntryOtherTagsXml( rasterEntry )
     }
@@ -859,7 +859,7 @@ class RasterEntry
               }
               break
             default:
-              if(rasterEntry.grailsApplication.config.stager.includeOtherTags)
+              if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
               {
                 rasterEntry.otherTagsMap[name] = value
               }
