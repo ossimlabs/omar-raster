@@ -561,7 +561,6 @@ class RasterEntry
                 rasterEntry.targetId = value
               }
               break;
-            case "productid":
             case "iid1":
               if ( value )
               {
