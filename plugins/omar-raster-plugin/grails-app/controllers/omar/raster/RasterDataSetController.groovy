@@ -72,15 +72,15 @@ The service api **addRaster**
 
 *   **thumbnailStretchType**
 
-    Indicates the type of stretch to use for thumbnail generation  This can be 
+    Indicates the type of stretch to use for thumbnail generation  This can be
 	 **none**, **auto-minmax**, **auto-percentile**, **std-stretch-1**, **std-stretch-2**, **std-stretch-3**.
 
 **Additional Notes**
 
-You can also pass the arguments as a JSON string and post 
+You can also pass the arguments as a JSON string and post
 to the URL.  The format supported:
 
-```        
+```
 {
    "filename": "",
    "background": "",
@@ -92,7 +92,7 @@ to the URL.  The format supported:
 	"thumbnailSize":"",
 	"thumbnailType":"",
 	"thumbnailStretchType":""
-	
+
 }
 ```
             """)
@@ -136,7 +136,7 @@ to the URL.  The format supported:
 			def json
 			try{
 				json = body?new JsonSlurper().parseText(body):null
-			} 
+			}
 			catch(e)
 			{
 				json = null
@@ -154,25 +154,25 @@ to the URL.  The format supported:
 			def status = rasterDataSetService.addRaster( httpStatusMessage, cmd )
 
 			response.status = httpStatusMessage.status
-			render( httpStatusMessage.message )			
+			render( httpStatusMessage.message )
 		}
 		else
 		{
 			def result = rasterDataSetService.addRasterXml(xmlString)
    		response.status = result.status
-			render( result.message )			
+			render( result.message )
 		}
 	}
 
-	@ApiOperation( value = "Remove a Raster from the database", 
-		            produces = 'text/plain', 
+	@ApiOperation( value = "Remove a Raster from the database",
+		            produces = 'text/plain',
 		            httpMethod = 'POST' )
 	@ApiImplicitParams([
-			@ApiImplicitParam( name = 'deleteFiles', 
-				                value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)', 
-				                allowableValues="true,false", 
-				                defaultValue="false", 
-				                dataType = "boolean", 
+			@ApiImplicitParam( name = 'deleteFiles',
+				                value = 'Delete the image file and all support files linked to it in the database (e.g. his, ovr, etc.)',
+				                allowableValues="true,false",
+				                defaultValue="false",
+				                dataType = "boolean",
 				                paramType = 'query',
 				                required = false),
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to remove', dataType = 'string', paramType = 'query',required = true ),
@@ -216,7 +216,7 @@ to the URL.  The format supported:
 			produces = 'application/json',
 			httpMethod = 'GET',
 			notes = """
-The service api **getRasterFiles**  
+The service api **getRasterFiles**
 
 ## Parameter List
 
@@ -225,10 +225,10 @@ The service api **getRasterFiles**
     This can be the record ID, image ID, or the indexId for a entry to search for
     """)
 	@ApiImplicitParams( [
-			@ApiImplicitParam(name = 'id', 
-				               value = 'Search Id', 
-				               required=false, 
-				               paramType = 'query', 
+			@ApiImplicitParam(name = 'id',
+				               value = 'Search Id',
+				               required=false,
+				               paramType = 'query',
 				               dataType = 'string'),
 	] )
 	def getRasterFiles()
@@ -255,7 +255,7 @@ The service api **getRasterFiles**
 	)
 	@ApiImplicitParams([
 		@ApiImplicitParam(
-			allowableValues = "countryCode, missionId, sensorId, targetId",
+			allowableValues = "countryCode, missionId, sensorId, targetId, productId",
  			dataType = 'string',
 			defaultValue = "countryCode",
 			name = 'property',
@@ -268,18 +268,20 @@ The service api **getRasterFiles**
 		log.info "getDistinctValues: ${params}"
 
 		def results = []
-		switch (params.property) {
-			case "countryCode" :
-			case "missionId" :
-			case "sensorId" :
-			case "targetId" :
-				results = RasterEntry.withCriteria {
-					projections {
-						distinct("${params.property}")
-					}
-				}
-		}
 
+		boolean isValidSearchKey = RasterEntryDistinctValues.values()
+			.map { it.rasterDbFieldKey }
+			.any { it == params.property }
+
+		if (isValidSearchKey){
+			results = RasterEntry.withCriteria {
+				projections {
+					distinct("${params.property}")
+				}
+			}
+		} else {
+			log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
+		}
 
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
