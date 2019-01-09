@@ -266,23 +266,7 @@ The service api **getRasterFiles**
 	])
 	def getDistinctValues() {
 		log.info "getDistinctValues: ${params}"
-
-		def results = []
-
-		boolean isValidSearchKey = RasterEntryDistinctValues.values()
-			.map { it.rasterDbFieldKey }
-			.any { it == params.property }
-
-		if (isValidSearchKey){
-			results = RasterEntry.withCriteria {
-				projections {
-					distinct("${params.property}")
-				}
-			}
-		} else {
-			log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
-		}
-
+        def results = rasterDataSetService.getDistinctValues(params)
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
 
