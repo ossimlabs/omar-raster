@@ -39,7 +39,7 @@ class RasterDataSetService implements ApplicationContextAware
       Timestamp result
       if(v instanceof String)
       {
-         result = DateUtil.parseDate(v)?.toTimestamp()  
+         result = DateUtil.parseDate(v)?.toTimestamp()
       }
       else if(v instanceof Date)
       {
@@ -89,12 +89,12 @@ class RasterDataSetService implements ApplicationContextAware
             def repository = ingestService?.findRepositoryForFile("/")
             def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
             String filename
-            
+
             rasterDataSets?.each { rasterDataSet ->
 		        filename = rasterDataSet.mainFile?.name
                 if (rasterDataSet.rasterEntries.size() > 0)
                 {
-                    try 
+                    try
                     {
                         if (overrides)
                         {
@@ -102,7 +102,7 @@ class RasterDataSetService implements ApplicationContextAware
                                 applyOverrideToRasterEntry(rasterEntry, overrides)
                             }
                         }
-                        if (rasterDataSet.save()) 
+                        if (rasterDataSet.save())
                         {
                             //stagerHandler.processSuccessful(filename, xml)
                             result?.status = HttpStatus.OK
@@ -179,7 +179,7 @@ class RasterDataSetService implements ApplicationContextAware
         def acquisitionDates
         def missionids
         def imageids
-        def sensorids   
+        def sensorids
         def fileTypes
         def filenames
 
@@ -251,7 +251,7 @@ class RasterDataSetService implements ApplicationContextAware
                         filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                         acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                         ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
-                    
+
                         raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
                                 requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
                                 filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
@@ -294,7 +294,7 @@ class RasterDataSetService implements ApplicationContextAware
                         rasterDataSets?.each { rasterDataSet ->
                             httpStatusMessage?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                            httpStatusMessage?.message = "Added raster ${ids}:${filename}"      
+                            httpStatusMessage?.message = "Added raster ${ids}:${filename}"
                             missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
                             imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
                             sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
@@ -302,14 +302,14 @@ class RasterDataSetService implements ApplicationContextAware
                             filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
                             acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                             ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
-                        
+
                             raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
                                     requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
                                     filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
                                     ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
                             log.info raster_logs.toString()
-                        }    
+                        }
                     }
                 }
                 else
@@ -598,4 +598,22 @@ class RasterDataSetService implements ApplicationContextAware
 		}
         return false
 	}
+
+    def getDistinctValues (def params) {
+        def results = []
+
+		boolean isValidSearchKey = RasterEntryDistinctValues.values()
+			.any { it.rasterDbFieldKey == params.property }
+
+		if (isValidSearchKey){
+			results = RasterEntry.withCriteria {
+				projections {
+					distinct("${params.property}")
+				}
+			}
+		} else {
+			log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
+		}
+        return results
+    }
 }
