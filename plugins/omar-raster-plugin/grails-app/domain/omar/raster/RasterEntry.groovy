@@ -14,6 +14,12 @@ import omar.core.DateUtil
 
 //import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 
+import omar.raster.tags.FileTypeTag
+import omar.raster.tags.MissionTag
+import omar.raster.tags.SensorTag
+import omar.raster.tags.CountryCodeTag
+
+
 class RasterEntry
 {
   def grailsApplication
@@ -92,6 +98,11 @@ class RasterEntry
   static hasMany = [fileObjects: RasterEntryFile]
 
   Collection fileObjects
+
+  FileTypeTag fileTypeTag
+  SensorTag sensorTag
+  MissionTag missionTag 
+  CountryCodeTag countryCodeTag 
 
   static namedQueries = {
     compositeId { compositeId ->
@@ -198,9 +209,15 @@ class RasterEntry
 
     groundGeom( nullable: false )
     acquisitionDate( nullable: true )
+
+    fileTypeTag(nullable: true)
+    missionTag(nullable: true)
+    sensorTag(nullable: true)
+    countryCodeTag(nullable: true)
   }
 
-  def beforeInsert = {
+  def beforeInsert() {
+
     if ( !ingestDate )
     {
       // ingestDate = new DateTime(DateTimeZone.UTC);
@@ -220,6 +237,7 @@ class RasterEntry
         receiveDate = ingestDate;
       }
     }
+    true
   }
 
   def getGeometryCenter()
@@ -585,30 +603,35 @@ class RasterEntry
               if ( value )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
               }
               break;
             case ~/.*sensor.*/:
               if(value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
               }
               break;
             case "sensor_type":
               if ( value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
               }
               break
             case "country":
               if ( value && !rasterEntry.countryCode )
               {
                 rasterEntry.countryCode = value
+                rasterEntry.countryCodeTag = CountryCodeTag.findOrSaveWhere(name: value)
               }
               break
             case "countrycode":
               if ( value )
               {
                 rasterEntry.countryCode = value
+                rasterEntry.countryCodeTag = CountryCodeTag.findOrSaveWhere(name: value)
               }
               break
             //case "fsctlh":
@@ -640,6 +663,8 @@ class RasterEntry
               if ( value && !rasterEntry.missionId )
               {
                 rasterEntry.missionId = value
+                rasterEntry.missionTag = MissionTag.findOrSaveWhere(name: value)
+
               }
               break;
             case "isorce":
@@ -788,6 +813,7 @@ class RasterEntry
               if ( value && !rasterEntry.fileType )
               {
                 rasterEntry.fileType = value
+                rasterEntry.fileTypeTag = FileTypeTag.findOrSaveWhere(name: value)
               }
               break
 
