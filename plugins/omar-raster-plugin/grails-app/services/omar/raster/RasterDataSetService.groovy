@@ -584,7 +584,7 @@ class RasterDataSetService implements ApplicationContextAware
 	private static boolean updateLastAccess(RasterEntry re) {
 		if (re.accessDate == null) {
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            re.save(flush: true)
+            re.save()
             return true
 		}
 
@@ -593,7 +593,7 @@ class RasterDataSetService implements ApplicationContextAware
 
 		if (millisecondsSinceAccessed > oneDay) {
 			re.accessDate = new Timestamp(System.currentTimeMillis())
-            re.save(flush: true)
+            re.save()
             return true
 		}
         return false
