@@ -14,11 +14,12 @@ import omar.core.DateUtil
 
 //import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 
-import omar.raster.tags.FileTypeTag
-import omar.raster.tags.MissionTag
-import omar.raster.tags.SensorTag
 import omar.raster.tags.CountryCodeTag
-
+import omar.raster.tags.FileTypeTag
+import omar.raster.tags.MissionIdTag
+import omar.raster.tags.ProductIdTag
+import omar.raster.tags.SensorIdTag
+import omar.raster.tags.TargetIdTag
 
 class RasterEntry
 {
@@ -99,10 +100,12 @@ class RasterEntry
 
   Collection fileObjects
 
-  FileTypeTag fileTypeTag
-  SensorTag sensorTag
-  MissionTag missionTag 
   CountryCodeTag countryCodeTag 
+  FileTypeTag fileTypeTag
+  MissionIdTag missionIdTag 
+  ProductIdTag productIdTag 
+  SensorIdTag sensorIdTag
+  TargetIdTag targetIdTag
 
   static namedQueries = {
     compositeId { compositeId ->
@@ -210,10 +213,13 @@ class RasterEntry
     groundGeom( nullable: false )
     acquisitionDate( nullable: true )
 
-    fileTypeTag(nullable: true)
-    missionTag(nullable: true)
-    sensorTag(nullable: true)
+    // Emerated Tags
     countryCodeTag(nullable: true)
+    fileTypeTag(nullable: true)
+    missionIdTag(nullable: true)
+    productIdTag(nullable: true)
+    sensorIdTag(nullable: true)
+    targetIdTag(nullable: true)
   }
 
   def beforeInsert() {
@@ -571,12 +577,15 @@ class RasterEntry
               if ( value && !rasterEntry.targetId )
               {
                 rasterEntry.targetId = value
+                rasterEntry.targetIdTag = TargetIdTag.findOrSaveWhere(name: value)
+
               }
               break;
             case "targetid":
               if ( value )
               {
                 rasterEntry.targetId = value
+                rasterEntry.targetIdTag = TargetIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "productid":
@@ -584,49 +593,39 @@ class RasterEntry
               if ( value )
               {
                 rasterEntry.productId = value
+                rasterEntry.productIdTag = ProductIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "be":
+            case "benumber":
               if ( value &&!rasterEntry.beNumber)
               {
                 rasterEntry.beNumber = value;
               }
               break
-            case "benumber":
-              if ( value )
-              {
-                rasterEntry.beNumber = value;
-              }
-              break;
             case "sensorid":
             case "sensor_id":
               if ( value )
               {
                 rasterEntry.sensorId = value
-                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break;
             case ~/.*sensor.*/:
               if(value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
-                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "sensor_type":
               if ( value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
-                rasterEntry.sensorTag = SensorTag.findOrSaveWhere(name: value)
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break
             case "country":
-              if ( value && !rasterEntry.countryCode )
-              {
-                rasterEntry.countryCode = value
-                rasterEntry.countryCodeTag = CountryCodeTag.findOrSaveWhere(name: value)
-              }
-              break
             case "countrycode":
               if ( value )
               {
@@ -663,7 +662,7 @@ class RasterEntry
               if ( value && !rasterEntry.missionId )
               {
                 rasterEntry.missionId = value
-                rasterEntry.missionTag = MissionTag.findOrSaveWhere(name: value)
+                rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: value)
 
               }
               break;
