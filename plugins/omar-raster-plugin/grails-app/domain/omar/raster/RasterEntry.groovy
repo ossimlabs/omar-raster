@@ -14,6 +14,13 @@ import omar.core.DateUtil
 
 //import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 
+import omar.raster.tags.CountryCodeTag
+import omar.raster.tags.FileTypeTag
+import omar.raster.tags.MissionIdTag
+import omar.raster.tags.ProductIdTag
+import omar.raster.tags.SensorIdTag
+import omar.raster.tags.TargetIdTag
+
 class RasterEntry
 {
   def grailsApplication
@@ -92,6 +99,13 @@ class RasterEntry
   static hasMany = [fileObjects: RasterEntryFile]
 
   Collection fileObjects
+
+  CountryCodeTag countryCodeTag 
+  FileTypeTag fileTypeTag
+  MissionIdTag missionIdTag 
+  ProductIdTag productIdTag 
+  SensorIdTag sensorIdTag
+  TargetIdTag targetIdTag
 
   static namedQueries = {
     compositeId { compositeId ->
@@ -198,9 +212,18 @@ class RasterEntry
 
     groundGeom( nullable: false )
     acquisitionDate( nullable: true )
+
+    // Emerated Tags
+    countryCodeTag(nullable: true)
+    fileTypeTag(nullable: true)
+    missionIdTag(nullable: true)
+    productIdTag(nullable: true)
+    sensorIdTag(nullable: true)
+    targetIdTag(nullable: true)
   }
 
-  def beforeInsert = {
+  def beforeInsert() {
+
     if ( !ingestDate )
     {
       // ingestDate = new DateTime(DateTimeZone.UTC);
@@ -220,6 +243,7 @@ class RasterEntry
         receiveDate = ingestDate;
       }
     }
+    true
   }
 
   def getGeometryCenter()
@@ -553,12 +577,15 @@ class RasterEntry
               if ( value && !rasterEntry.targetId )
               {
                 rasterEntry.targetId = value
+                rasterEntry.targetIdTag = TargetIdTag.findOrSaveWhere(name: value)
+
               }
               break;
             case "targetid":
               if ( value )
               {
                 rasterEntry.targetId = value
+                rasterEntry.targetIdTag = TargetIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "productid":
@@ -566,49 +593,44 @@ class RasterEntry
               if ( value )
               {
                 rasterEntry.productId = value
+                rasterEntry.productIdTag = ProductIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "be":
+            case "benumber":
               if ( value &&!rasterEntry.beNumber)
               {
                 rasterEntry.beNumber = value;
               }
               break
-            case "benumber":
-              if ( value )
-              {
-                rasterEntry.beNumber = value;
-              }
-              break;
             case "sensorid":
             case "sensor_id":
               if ( value )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break;
             case ~/.*sensor.*/:
               if(value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break;
             case "sensor_type":
               if ( value && !rasterEntry.sensorId )
               {
                 rasterEntry.sensorId = value
+                rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: value)
               }
               break
             case "country":
-              if ( value && !rasterEntry.countryCode )
-              {
-                rasterEntry.countryCode = value
-              }
-              break
             case "countrycode":
               if ( value )
               {
                 rasterEntry.countryCode = value
+                rasterEntry.countryCodeTag = CountryCodeTag.findOrSaveWhere(name: value)
               }
               break
             //case "fsctlh":
@@ -640,6 +662,8 @@ class RasterEntry
               if ( value && !rasterEntry.missionId )
               {
                 rasterEntry.missionId = value
+                rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: value)
+
               }
               break;
             case "isorce":
@@ -788,6 +812,7 @@ class RasterEntry
               if ( value && !rasterEntry.fileType )
               {
                 rasterEntry.fileType = value
+                rasterEntry.fileTypeTag = FileTypeTag.findOrSaveWhere(name: value)
               }
               break
 
