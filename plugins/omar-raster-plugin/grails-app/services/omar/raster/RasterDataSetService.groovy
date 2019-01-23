@@ -15,6 +15,13 @@ import org.springframework.context.ApplicationContextAware
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
+import omar.raster.tags.CountryCodeTag
+import omar.raster.tags.FileTypeTag
+import omar.raster.tags.MissionIdTag
+import omar.raster.tags.ProductIdTag
+import omar.raster.tags.SensorIdTag
+import omar.raster.tags.TargetIdTag
+
 @Slf4j
 class RasterDataSetService implements ApplicationContextAware
 {
@@ -601,19 +608,38 @@ class RasterDataSetService implements ApplicationContextAware
 
     def getDistinctValues (def params) {
         def results = []
+        
+        def criteria = {
+            projections {
+                property('name')
+            }
+            order('name')
+        }
 
-		boolean isValidSearchKey = RasterEntryDistinctValues.values()
-			.any { it.rasterDbFieldKey == params.property }
-
-		if (isValidSearchKey){
-			results = RasterEntry.withCriteria {
-				projections {
-					distinct("${params.property}")
-				}
-			}
-		} else {
+        switch ( RasterEntryDistinctValues.findByValue( params?.property ) )
+        {
+        case RasterEntryDistinctValues.COUNTRY_CODE:
+            results = CountryCodeTag.withCriteria(criteria)
+            break
+        case RasterEntryDistinctValues.FILE_TYPE:
+            results = FileTypeTag.withCriteria(criteria)
+            break
+        case RasterEntryDistinctValues.MISSION_ID:
+            results = MissionIdTag.withCriteria(criteria)
+            break
+        case RasterEntryDistinctValues.PRODUCT_ID:
+            results = ProductIdTag.withCriteria(criteria)
+            break
+        case RasterEntryDistinctValues.SENSOR_ID:
+            results = SensorIdTag.withCriteria(criteria)
+            break
+        case RasterEntryDistinctValues.TARGET_ID:
+            results = TargetIdTag.withCriteria(criteria)
+            break
+        default:
 			log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
-		}
+        }
+
         return results
     }
 }
