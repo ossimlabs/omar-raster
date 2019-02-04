@@ -4,11 +4,7 @@ pluginManagement {
     gradlePluginPortal()
   }
 }
-def final O2_DEV_HOME = System.getenv('O2_DEV_HOME')
 
-if ( O2_DEV_HOME ) {
+include 'omar-raster-plugin'
 
-   include 'omar-raster-plugin'
-
-   project(':omar-raster-plugin').projectDir = "${O2_DEV_HOME}/omar-raster/plugins/omar-raster-plugin" as File
-}
+project(':omar-raster-plugin').projectDir = "${rootProject.projectDir}/plugins/omar-raster-plugin" as File
