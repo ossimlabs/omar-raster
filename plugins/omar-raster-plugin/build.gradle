@@ -61,6 +61,7 @@ dependencies {
 
   compile "io.swagger:swagger-annotations:1.5.15"
   compile 'com.vividsolutions:jts:1.13'
+  compile "joda-time:joda-time:2.9.9"
 
   compile "org.springframework.boot:spring-boot-starter-logging"
   compile "org.springframework.boot:spring-boot-autoconfigure"
