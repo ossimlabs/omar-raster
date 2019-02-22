@@ -57,6 +57,7 @@ dependencies {
   if ( ! System.getenv('O2_INLINE_BUILD') ) {
       compile "io.ossim.omar.plugins:omar-core-plugin:${latestGradleIdentifier}"
       compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
+      compile "io.ossim.omar.plugins:omar-hibernate-spatial-plugin:${latestGradleIdentifier}"
   }
 
   compile "io.swagger:swagger-annotations:1.5.15"
