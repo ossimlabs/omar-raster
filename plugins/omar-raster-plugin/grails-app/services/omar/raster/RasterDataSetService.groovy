@@ -444,10 +444,8 @@ class RasterDataSetService implements ApplicationContextAware
         def rasterFile = RasterFile.findByNameAndType(filename, "main")
         if (rasterFile)
         {
-            rasterFile?.rasterDataSet?.delete(flush: true)
             httpStatusMessage?.status = HttpStatus.OK
             def ids = rasterFile?.rasterDataSet?.rasterEntries?.collect { it?.id }?.join(",")
-            httpStatusMessage?.message = "removed raster ${ids}:${filename}"
 
             if (params.deleteFiles?.toBoolean())
             {
@@ -490,6 +488,8 @@ class RasterDataSetService implements ApplicationContextAware
                     }
                 }
             }
+            rasterFile?.rasterDataSet?.delete(flush: true)
+            httpStatusMessage?.message = "removed raster ${ids}:${filename}"
         }
         else
         {
