@@ -38,7 +38,7 @@ The service api **addRaster**
 
     If the parameter is true it will indicate to submit the process as a background job.
 
-*   **buildThumbanils**
+*   **buildThumbnails**
 
     If the parameter is true it will indicate to build thumbnails for the image.
 
