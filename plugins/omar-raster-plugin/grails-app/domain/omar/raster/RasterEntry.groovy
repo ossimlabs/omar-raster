@@ -893,6 +893,10 @@ class RasterEntry
       }
     }
 
+    if ( !rasterEntry.imageId ) {
+      rasterEntry.imageId = hashCode(metadataNode)
+    }
+
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
 
   }
