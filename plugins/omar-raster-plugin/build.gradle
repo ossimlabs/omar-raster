@@ -50,7 +50,7 @@ dependencyManagement {
 if ( System.getenv('O2_INLINE_BUILD') ) {
   grails {
     plugins {
-      compile project(":omar-stager-plugin")
+      compile project(":omar-stager-core-plugin")
     }
   }
 }
@@ -58,7 +58,7 @@ if ( System.getenv('O2_INLINE_BUILD') ) {
 dependencies {
   if ( ! System.getenv('O2_INLINE_BUILD') ) {
       compile "io.ossim.omar.plugins:omar-core-plugin:${latestGradleIdentifier}"
-      compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
+      compile "io.ossim.omar.plugins:omar-stager-core-plugin:${latestGradleIdentifier}"
   }
 
   compile "io.swagger:swagger-annotations:1.5.15"
