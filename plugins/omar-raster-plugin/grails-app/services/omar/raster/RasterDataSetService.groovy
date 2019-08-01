@@ -9,7 +9,7 @@ import omar.core.DateUtil
 import omar.raster.RasterEntry
 import java.sql.Timestamp
 
-import omar.stager.OmarStageFile
+import omar.stager.core.OmarStageFile
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import groovy.json.JsonBuilder
