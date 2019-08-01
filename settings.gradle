@@ -13,7 +13,7 @@ if ( System.getenv('O2_INLINE_BUILD')) {
       "omar-core",
       "omar-hibernate-spatial",
       "omar-oms",
-      "omar-stager"
+      "omar-stager-core"
   ]
 
   modules.each { module ->
