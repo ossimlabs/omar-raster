@@ -557,6 +557,7 @@ class RasterEntry
             case "iid":
               if ( value && !rasterEntry.imageId )
               {
+                println("Got ImageID: " + value)
                 rasterEntry.imageId = value
               }
               break
@@ -894,6 +895,7 @@ class RasterEntry
     }
 
     if ( !rasterEntry.imageId ) {
+      println("Generating ImageId...")
       rasterEntry.imageId = hashCode(metadataNode)
     }
 
