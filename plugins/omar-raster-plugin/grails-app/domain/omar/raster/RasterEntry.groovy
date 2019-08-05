@@ -895,8 +895,9 @@ class RasterEntry
     }
 
     if ( !rasterEntry.imageId ) {
-      println("Generating ImageId...")
-      rasterEntry.imageId = hashCode(metadataNode)
+      Integer newId = hashCode(metadataNode)
+      println("Generating ImageId...$newId")
+      rasterEntry.imageId = newId.toString()
     }
 
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
