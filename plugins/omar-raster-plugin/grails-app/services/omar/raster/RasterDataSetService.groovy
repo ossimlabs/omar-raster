@@ -191,6 +191,7 @@ class RasterDataSetService implements ApplicationContextAware
         def filenames
 
 //		println params.logs
+        println("DEBUG: adding raster from version 'fix-no-image-id'")
 
 
         if (!scheme || (scheme == "file"))
