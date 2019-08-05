@@ -551,6 +551,7 @@ class RasterEntry
             case "imageid":
               if ( value )
               {
+                println("Got ImageID: " + value)
                 rasterEntry.imageId = value
               }
               break;
