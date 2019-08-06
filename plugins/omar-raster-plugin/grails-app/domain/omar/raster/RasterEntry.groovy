@@ -894,11 +894,8 @@ class RasterEntry
       }
     }
 
-    if ( !rasterEntry.title ) {
-      Integer newId = hashCode(metadataNode)
-      println("Generating title...$newId")
-      rasterEntry.title = newId.toString()
-    }
+    println("Generating title...${rasterEntry.filename}")
+    rasterEntry.title = rasterEntry.filename
 
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
 
