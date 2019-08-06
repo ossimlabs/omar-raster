@@ -537,6 +537,7 @@ class RasterEntry
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
 
+        println(name + " : " + value)
 
         if ( name && value )
         {
@@ -551,14 +552,12 @@ class RasterEntry
             case "imageid":
               if ( value )
               {
-                println("Got ImageID: " + value)
                 rasterEntry.imageId = value
               }
               break;
             case "iid":
               if ( value && !rasterEntry.imageId )
               {
-                println("Got ImageID: " + value)
                 rasterEntry.imageId = value
               }
               break
@@ -895,10 +894,10 @@ class RasterEntry
       }
     }
 
-    if ( !rasterEntry.imageId ) {
+    if ( !rasterEntry.title ) {
       Integer newId = hashCode(metadataNode)
-      println("Generating ImageId...$newId")
-      rasterEntry.imageId = newId.toString()
+      println("Generating title...$newId")
+      rasterEntry.title = newId.toString()
     }
 
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"

@@ -115,8 +115,6 @@ to the URL.  The format supported:
 		String body = request.reader.text
 		def xmlString
 
-		println("Entering addRaster()....body: $body")
-
 		if(body)
 		{
 			def xmlCheck
