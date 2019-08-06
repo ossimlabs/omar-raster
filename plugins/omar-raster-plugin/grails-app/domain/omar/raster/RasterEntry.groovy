@@ -897,7 +897,7 @@ class RasterEntry
     }
 
     if ( !rasterEntry.title ) {
-      def basename = rasterEntry.filename.toString().split(File.separator).last()
+      def basename = rasterEntry.filename.toString().split("/").last()
       println("Generating title...$basename")
       rasterEntry.title = basename
     }
