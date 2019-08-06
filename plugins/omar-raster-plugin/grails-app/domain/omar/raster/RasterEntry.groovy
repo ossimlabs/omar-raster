@@ -537,8 +537,6 @@ class RasterEntry
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
 
-        println(name + " : " + value)
-
         if ( name && value )
         {
           switch ( name.toLowerCase() )
@@ -894,8 +892,15 @@ class RasterEntry
       }
     }
 
-    println("Generating title...${rasterEntry.filename}")
-    rasterEntry.title = rasterEntry.filename
+    if ( !rasterEntry.imageId ) {
+      rasterEntry.imageId = rasterEntry.indexId
+    }
+
+    if ( !rasterEntry.title ) {
+      def basename = rasterEntry.filename.toString().split(File.separator).last()
+      println("Generating title...$basename")
+      rasterEntry.title = basename
+    }
 
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
 
