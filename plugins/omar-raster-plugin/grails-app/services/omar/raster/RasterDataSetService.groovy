@@ -192,6 +192,7 @@ class RasterDataSetService implements ApplicationContextAware
 
 //		println params.logs
 
+
         if (!scheme || (scheme == "file"))
         {
             File testFile = filename as File

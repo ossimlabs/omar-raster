@@ -537,6 +537,7 @@ class RasterEntry
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
 
+
         if ( name && value )
         {
           switch ( name.toLowerCase() )

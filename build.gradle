@@ -46,7 +46,7 @@ subprojects { project ->
 
         io.ossim.gradleDefaults.Variables.setAdditionalVariables(project)
         io.ossim.gradleDefaults.Variables.setVersionVariables(project)
-        version "${buildVersion}-fix-no-image-id"
+        version "${buildVersion}-${buildVersionTag}"
 
         if ( isGrailsApp )        
         {
