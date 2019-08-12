@@ -893,6 +893,17 @@ class RasterEntry
       }
     }
 
+    if ( !rasterEntry.imageId ) {
+      log.debug("Generating Image ID... ${rasterEntry.indexId}")
+      rasterEntry.imageId = rasterEntry.indexId
+    }
+
+    if ( !rasterEntry.title ) {
+      def basename = rasterEntry.filename.toString().split("/").last()
+      log.debug("Generating title... $basename")
+      rasterEntry.title = basename
+    }
+
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
 
   }
