@@ -21,6 +21,9 @@ import omar.raster.tags.ProductIdTag
 import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
 
+import groovy.util.logging.Slf4j
+
+@Slf4j
 class RasterEntry
 {
   def grailsApplication
