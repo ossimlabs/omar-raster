@@ -894,13 +894,13 @@ class RasterEntry
     }
 
     if ( !rasterEntry.imageId ) {
-      println("Generating Image ID... ${rasterEntry.indexId}")
+      log.debug("Generating Image ID... ${rasterEntry.indexId}")
       rasterEntry.imageId = rasterEntry.indexId
     }
 
     if ( !rasterEntry.title ) {
       def basename = rasterEntry.filename.toString().split("/").last()
-      println("Generating title... $basename")
+      log.debug("Generating title... $basename")
       rasterEntry.title = basename
     }
 
