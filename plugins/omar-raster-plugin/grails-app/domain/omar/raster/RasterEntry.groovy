@@ -1,9 +1,9 @@
 package omar.raster
 
-import com.vividsolutions.jts.geom.Geometry
-import com.vividsolutions.jts.geom.MultiPolygon
-import com.vividsolutions.jts.geom.Polygon
-import com.vividsolutions.jts.io.WKTReader
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.MultiPolygon
+import org.locationtech.jts.geom.Polygon
+import org.locationtech.jts.io.WKTReader
 //import org.hibernate.spatial.GeometryType
 
 // import org.joda.time.DateTime

@@ -27,59 +27,33 @@ class RasterDataSetController
 			httpMethod = "POST",
 			notes = """
 The service api **addRaster**
-
 ## Parameter List
-
 *   **filename**
-
     Pass the filename to be added and indexed into the database
-
 *   **background**
-
     If the parameter is true it will indicate to submit the process as a background job.
-
 *   **buildThumbnails**
-
     If the parameter is true it will indicate to build thumbnails for the image.
-
 *   **buildOverviews**
-
     If the parameter is true it will indicate to build overviews for the image. Also known as reduced resolution sets.
-
 *   **buildHistograms**
-
     If the parameter is true it will indicate to build histograms for the image.
-
 *   **buildHistogramsWithR0**
-
     If the parameter is true and buildHistograms is true then it will use the full resolution to build the histograms. Ususally this is specified if you have images with internal overviews. If internal overviews are found and buildHistograms is true and buildHistogramsWithR0 is false then it will build using the first iteration of the overview and that is whatever the last level the internal overviews end. So if you have an image with internal 5 levels then it will use the 5th level for the histogram. If
-
 *   **useFastHistogramStaging**
-
     If enabled it will only use a few tiles in the image to calculate the histogram
-
 *   **overviewType**
-
     Indicates the overview type to use.
-
 *   **overviewCompressionType**
-
     Indicates the type of compression to use during the building of the overviews.
-
 *   **thumbnailType**
-
     Indicates the type of thumbnails to create.  This value can be **jpeg** or **png**.
-
 *   **thumbnailStretchType**
-
     Indicates the type of stretch to use for thumbnail generation  This can be
 	 **none**, **auto-minmax**, **auto-percentile**, **std-stretch-1**, **std-stretch-2**, **std-stretch-3**.
-
 **Additional Notes**
-
 You can also pass the arguments as a JSON string and post
 to the URL.  The format supported:
-
 ```
 {
    "filename": "",
@@ -92,7 +66,6 @@ to the URL.  The format supported:
 	"thumbnailSize":"",
 	"thumbnailType":"",
 	"thumbnailStretchType":""
-
 }
 ```
             """)
@@ -217,11 +190,8 @@ to the URL.  The format supported:
 			httpMethod = 'GET',
 			notes = """
 The service api **getRasterFiles**
-
 ## Parameter List
-
 *   **id**
-
     This can be the record ID, image ID, or the indexId for a entry to search for
     """)
 	@ApiImplicitParams( [
