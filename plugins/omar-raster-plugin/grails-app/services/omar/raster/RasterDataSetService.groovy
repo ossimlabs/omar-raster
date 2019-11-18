@@ -21,12 +21,12 @@ import omar.raster.tags.MissionIdTag
 import omar.raster.tags.ProductIdTag
 import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
+import grails.gorm.transactions.Transactional
 
 @Slf4j
+@Transactional
 class RasterDataSetService implements ApplicationContextAware
 {
-
-    static transactional = true
 
     def dataInfoService
     def ingestService
