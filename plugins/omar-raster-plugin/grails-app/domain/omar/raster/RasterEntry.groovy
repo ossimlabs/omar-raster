@@ -907,6 +907,66 @@ class RasterEntry
       rasterEntry.title = basename
     }
 
+    def csdida = metadataNode.NITF?.CSDIDA
+
+    if ( csdida ) 
+    {
+      if ( ! rasterEntry.missionId  )
+      {
+        def missionId =  "${csdida?.platform_code?.text()}${csdida?.vehicle_id?.text()}"
+
+        if ( missionId ) 
+        {
+          rasterEntry.missionId = missionId
+          rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: missionId)
+        }
+      }
+
+      if ( ! rasterEntry.sensorId )
+      {
+        def sensorId =  csdida?.sensor_id?.text()
+
+        if ( sensorId ) 
+        {
+          rasterEntry.sensorId = sensorId
+          rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: sensorId)
+        }
+      }
+
+      if ( ! rasterEntry.acquisitionDate  )
+      {
+        def time = csdida?.time?.text() + 'Z'
+
+        if ( time ) 
+        {
+          rasterEntry.acquisitionDate = DateUtil.parseDate(time)
+        }
+      }
+    }
+
+    if ( ! rasterEntry.securityCode  )
+    {
+      def securityCode = metadataNode?.NTIF?.fsclas?.text()
+
+      if ( securityCode ) 
+      {
+        rasterEntry.securityCode = securityCode
+      }
+    }
+
+
+    // if ( ! rasterEntry.fileType ) 
+    // {
+    //   if  ( metadataNode?.NITF )
+    //   {
+    //     rasterEntry.fileType = 'nitf'
+    //   }
+    //   else if ( metadataNode?.TIFF ) 
+    //   {
+    //     rasterEntry.fileType = 'tiff'
+    //   }
+    // }
+
     //println "RASTERENTRY METADATA = ${rasterEntry.metadata}"
 
   }
