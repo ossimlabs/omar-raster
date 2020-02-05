@@ -951,6 +951,23 @@ class RasterEntry
       if ( securityCode ) 
       {
         rasterEntry.securityCode = securityCode
+
+        switch(securityCode.toUpperUpperCase())
+        {
+          case "U":
+            rasterEntry.securityClassification = "UNCLASSIFIED"
+            break
+          case "R":
+            rasterEntry.securityClassification = "RESTRICTED"
+            break
+          case "S":
+            rasterEntry.securityClassification = "SECRET"
+            break
+          case "T":
+          case "TS":
+            rasterEntry.securityClassification = "TOP SECRET"
+            break
+         }
       }
     }
 
