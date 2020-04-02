@@ -757,7 +757,7 @@ class RasterEntry
             case "isclas":
               if ( value && !rasterEntry.securityClassification )
               {
-                switch(value.toUpperUpperCase())
+                switch(value.toUpperCase())
                 {
                   case "U":
                     rasterEntry.securityClassification = "UNCLASSIFIED"
