@@ -386,7 +386,7 @@ class RasterEntry
   {
     rasterEntry = rasterEntry ?: new RasterEntry()
 
-    rasterEntry.entryId = rasterEntryNode.entryId
+    rasterEntry.entryId = rasterEntryNode.entryId?.text()?.trim()
     rasterEntry.width = rasterEntryNode?.width?.toLong()
     rasterEntry.height = rasterEntryNode?.height?.toLong()
     rasterEntry.numberOfBands = rasterEntryNode?.numberOfBands?.toInteger()
@@ -449,20 +449,24 @@ class RasterEntry
     def metadataNode = rasterEntryNode.metadata
 
     initRasterEntryMetadata( metadataNode, rasterEntry )
+
     if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
     {
       initRasterEntryOtherTagsXml( rasterEntry )
     }
 
     def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
-    def filename = mainFile?.name
+    def filename = mainFile?.name?.trim()
     if ( !rasterEntry.filename && filename )
     {
       rasterEntry.filename = filename
     }
     if ( !rasterEntry.indexId )
     {
-      rasterEntry.indexId = "${rasterEntry.entryId}-${filename}".encodeAsSHA256()
+      def indexIdKey = "${rasterEntry.entryId}-${filename}"
+      def indexIdValue = indexIdKey.encodeAsSHA256()
+      // println "${indexIdKey}=${indexIdValue}"
+      rasterEntry.indexId = indexIdValue
     }
     if ( rasterEntry.validModel == null )
     {
