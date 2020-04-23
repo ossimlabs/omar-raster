@@ -956,7 +956,7 @@ class RasterEntry
       {
         rasterEntry.securityCode = securityCode
 
-        switch(securityCode.toUpperUpperCase())
+        switch(securityCode.toUpperCase())
         {
           case "U":
             rasterEntry.securityClassification = "UNCLASSIFIED"
