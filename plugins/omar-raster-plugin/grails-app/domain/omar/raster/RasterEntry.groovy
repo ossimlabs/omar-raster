@@ -807,7 +807,7 @@ class RasterEntry
               break;
             case "niirs":
             case "predicted_niirs":
-              if ( value && value != "nan" && !rasterEntry.niirs )
+              if ( value && value != "nan" && value != "N/A" && !rasterEntry.niirs )
               {
                 rasterEntry.niirs = value as Double
               }
