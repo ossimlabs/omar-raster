@@ -694,20 +694,20 @@ class RasterEntry
               break
             case "azimuthangle":
             case "azimuth_angle":
-              if ( value && value != "nan" )
+              if ( value?.isNumber() )
               {
                 rasterEntry.azimuthAngle = value.toDouble().round( 2 )
               }
               break
             case "angletonorth":
-              if ( value && value != "nan" && !rasterEntry.azimuthAngle )
+              if ( value?.isNumber() && !rasterEntry.azimuthAngle )
               {
                 rasterEntry.azimuthAngle = (( ( value as Double ) + 90.0 ) % 360.0).round( 2 );
               }
               break;
             case ~/.*graz_ang.*/:
             case "grazingangle":
-              if ( value && (value != "nan") )
+              if ( value?.isNumber() )
               {
                 rasterEntry.grazingAngle = value.toDouble().round( 2 )
               }
@@ -717,25 +717,25 @@ class RasterEntry
             case "cloud_cvr":
             case "cloudcvr":
             case "cloudcover":
-              if ( value && (value != "nan") )
+              if ( value?.isNumber() )
               {
                 rasterEntry.cloudCover = value as Double
               }
               break;
             case "elevation_angle":
-              if ( value && (value != "nan") &&(rasterEntry.grazingAngle==null))
+              if ( value?.isNumber() &&(rasterEntry.grazingAngle==null))
               {
                 rasterEntry.grazingAngle = value.toDouble().round( 2 )
               }
               break;
             case "oblang":
-              if ( value && value != "nan" && !rasterEntry.grazingAngle )
+              if ( value?.isNumber() && !rasterEntry.grazingAngle )
               {
                 rasterEntry.grazingAngle = (90 - ( value as Double )).round( 2 )
               }
               break;
             case "obl_ang":
-              if ( value && value != "nan" && !rasterEntry.grazingAngle )
+              if ( value?.isNumber() && !rasterEntry.grazingAngle )
               {
                 rasterEntry.grazingAngle = (90 - ( value as Double )).round( 2 )
               }
@@ -807,8 +807,7 @@ class RasterEntry
               break;
             case "niirs":
             case "predicted_niirs":
-            println "NIIRS: ${value}"
-              if ( value && value != "nan" && value != "N/A" && !rasterEntry.niirs )
+              if ( value?.isNumber() && !rasterEntry.niirs )
               {
                 rasterEntry.niirs = value as Double
               }
@@ -854,7 +853,7 @@ class RasterEntry
             case "sunazimuth":
             case "sun_azimuth":
             case "sunaz":
-              if(value )
+              if(value?.isNumber() )
               {
                 try{
                   rasterEntry.sunAzimuth = value.toDouble()
@@ -868,7 +867,7 @@ class RasterEntry
             case "sunelevation":
             case "sun_elevation":
             case "sunel":
-              if(value )
+              if(value?.isNumber() )
               {
                 try{
                   rasterEntry.sunElevation = value.toDouble()
