@@ -666,7 +666,7 @@ class RasterEntry
               break;
             case "mission":
             case "missionid":
-              if ( value && !rasterEntry.missionId )
+              if ( value /*&& !rasterEntry.missionId*/ )
               {
                 rasterEntry.missionId = value
                 rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: value)
