@@ -17,7 +17,7 @@ import groovy.json.JsonSlurper
 class RasterDataSetController
 {
 	static allowedMethods = [
-			addRaster: ['GET', 'POST'],
+			addRaster: 'POST',
 			removeRaster: 'POST' ,
 			getRasterFilesProcessing: 'GET'
 	]
