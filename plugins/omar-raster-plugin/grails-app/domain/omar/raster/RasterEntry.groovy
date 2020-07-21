@@ -461,7 +461,7 @@ class RasterEntry
     {
       initRasterEntryOtherTagsXml( rasterEntry )
     }
-
+    println "After metadata: ${ rasterEntry.title }"
 
     if ( !rasterEntry.indexId )
     {
