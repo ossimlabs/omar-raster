@@ -544,7 +544,7 @@ class RasterEntry
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
 
-
+println name
         if ( name && value )
         {
           switch ( name.toLowerCase() )
@@ -778,6 +778,7 @@ class RasterEntry
                 }
               }
               break;
+            case "ftitle":
             case "title":
             case "ititle":
             case "iid2":
@@ -906,8 +907,7 @@ class RasterEntry
     }
 
     if ( !rasterEntry.title ) {
-      println rasterEntry
-      println rasterEntry.filename
+      println rasterEntry.properties
       def basename = rasterEntry.filename.toString().split("/").last()
       log.debug("Generating title... $basename")
       rasterEntry.title = basename
