@@ -447,7 +447,14 @@ class RasterEntry
       }
     }
     def metadataNode = rasterEntryNode.metadata
-
+    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
+    println "Mainfile: ${mainFile}"
+    def filename = mainFile?.name?.trim()
+    println "Filename: ${filename}"
+    if ( !rasterEntry.filename && filename )
+    { println "The filename is being set"
+      rasterEntry.filename = filename
+    }
     initRasterEntryMetadata( metadataNode, rasterEntry )
 
     if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
@@ -455,14 +462,7 @@ class RasterEntry
       initRasterEntryOtherTagsXml( rasterEntry )
     }
 
-    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
-    println mainFile
-    def filename = mainFile?.name?.trim()
-    println filename
-    if ( !rasterEntry.filename && filename )
-    {
-      rasterEntry.filename = filename
-    }
+
     if ( !rasterEntry.indexId )
     {
       def indexIdKey = "${rasterEntry.entryId}-${filename}"
@@ -506,7 +506,8 @@ class RasterEntry
   }
 
   static initRasterEntryMetadata(def metadataNode, def rasterEntry)
-  {
+  {println "Starting metadata"
+   println "Here is the filename in the metadata: ${rasterEntry.filename}"
 //    if ( !rasterEntry.metadata )
 //    {
 //      rasterEntry.metadata = new RasterEntryMetadata()
