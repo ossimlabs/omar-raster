@@ -456,7 +456,9 @@ class RasterEntry
     }
 
     def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
+    println mainFile
     def filename = mainFile?.name?.trim()
+    println filename
     if ( !rasterEntry.filename && filename )
     {
       rasterEntry.filename = filename
@@ -544,7 +546,6 @@ class RasterEntry
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
 
-println name
         if ( name && value )
         {
           switch ( name.toLowerCase() )
@@ -778,7 +779,6 @@ println name
                 }
               }
               break;
-            case "ftitle":
             case "title":
             case "ititle":
             case "iid2":
@@ -907,7 +907,7 @@ println name
     }
 
     if ( !rasterEntry.title ) {
-      println rasterEntry.properties
+      println rasterEntry
       def basename = rasterEntry.filename.toString().split("/").last()
       log.debug("Generating title... $basename")
       rasterEntry.title = basename
