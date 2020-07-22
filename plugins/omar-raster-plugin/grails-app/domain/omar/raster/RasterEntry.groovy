@@ -376,7 +376,8 @@ class RasterEntry
           }
         }
       }
-      //println result
+      //
+      result
     }
 
     result
@@ -448,11 +449,11 @@ class RasterEntry
     }
     def metadataNode = rasterEntryNode.metadata
     def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
-    println "Mainfile: ${mainFile}"
+
     def filename = mainFile?.name?.trim()
-    println "Filename: ${filename}"
+
     if ( !rasterEntry.filename && filename )
-    { println "The filename is being set"
+    { 
       rasterEntry.filename = filename
     }
     initRasterEntryMetadata( metadataNode, rasterEntry )
@@ -461,7 +462,7 @@ class RasterEntry
     {
       initRasterEntryOtherTagsXml( rasterEntry )
     }
-    println "After metadata: ${ rasterEntry.title }"
+
 
     if ( !rasterEntry.indexId )
     {
@@ -506,8 +507,7 @@ class RasterEntry
   }
 
   static initRasterEntryMetadata(def metadataNode, def rasterEntry)
-  {println "Starting metadata"
-   println "Here is the filename in the metadata: ${rasterEntry.filename}"
+
 //    if ( !rasterEntry.metadata )
 //    {
 //      rasterEntry.metadata = new RasterEntryMetadata()
@@ -908,7 +908,6 @@ class RasterEntry
     }
 
     if ( !rasterEntry.title ) {
-      println rasterEntry
       def basename = rasterEntry.filename.toString().split("/").last()
       log.debug("Generating title... $basename")
       rasterEntry.title = basename
