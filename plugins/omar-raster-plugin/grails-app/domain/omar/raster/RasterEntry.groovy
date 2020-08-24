@@ -376,7 +376,8 @@ class RasterEntry
           }
         }
       }
-      //println result
+      //
+      result
     }
 
     result
@@ -447,7 +448,14 @@ class RasterEntry
       }
     }
     def metadataNode = rasterEntryNode.metadata
+    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
 
+    def filename = mainFile?.name?.trim()
+
+    if ( !rasterEntry.filename && filename )
+    { 
+      rasterEntry.filename = filename
+    }
     initRasterEntryMetadata( metadataNode, rasterEntry )
 
     if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
@@ -455,12 +463,7 @@ class RasterEntry
       initRasterEntryOtherTagsXml( rasterEntry )
     }
 
-    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
-    def filename = mainFile?.name?.trim()
-    if ( !rasterEntry.filename && filename )
-    {
-      rasterEntry.filename = filename
-    }
+
     if ( !rasterEntry.indexId )
     {
       def indexIdKey = "${rasterEntry.entryId}-${filename}"
@@ -504,7 +507,7 @@ class RasterEntry
   }
 
   static initRasterEntryMetadata(def metadataNode, def rasterEntry)
-  {
+
 //    if ( !rasterEntry.metadata )
 //    {
 //      rasterEntry.metadata = new RasterEntryMetadata()
@@ -543,7 +546,6 @@ class RasterEntry
 //            !key.startsWith("SECONDARY_BE") &&
 //            !key.equals("ENABLED") &&
 //            !key.equals("ENABLE_CACHE")
-
 
         if ( name && value )
         {
@@ -666,7 +668,7 @@ class RasterEntry
               break;
             case "mission":
             case "missionid":
-              if ( value && !rasterEntry.missionId )
+              if ( value /*&& !rasterEntry.missionId*/ )
               {
                 rasterEntry.missionId = value
                 rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: value)
