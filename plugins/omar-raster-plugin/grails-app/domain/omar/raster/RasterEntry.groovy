@@ -507,7 +507,7 @@ class RasterEntry
   }
 
   static initRasterEntryMetadata(def metadataNode, def rasterEntry)
-
+  {
 //    if ( !rasterEntry.metadata )
 //    {
 //      rasterEntry.metadata = new RasterEntryMetadata()
