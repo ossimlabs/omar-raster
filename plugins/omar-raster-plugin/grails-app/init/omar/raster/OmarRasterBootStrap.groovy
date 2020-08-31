@@ -15,6 +15,8 @@ class OmarRasterBootStrap {
     def init = { servletContext ->    
       if ( RasterEntry.count() > 0 ) {
         Sql sql = new Sql(dataSource)
+        
+        sql?.executeUpdate "create index if not exists raster_entry_ground_geom_idx on raster_entry using gist ( ground_geom )"
 
         if ( CountryCodeTag.count() == 0 )  {
           CountryCodeTag.backPopulate sql
@@ -34,7 +36,7 @@ class OmarRasterBootStrap {
         if ( TargetIdTag.count() == 0 )  {
           TargetIdTag.backPopulate sql
         }
-        sql.close()  
+        sql?.close()  
       }
     }
     def destroy = {
