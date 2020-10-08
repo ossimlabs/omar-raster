@@ -43,10 +43,8 @@ class OmarRasterBootStrap {
             }
         }
         catch (final org.springframework.dao.InvalidDataAccessResourceUsageException e) {
-            log.error("Bootstrap init failure. If the exception is from Hibernate unable to create raster_entry, " +
-                    "the likely cause is missing postgis extensions/schemas. Omar Raster plugin " +
-                    "requires postgis DB schema.")
-            log.error(e.message)
+            log.error(e.message + "; Bootstrap init failure. If the nested exception is from SQL/Hibernate unable to create raster_entry, " +
+                    "the likely cause is missing postgis extensions/schemas. Omar Raster plugin requires postgis DB schema.")
             throw (e)
         }
     }
