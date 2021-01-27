@@ -4,7 +4,14 @@ properties([
     buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '3', daysToKeepStr: '', numToKeepStr: '20'))
 ])
 
-podTemplate() {
+podTemplate(containers: [
+    containerTemplate(
+        name: 'jdk11',
+        image: 'openjdk:11',
+        ttyEnabled: true,
+        command: 'cat'
+    )]
+) {
   node(POD_LABEL) {
     stage("Checkout branch") {
       scmVars = checkout(scm)
@@ -28,28 +35,29 @@ podTemplate() {
               projectName: o2ArtifactProject,
               filter     : "common-variables.groovy",
               flatten    : true])
-          }
+      }
 
-          load "common-variables.groovy"
-        }
-
-
-    stage("Assemble") {
-      sh """
-        ./gradlew assemble -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
-      """
-      archiveArtifacts "plugins/*/build/libs/*.jar"
+      load "common-variables.groovy"
     }
 
-    stage("Publish Nexus") {
-      withCredentials([[$class          : 'UsernamePasswordMultiBinding',
-                        credentialsId   : 'nexusCredentials',
-                        usernameVariable: 'MAVEN_REPO_USERNAME',
-                        passwordVariable: 'MAVEN_REPO_PASSWORD']]) {
 
+    container('jdk11') {
+      stage("Assemble") {
         sh """
-          ./gradlew publish -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
+          ./gradlew assemble -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
         """
+        archiveArtifacts "plugins/*/build/libs/*.jar"
+      }
+
+      stage("Publish Nexus") {
+        withCredentials([[$class          : 'UsernamePasswordMultiBinding',
+                          credentialsId   : 'nexusCredentials',
+                          usernameVariable: 'MAVEN_REPO_USERNAME',
+                          passwordVariable: 'MAVEN_REPO_PASSWORD']]) {
+          sh """
+            ./gradlew publish -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
+          """
+        }
       }
     }
   }
