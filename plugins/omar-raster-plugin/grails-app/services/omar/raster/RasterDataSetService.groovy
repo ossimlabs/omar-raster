@@ -488,6 +488,51 @@ class RasterDataSetService implements ApplicationContextAware
                     }
                 }
             }
+
+            if (params.deleteSupportFiles?.toBoolean())
+            {
+                def files = []
+                rasterFile?.rasterDataSet?.fileObjects.each() { files << it.name }
+                rasterFile?.rasterDataSet?.rasterEntries.each() {
+                    it.fileObjects.each() { files << it.name }
+                }
+
+                files.each() {
+                    def file = it
+                    URI uri = new URI(file)
+                    String scheme = uri.scheme?.toLowerCase()
+                    if (!scheme || (scheme == "file"))
+                    {
+                        if (!uri.path.endsWith(".tif"))
+                        {                    
+                            File fileToRemove = file as File 
+                            if (fileToRemove.canWrite())
+                            {
+                                if (fileToRemove.isDirectory())
+                                {
+                                    fileToRemove.deleteDir()
+                                }
+                                else
+                                {
+                                    fileToRemove.delete()
+                                }
+                                if (!fileToRemove.exists())
+                                {
+                                    log.debug("Deleted ${file}")
+                                }
+                                else
+                                {
+                                    log.debug("Unable to delete ${file}")
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+//						log.info("Don't have permissions to delete ${file}")
+                    }
+                }
+            }
             rasterFile?.rasterDataSet?.delete(flush: true)
             httpStatusMessage?.message = "removed raster ${ids}:${filename}"
         }
