@@ -457,7 +457,7 @@ class RasterDataSetService implements ApplicationContextAware
 
                 files.each() {
                     def file = it?.toFile()
-                    if (file?.isFile())
+                    if (file?.isFile() && file.name != filename)
                     {
                         File fileToRemove = file as File
                         if (fileToRemove.canWrite())
@@ -493,7 +493,7 @@ class RasterDataSetService implements ApplicationContextAware
 
                 files.each() {
                     def file = it?.toFile()
-                    if (file?.isFile())
+                    if (file?.isFile() && file.name != filename)
                     {
                             File fileToRemove = file as File 
                             if (fileToRemove.canWrite())
