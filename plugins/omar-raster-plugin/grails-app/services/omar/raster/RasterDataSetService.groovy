@@ -456,10 +456,8 @@ class RasterDataSetService implements ApplicationContextAware
                 }
 
                 files.each() {
-                    def file = it
-                    URI uri = new URI(file)
-                    String scheme = uri.scheme?.toLowerCase()
-                    if (!scheme || (scheme == "file"))
+                    def file = it?.toFile()
+                    if (file?.isFile())
                     {
                         File fileToRemove = file as File
                         if (fileToRemove.canWrite())
@@ -491,20 +489,12 @@ class RasterDataSetService implements ApplicationContextAware
 
             if (params.deleteSupportFiles?.toBoolean())
             {
-                def files = []
-                rasterFile?.rasterDataSet?.fileObjects.each() { files << it.name }
-                rasterFile?.rasterDataSet?.rasterEntries.each() {
-                    it.fileObjects.each() { files << it.name }
-                }
+                def files = rasterFile?.rasterDataSet?.fileObjects?.grep { it.type != 'main' }
 
                 files.each() {
-                    def file = it
-                    URI uri = new URI(file)
-                    String scheme = uri.scheme?.toLowerCase()
-                    if (!scheme || (scheme == "file"))
+                    def file = it?.toFile()
+                    if (file?.isFile())
                     {
-                        if (!uri.path.endsWith(".tif"))
-                        {                    
                             File fileToRemove = file as File 
                             if (fileToRemove.canWrite())
                             {
@@ -525,7 +515,6 @@ class RasterDataSetService implements ApplicationContextAware
                                     log.debug("Unable to delete ${file}")
                                 }
                             }
-                        }
                     }
                     else
                     {
