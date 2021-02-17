@@ -148,6 +148,13 @@ to the URL.  The format supported:
 				                dataType = "boolean",
 				                paramType = 'query',
 				                required = false),
+			@ApiImplicitParam( name = 'deleteSupportFiles',
+				                value = 'Delete all the support files linked to it in the database (e.g. his, ovr)',
+				                allowableValues="true,false",
+				                defaultValue="false",
+				                dataType = "boolean",
+				                paramType = 'query',
+				                required = false),
 			@ApiImplicitParam( name = 'filename', value = 'Path to file to remove', dataType = 'string', paramType = 'query',required = true ),
 	])
 	def removeRaster()
