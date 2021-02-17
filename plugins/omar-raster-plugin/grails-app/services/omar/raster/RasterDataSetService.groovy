@@ -472,17 +472,17 @@ class RasterDataSetService implements ApplicationContextAware
                             }
                             if (!fileToRemove.exists())
                             {
-                                log.debug("Deleted ${file}")
+                                log.info("Deleted ${file}")
                             }
                             else
                             {
-                                log.debug("Unable to delete ${file}")
+                                log.info("Unable to delete ${file}")
                             }
                         }
                     }
                     else
                     {
-//						log.info("Don't have permissions to delete ${file}")
+			log.info("Don't have permissions to delete ${file}")
                     }
                 }
             }
@@ -508,17 +508,17 @@ class RasterDataSetService implements ApplicationContextAware
                                 }
                                 if (!fileToRemove.exists())
                                 {
-                                    log.debug("Deleted ${file}")
+                                    log.info("Deleted ${file}")
                                 }
                                 else
                                 {
-                                    log.debug("Unable to delete ${file}")
+                                    log.info("Unable to delete ${file}")
                                 }
                             }
                     }
                     else
                     {
-//						log.info("Don't have permissions to delete ${file}")
+			log.info("Don't have permissions to delete ${file}")
                     }
                 }
             }
