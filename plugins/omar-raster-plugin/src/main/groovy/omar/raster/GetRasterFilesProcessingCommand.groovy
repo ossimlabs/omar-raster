@@ -9,7 +9,7 @@ class GetRasterFilesProcessingCommand implements Validateable
    Integer offset
    Integer limit
    String filter
-   static contraints = {
+   static constraints = {
       offset nullable: true
       limit nullable: true
    }

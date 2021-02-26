@@ -224,6 +224,24 @@ The service api **getRasterFiles**
 
 		render contentType: "application/json", text: result as JSON
 	}
+	// Start
+	// From omar-avro
+	@ApiImplicitParams([
+			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
+			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
+	])
+	def listMessages(GetMessageCommand cmd)
+	{
+		cmd.validate()
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
+
+		HashMap result = avroService.listMessages(cmd)
+		render contentType: "application/json", text: result as JSON
+	}
+	// End
 
 	@ApiOperation(
 		value = "Returns an array of distinct values in the Raster Entry table for a given column name",
