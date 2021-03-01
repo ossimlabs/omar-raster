@@ -7,6 +7,8 @@ import omar.core.HttpStatusMessage
 import omar.core.BindUtil
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.springframework.http.HttpStatus
+
 @Api( value = "dataManager",
      produces = 'application/json',
      consumes = 'application/json',
