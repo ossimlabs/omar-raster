@@ -4,14 +4,13 @@ import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.util.logging.Slf4j
 import omar.core.Repository
-import omar.core.HttpStatus
 import omar.core.DateUtil
-import omar.raster.RasterEntry
 import java.sql.Timestamp
 
 import omar.stager.core.OmarStageFile
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import org.springframework.http.HttpStatus
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 

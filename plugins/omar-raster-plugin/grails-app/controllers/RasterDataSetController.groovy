@@ -6,8 +6,6 @@ import grails.converters.JSON
 import omar.core.HttpStatusMessage
 import omar.core.BindUtil
 import groovy.json.JsonOutput
-import groovy.xml.XmlUtil
-import groovy.util.XmlSlurper
 import groovy.json.JsonSlurper
 @Api( value = "dataManager",
      produces = 'application/json',
