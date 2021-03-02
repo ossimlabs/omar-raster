@@ -31,24 +31,5 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         then:
         cmd.error.allError.size() == 0
     }
+
 }
-
-
-
-
-//class GetMessageCommandSpec extends Specification {
-
-//    GetMessageCommand cmd = new GetMessageCommand()
-
-    // writing constraints for cmd obj
-    // testing to see we get errors when we should and vice versa
-    // controller spec testing for response code
-//    void "test negative value"() {
-//        when:
-//        cmd.limit = -5
-//        cmd.offset = -5
-//        cmd.validate()
-//
-//        then:
-//        cmd.errors.allErrors.size() == 2
-//    }

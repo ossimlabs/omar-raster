@@ -20,7 +20,8 @@ class RasterDataSetController
 			addRaster: 'POST',
 			removeRaster: 'POST' ,
 			getRasterFilesProcessing: 'GET',
-			getRasterFiles: 'GET'
+			getRasterFiles: 'GET',
+			getDistinctValues: 'GET'
 	]
 
 	def rasterDataSetService
@@ -232,9 +233,14 @@ The service api **getRasterFiles**
 			value = 'Column Name'
 		)
 	])
-	def getDistinctValues() {
+	def getDistinctValues(GetDistinctValuesCommand cmd) {
 		log.info "getDistinctValues: ${params}"
-        def results = rasterDataSetService.getDistinctValues(params)
+		cmd.validate()
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
+		def results = rasterDataSetService.getDistinctValues(params)
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
 
