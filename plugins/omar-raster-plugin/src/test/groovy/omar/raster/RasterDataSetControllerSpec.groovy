@@ -6,6 +6,15 @@ import spock.lang.Specification
 
 class RasterDataSetControllerSpec extends Specification implements ControllerUnitTest<RasterDataSetController> {
 
+    void setup() {
+        HashMap result = [ results:[] ]
+        controller.rasterDataSetService = Stub(RasterDataSetService) {
+            getFileProcessingStatus(_) >> result
+            getDistinctValues(_) >> result
+            getRasterFiles(_) >> result
+        }
+    }
+
     void "getRasterFiles null ID returns 422 code"() {
         when:
         GetRasterFilesCommand cmd = new GetRasterFilesCommand()
@@ -26,12 +35,6 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
     }
 
     void "getRasterFiles non empty returns 200 code"(){
-        given:
-        HashMap result = [ results:[] ]
-        controller.rasterDataSetService = Stub(RasterDataSetService) {
-            getRasterFiles(_) >> result
-        }
-
         when:
         GetRasterFilesCommand cmd = new GetRasterFilesCommand()
         cmd.id = "1265"
@@ -43,10 +46,6 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
 
     void "getRasterFilesProcessing invalid offset and limit returns 422"() {
         given:
-        HashMap result = [results: []]
-        controller.rasterDataSetService = Stub(RasterDataSetService) {
-            getFileProcessingStatus(_) >> result
-        }
         GetRasterFilesProcessingCommand cmd = new GetRasterFilesProcessingCommand()
 
         when:
@@ -59,15 +58,8 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
     }
 
     void "getDistinctValues valid property returns 200"() {
-        given:
-        HashMap result = [results: []]
-        controller.rasterDataSetService = Stub(RasterDataSetService) {
-            getDistinctValues(_) >> result
-        }
-        GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
-
-        // Test one time for 200 and 422 response
         when:
+        GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
         response.reset()
         cmd.property = "targetId"
         controller.getDistinctValues(cmd)
