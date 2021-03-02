@@ -20,7 +20,7 @@ class RasterDataSetController
 			addRaster: 'POST',
 			removeRaster: 'POST' ,
 			getRasterFilesProcessing: 'GET',
-			getRasterFiles: 'GET' // getRasterFiles: Undocumented code returned in Swagger
+			getRasterFiles: 'GET'
 	]
 
 	def rasterDataSetService
@@ -176,31 +176,15 @@ to the URL.  The format supported:
 			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
 			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
 	 ] )
-	def getRasterFilesProcessing(GetRasterFilesCommand cmd )
+	def getRasterFilesProcessing(GetRasterFilesProcessingCommand cmd )
 	{
-//		log.info "getRasterFilesProcessing: ${params}"
-//
-//		def jsonData = request.JSON?request.JSON as HashMap:null
-//		def requestParams = params - params.subMap( ['controller', 'action'] )
-//		def cmd = new GetRasterFilesProcessingCommand()
-//
-//		// get map from JSON and merge into parameters
-//		if(jsonData) requestParams << jsonData
-//		BindUtil.fixParamNames( GetRasterFilesProcessingCommand, requestParams )
-//		bindData( cmd, requestParams )
-
 		cmd.validate()
-
-
-
 		if (cmd.errors.hasErrors()) {
 			render status: HttpStatus.UNPROCESSABLE_ENTITY
 			return
 		}
-		// if nothing above, could still make call below
 
 		HashMap result = rasterDataSetService.getFileProcessingStatus(cmd)
-
 		render contentType: "application/json", text: result as JSON
 	}
 
@@ -216,58 +200,21 @@ The service api **getRasterFiles**
 	@ApiImplicitParams( [
 			@ApiImplicitParam(name = 'id',
 				               value = 'Search Id',
-				               required=false,
+				               required=true,
 				               paramType = 'query',
 				               dataType = 'string'),
 	] )
-	def getRasterFiles(GetRasterFilesCommand cmd ) // when http request send in param with id it puts it in cmd obj
-	// using cmd obj lets you not have to parse out json and it's validatable
-	// cmd obj is assumed to be non-null but it may not be set
+	def getRasterFiles(GetRasterFilesCommand cmd )
 	{
-//		log.info "getRasterFiles: ${params}"
-// from here
-//		def jsonData = request.JSON?request.JSON as HashMap:null
-//		def requestParams = params - params.subMap( ['controller', 'action'] )
-//		def cmd = new GetRasterFilesCommand()  //creating command obj
-//		// get values from swagger
-//
-//		// get map from JSON and merge into parameters
-//		if(jsonData) requestParams << jsonData
-//		BindUtil.fixParamNames( GetRasterFilesCommand, requestParams )
-//		bindData( cmd, requestParams )
-		// to here is provided by the framework (grails) by providing cmd obj as param
-
 		cmd.validate()
 		if (cmd.errors.hasErrors()) {
 			render status: HttpStatus.UNPROCESSABLE_ENTITY
 			return
 		}
-		// if nothing above, could still make call below
-		HashMap result = rasterDataSetService.getRasterFiles(cmd)
 
+		HashMap result = rasterDataSetService.getRasterFiles(cmd)
 		render contentType: "application/json", text: result as JSON
 	}
-
-//	// Start
-//	// From omar-avro
-//	@ApiImplicitParams([
-//			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
-//			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
-//	])
-//	def listMessages(GetMessageCommand cmd)
-//	{
-//// ^ provide cmd obj, grails takes values and puts them into matching field within cmd obj
-//
-//		cmd.validate() // call validate on cmd obj
-//		if (cmd.errors.hasErrors()) { // check if errors
-//			render status: HttpStatus.UNPROCESSABLE_ENTITY
-//			return
-//		}
-//
-//		HashMap result = avroService.listMessages(cmd)
-//		render contentType: "application/json", text: result as JSON
-//	}
-//	// End
 
 	@ApiOperation(
 		value = "Returns an array of distinct values in the Raster Entry table for a given column name",
