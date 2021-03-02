@@ -4,12 +4,53 @@ import spock.lang.Specification
 
 class GetDistinctValuesCommandSpec extends Specification {
     GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
-    void "GetDistinctValuesCommand"() {
+    void "is valid countryCode"() {
+        when:
+        cmd.property = "countryCode"
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == false
+    }
+    void "is valid missionId"() {
         when:
         cmd.property = "missionId"
         cmd.validate()
 
         then:
-        cmd.error.allError.size() == 0
+        cmd.errors.hasErrors() == false
+    }
+    void "is valid sensorId"() {
+        when:
+        cmd.property = "sensorId"
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == false
+    }
+    void "is valid productId"() {
+        when:
+        cmd.property = "productId"
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == false
+    }
+    void "is valid targetId"() {
+        when:
+        cmd.property = "targetId"
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == false
+    }
+
+    void "is invalid fakeID"() {
+        when:
+        cmd.property = "fakeID"
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == true
     }
 }
