@@ -8,6 +8,9 @@ class GetDistinctValuesCommand  implements Validateable{
     String property
 
     static constraints = {
-        property blank: false, matches: "countryCode|missionId|sensorId|targetId|productId"
+        property blank: false, validator: { val, obj,errors ->
+                if (!RasterEntryDistinctValues.findByValue(val)) {
+                    errors.rejectValue('property', 'invalid property')
+                }}
     }
 }
