@@ -227,20 +227,19 @@ The service api **getRasterFiles**
 			allowableValues = "countryCode, missionId, sensorId, targetId, productId",
  			dataType = 'string',
 			defaultValue = "countryCode",
-			name = 'property',
+			name = 'rasterKey',
 			paramType = 'query',
 			required = true,
 			value = 'Column Name'
 		)
 	])
 	def getDistinctValues(GetDistinctValuesCommand cmd) {
-		log.info "getDistinctValues: ${params}"
 		cmd.validate()
 		if (cmd.errors.hasErrors()) {
 			render status: HttpStatus.UNPROCESSABLE_ENTITY
 			return
 		}
-		def results = rasterDataSetService.getDistinctValues(params)
+		def results = rasterDataSetService.getDistinctValues(cmd.rasterKey)
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
 

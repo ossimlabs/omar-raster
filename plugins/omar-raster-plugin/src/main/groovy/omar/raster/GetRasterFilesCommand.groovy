@@ -8,6 +8,6 @@ class GetRasterFilesCommand  implements Validateable
 {
    String id
    static constraints = {
-      id required: true
+      id blank: false, nullable: false
    }
 }
