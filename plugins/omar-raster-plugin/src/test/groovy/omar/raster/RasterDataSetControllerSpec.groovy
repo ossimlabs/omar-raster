@@ -41,6 +41,23 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         response.status == HttpStatus.OK.value()
     }
 
+    void "test GetRasterFilesProcessingCommand"() {
+        given:
+        HashMap result = [results: []]
+        controller.rasterDataSetService = Stub(RasterDataSetService) {
+            getFileProcessingStatus(_) >> result
+        }
+        GetRasterFilesProcessingCommand cmd = new GetRasterFilesProcessingCommand()
+
+        when:
+        cmd.offset = -1
+        cmd.limit = -1
+        controller.getRasterFilesProcessing()
+
+        then:
+        HttpStatus.UNPROCESSABLE_ENTITY.value() == response.status
+    }
+
     void "getDistinctValues test"() {
         given:
         HashMap result = [results: []]
