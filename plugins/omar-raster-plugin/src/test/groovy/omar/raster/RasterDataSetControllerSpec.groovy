@@ -41,7 +41,7 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         response.status == HttpStatus.OK.value()
     }
 
-    void "test GetRasterFilesProcessingCommand"() {
+    void "getRasterFilesProcessing invalid offset and limit returns 422"() {
         given:
         HashMap result = [results: []]
         controller.rasterDataSetService = Stub(RasterDataSetService) {
@@ -58,7 +58,7 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         HttpStatus.UNPROCESSABLE_ENTITY.value() == response.status
     }
 
-    void "getDistinctValues test"() {
+    void "getDistinctValues valid property returns 200"() {
         given:
         HashMap result = [results: []]
         controller.rasterDataSetService = Stub(RasterDataSetService) {
@@ -66,42 +66,20 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         }
         GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
 
-//        when:
-//        cmd.value = "countryCode"
-//        controller.getDistinctValues(cmd)
-//
-//        then:
-//        HttpStatus.OK.value() == response.status
-//
-//        when:
-//        cmd.value = "missionId"
-//        controller.getDistinctValues(cmd)
-//
-//        then:
-//        response.status == HttpStatus.OK.value()
-//
-//        when:
-//        cmd.value = "sensorId"
-//        controller.getDistinctValues(cmd)
-//
-//        then:
-//        response.status == HttpStatus.OK.value()
-//
-//        when:
-//        cmd.value = "productId"
-//        controller.getDistinctValues(cmd)
-//
-//        then:
-//        response.status == HttpStatus.OK.value()
-//
-//        when:
-//        cmd.value = "targetId"
-//        controller.getDistinctValues(cmd)
-//
-//        then:
-//        response.status == HttpStatus.OK.value()
-
+        // Test one time for 200 and 422 response
         when:
+        response.reset()
+        cmd.property = "targetId"
+        controller.getDistinctValues(cmd)
+
+        then:
+        response.status == HttpStatus.OK.value()
+    }
+
+    void "getDistinctValues invalid property returns 422"() {
+        when:
+        GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
+        response.reset()
         cmd.property = "fakeID"
         controller.getDistinctValues(cmd)
 
