@@ -6,7 +6,7 @@ class GetDistinctValuesCommandSpec extends Specification {
     GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
     void "is valid countryCode"() {
         when:
-        cmd.rasterKey = "countryCode"
+        cmd.property = "countryCode"
         cmd.validate()
 
         then:
@@ -14,7 +14,7 @@ class GetDistinctValuesCommandSpec extends Specification {
     }
     void "is valid missionId"() {
         when:
-        cmd.rasterKey = "missionId"
+        cmd.property = "missionId"
         cmd.validate()
 
         then:
@@ -22,7 +22,7 @@ class GetDistinctValuesCommandSpec extends Specification {
     }
     void "is valid sensorId"() {
         when:
-        cmd.rasterKey = "sensorId"
+        cmd.property = "sensorId"
         cmd.validate()
 
         then:
@@ -30,7 +30,7 @@ class GetDistinctValuesCommandSpec extends Specification {
     }
     void "is valid productId"() {
         when:
-        cmd.rasterKey = "productId"
+        cmd.property = "productId"
         cmd.validate()
 
         then:
@@ -38,7 +38,7 @@ class GetDistinctValuesCommandSpec extends Specification {
     }
     void "is valid targetId"() {
         when:
-        cmd.rasterKey = "targetId"
+        cmd.property = "targetId"
         cmd.validate()
 
         then:
@@ -47,7 +47,7 @@ class GetDistinctValuesCommandSpec extends Specification {
 
     void "is invalid fakeID"() {
         when:
-        cmd.rasterKey = "fakeID"
+        cmd.property = "fakeID"
         cmd.validate()
 
         then:
@@ -56,14 +56,14 @@ class GetDistinctValuesCommandSpec extends Specification {
 
     void "null or empty has error"() {
         when:
-        cmd.rasterKey = null
+        cmd.property = null
         cmd.validate()
 
         then:
         cmd.errors.hasErrors() == true
 
         when:
-        cmd.rasterKey = ""
+        cmd.property = ""
         cmd.validate()
 
         then:

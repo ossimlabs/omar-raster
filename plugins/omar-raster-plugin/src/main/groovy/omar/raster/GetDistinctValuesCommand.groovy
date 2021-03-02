@@ -5,9 +5,9 @@ import groovy.transform.ToString
 
 @ToString( includeNames = true )
 class GetDistinctValuesCommand  implements Validateable{
-    String rasterKey
+    String property
 
     static constraints = {
-        rasterKey blank: false, matches: "countryCode|missionId|sensorId|targetId|productId"
+        property blank: false, matches: "countryCode|missionId|sensorId|targetId|productId"
     }
 }

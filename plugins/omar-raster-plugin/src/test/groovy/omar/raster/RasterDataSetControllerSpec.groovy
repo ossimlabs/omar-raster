@@ -85,7 +85,7 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
 //        response.status == HttpStatus.OK.value()
 
         when:
-        cmd.rasterKey = "fakeID"
+        cmd.property = "fakeID"
         controller.getDistinctValues(cmd)
 
         then:
