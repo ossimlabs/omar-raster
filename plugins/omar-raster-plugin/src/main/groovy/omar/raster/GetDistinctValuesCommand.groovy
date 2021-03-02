@@ -6,7 +6,7 @@ class GetDistinctValuesCommand  implements Validateable{
     String property
 
     static constraints = {
-        property matches: "countryCode|missionId|sensorId|targetId|productId"
+        property blank: false, matches: "countryCode|missionId|sensorId|targetId|productId"
     }
 
 }

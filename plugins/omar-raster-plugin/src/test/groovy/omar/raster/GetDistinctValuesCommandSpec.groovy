@@ -53,4 +53,20 @@ class GetDistinctValuesCommandSpec extends Specification {
         then:
         cmd.errors.hasErrors() == true
     }
+
+    void "is null or empty"() {
+        when:
+        cmd.property = null
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == true
+
+        when:
+        cmd.property = ""
+        cmd.validate()
+
+        then:
+        cmd.errors.hasErrors() == true
+    }
 }
