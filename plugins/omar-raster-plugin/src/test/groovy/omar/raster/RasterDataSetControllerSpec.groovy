@@ -11,6 +11,8 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
 //    def "GetRasterFilesProcessing"() {
 //    }
 
+
+    // TODO : Question - How does this work? Does each ID relate to a specific image or a collection of files?
     void "GetRasterFiles"() {
        when:
        cmd.id = "1265"
@@ -18,6 +20,16 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
 
        then:
        cmd.error.allError.size() == 0
+    }
+
+    void "GetRasterFilesProcessing"(){
+        when:
+        cmd.id = "1265"
+        cmd.offset = 1
+        cmd.limit = 1
+
+        then:
+        cmd.error.allError.size() == 0
     }
 }
 

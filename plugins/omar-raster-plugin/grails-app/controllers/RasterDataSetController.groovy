@@ -176,18 +176,29 @@ to the URL.  The format supported:
 			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
 			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
 	 ] )
-	def getRasterFilesProcessing()
+	def getRasterFilesProcessing(GetRasterFilesCommand cmd )
 	{
 //		log.info "getRasterFilesProcessing: ${params}"
+//
+//		def jsonData = request.JSON?request.JSON as HashMap:null
+//		def requestParams = params - params.subMap( ['controller', 'action'] )
+//		def cmd = new GetRasterFilesProcessingCommand()
+//
+//		// get map from JSON and merge into parameters
+//		if(jsonData) requestParams << jsonData
+//		BindUtil.fixParamNames( GetRasterFilesProcessingCommand, requestParams )
+//		bindData( cmd, requestParams )
 
-		def jsonData = request.JSON?request.JSON as HashMap:null
-		def requestParams = params - params.subMap( ['controller', 'action'] )
-		def cmd = new GetRasterFilesProcessingCommand()
+		cmd.validate()
 
-		// get map from JSON and merge into parameters
-		if(jsonData) requestParams << jsonData
-		BindUtil.fixParamNames( GetRasterFilesProcessingCommand, requestParams )
-		bindData( cmd, requestParams )
+
+
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
+		// if nothing above, could still make call below
+
 		HashMap result = rasterDataSetService.getFileProcessingStatus(cmd)
 
 		render contentType: "application/json", text: result as JSON
