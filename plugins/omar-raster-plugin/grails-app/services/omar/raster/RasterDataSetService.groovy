@@ -6,7 +6,6 @@ import groovy.util.logging.Slf4j
 import omar.core.Repository
 import omar.core.HttpStatus
 import omar.core.DateUtil
-import omar.raster.RasterEntry
 import java.sql.Timestamp
 
 import omar.stager.core.OmarStageFile

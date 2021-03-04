@@ -6,9 +6,9 @@ import grails.converters.JSON
 import omar.core.HttpStatusMessage
 import omar.core.BindUtil
 import groovy.json.JsonOutput
-import groovy.xml.XmlUtil
-import groovy.util.XmlSlurper
 import groovy.json.JsonSlurper
+import org.springframework.http.HttpStatus
+
 @Api( value = "dataManager",
      produces = 'application/json',
      consumes = 'application/json',
@@ -19,7 +19,9 @@ class RasterDataSetController
 	static allowedMethods = [
 			addRaster: 'POST',
 			removeRaster: 'POST' ,
-			getRasterFilesProcessing: 'GET'
+			getRasterFilesProcessing: 'GET',
+			getRasterFiles: 'GET',
+			getDistinctValues: 'GET'
 	]
 
 	def rasterDataSetService
@@ -175,20 +177,15 @@ to the URL.  The format supported:
 			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
 			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
 	 ] )
-	def getRasterFilesProcessing()
+	def getRasterFilesProcessing(GetRasterFilesProcessingCommand cmd )
 	{
-//		log.info "getRasterFilesProcessing: ${params}"
+		cmd.validate()
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
 
-		def jsonData = request.JSON?request.JSON as HashMap:null
-		def requestParams = params - params.subMap( ['controller', 'action'] )
-		def cmd = new GetRasterFilesProcessingCommand()
-
-		// get map from JSON and merge into parameters
-		if(jsonData) requestParams << jsonData
-		BindUtil.fixParamNames( GetRasterFilesProcessingCommand, requestParams )
-		bindData( cmd, requestParams )
 		HashMap result = rasterDataSetService.getFileProcessingStatus(cmd)
-
 		render contentType: "application/json", text: result as JSON
 	}
 
@@ -204,24 +201,19 @@ The service api **getRasterFiles**
 	@ApiImplicitParams( [
 			@ApiImplicitParam(name = 'id',
 				               value = 'Search Id',
-				               required=false,
+				               required=true,
 				               paramType = 'query',
 				               dataType = 'string'),
 	] )
-	def getRasterFiles()
+	def getRasterFiles(GetRasterFilesCommand cmd )
 	{
-//		log.info "getRasterFiles: ${params}"
+		cmd.validate()
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
 
-		def jsonData = request.JSON?request.JSON as HashMap:null
-		def requestParams = params - params.subMap( ['controller', 'action'] )
-		def cmd = new GetRasterFilesCommand()
-
-		// get map from JSON and merge into parameters
-		if(jsonData) requestParams << jsonData
-		BindUtil.fixParamNames( GetRasterFilesCommand, requestParams )
-		bindData( cmd, requestParams )
 		HashMap result = rasterDataSetService.getRasterFiles(cmd)
-
 		render contentType: "application/json", text: result as JSON
 	}
 
@@ -241,9 +233,13 @@ The service api **getRasterFiles**
 			value = 'Column Name'
 		)
 	])
-	def getDistinctValues() {
-		log.info "getDistinctValues: ${params}"
-        def results = rasterDataSetService.getDistinctValues(params)
+	def getDistinctValues(GetDistinctValuesCommand cmd) {
+		cmd.validate()
+		if (cmd.errors.hasErrors()) {
+			render status: HttpStatus.UNPROCESSABLE_ENTITY
+			return
+		}
+		def results = rasterDataSetService.getDistinctValues(cmd)
 		render contentType: "application/json", text: JsonOutput.toJson(results.findAll({ it != null }))
 	}
 

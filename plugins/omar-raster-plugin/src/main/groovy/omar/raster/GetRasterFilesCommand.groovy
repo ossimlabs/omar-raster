@@ -7,5 +7,7 @@ import groovy.transform.ToString
 class GetRasterFilesCommand  implements Validateable
 {
    String id
-   def ids
+   static constraints = {
+      id blank: false, nullable: false
+   }
 }
