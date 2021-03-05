@@ -57,6 +57,17 @@ class RasterDataSetControllerSpec extends Specification implements ControllerUni
         HttpStatus.UNPROCESSABLE_ENTITY.value() == response.status
     }
 
+    void "getRasterFilesProcessing no params returns 200"() {
+        given:
+        GetRasterFilesProcessingCommand cmd = new GetRasterFilesProcessingCommand()
+
+        when:
+        controller.getRasterFilesProcessing(cmd)
+
+        then:
+        HttpStatus.OK.value() == response.status
+    }
+
     void "getDistinctValues valid property returns 200"() {
         when:
         GetDistinctValuesCommand cmd = new GetDistinctValuesCommand()
