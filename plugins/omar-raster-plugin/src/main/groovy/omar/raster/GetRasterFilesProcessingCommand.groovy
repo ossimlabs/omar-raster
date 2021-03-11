@@ -12,5 +12,6 @@ class GetRasterFilesProcessingCommand implements Validateable
    static constraints = {
       offset nullable: true, min: 0
       limit nullable: true, min: 0
+      filter nullable: true
    }
 }
