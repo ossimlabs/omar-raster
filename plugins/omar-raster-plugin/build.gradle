@@ -20,6 +20,7 @@ dependencies {
     }
     //compile project( ":${ rootProject.name }-lib" )
     if ( ! System.getenv('O2_INLINE_BUILD') ) {
-       compile "io.ossim.omar.plugins:omar-stager-core-plugin:latest.release"
+//       compile "io.ossim.omar.plugins:omar-stager-core-plugin:latest.release"
+        compile "io.ossim.omar.plugins:omar-stager-core-plugin:+"
     }
 }
