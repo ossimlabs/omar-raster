@@ -6,7 +6,6 @@ import groovy.util.logging.Slf4j
 import omar.core.Repository
 import omar.core.HttpStatus
 import omar.core.DateUtil
-import omar.raster.RasterEntry
 import java.sql.Timestamp
 
 import omar.stager.core.OmarStageFile
@@ -456,10 +455,8 @@ class RasterDataSetService implements ApplicationContextAware
                 }
 
                 files.each() {
-                    def file = it
-                    URI uri = new URI(file)
-                    String scheme = uri.scheme?.toLowerCase()
-                    if (!scheme || (scheme == "file"))
+                    def file = it?.toFile()
+                    if (file?.isFile() && file.name != filename)
                     {
                         File fileToRemove = file as File
                         if (fileToRemove.canWrite())
@@ -474,17 +471,53 @@ class RasterDataSetService implements ApplicationContextAware
                             }
                             if (!fileToRemove.exists())
                             {
-                                log.debug("Deleted ${file}")
+                                log.info("Deleted ${file}")
                             }
                             else
                             {
-                                log.debug("Unable to delete ${file}")
+                                log.info("Unable to delete ${file}")
                             }
                         }
                     }
                     else
                     {
-//						log.info("Don't have permissions to delete ${file}")
+			log.info("Don't have permissions to delete ${file}")
+                    }
+                }
+            }
+
+            if (params.deleteSupportFiles?.toBoolean())
+            {
+                def files = rasterFile?.rasterDataSet?.fileObjects?.grep { it.type != 'main' }
+
+                files.each() {
+                    def file = it?.toFile()
+                    if (file?.isFile() && file.name != filename)
+                    {
+                            File fileToRemove = file as File 
+                            if (fileToRemove.canWrite())
+                            {
+                                if (fileToRemove.isDirectory())
+                                {
+                                    fileToRemove.deleteDir()
+                                }
+                                else
+                                {
+                                    fileToRemove.delete()
+                                }
+                                if (!fileToRemove.exists())
+                                {
+                                    log.info("Deleted ${file.name}")
+                                }
+                                else
+                                {
+                                    log.info("Unable to delete ${file.name}")
+                                }
+                            }
+                    }
+                    else
+                    {
+			log.info("Don't have permissions to delete ${file.name}")
                     }
                 }
             }
