@@ -22,11 +22,15 @@ import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
 import grails.gorm.transactions.Transactional
 
+import grails.core.GrailsApplication
+
+import java.text.SimpleDateFormat
+
 @Slf4j
 @Transactional
 class RasterDataSetService implements ApplicationContextAware
 {
-
+    GrailsApplication grailsApplication
     def dataInfoService
     def ingestService
     def stagerService
@@ -197,13 +201,13 @@ class RasterDataSetService implements ApplicationContextAware
             File testFile = filename as File
             if (!testFile?.exists())
             {
-                httpStatusMessage?.status = HttpStatus.NOT_FOUND
+                httpStatusMessage?.status = HttpStatus.NOT_FOUND // 404
                 httpStatusMessage?.message = "Not Found: ${filename}"
                 log.error(httpStatusMessage?.message)
             }
             else if (!testFile?.canRead())
             {
-                httpStatusMessage?.status = HttpStatus.FORBIDDEN
+                httpStatusMessage?.status = HttpStatus.FORBIDDEN //403
                 httpStatusMessage?.message = "Not Readable ${filename}"
                 log.error(httpStatusMessage?.message)
             }
@@ -228,8 +232,10 @@ class RasterDataSetService implements ApplicationContextAware
             if (!xml)
             {
                 httpStatusMessage?.message = "Unable to get information on file ${filename}"
-                httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                log.error(httpStatusMessage?.message)
+                httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE // 415
+
+                log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage.message}")
+                createErrorFile(filename, httpStatusMessage.message, httpStatusMessage.status)
 
                 return httpStatusMessage
             }
@@ -334,6 +340,7 @@ class RasterDataSetService implements ApplicationContextAware
                             {
                                 if (rasterDataSet.save())
                                 {
+
                                     //stagerHandler.processSuccessful(filename, xml)
                                     httpStatusMessage?.status = HttpStatus.OK
                                     def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
@@ -361,6 +368,7 @@ class RasterDataSetService implements ApplicationContextAware
                                     httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                                     httpStatusMessage?.message = "Unable to save image ${filename}, image probably already exists"
                                     log.error(httpStatusMessage?.message)
+
                                 }
                             }
                             catch (Exception e)
@@ -388,6 +396,11 @@ class RasterDataSetService implements ApplicationContextAware
         // Print logs in JSON for ElasticSearch and Kibana parsing
         println new JsonBuilder(logsJson).toString()
 
+        if (httpStatusMessage?.status != 200)
+        {
+            log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage.message}")
+            createErrorFile(filename, httpStatusMessage.message, httpStatusMessage.status)
+        }
 
         httpStatusMessage
     }
@@ -494,7 +507,7 @@ class RasterDataSetService implements ApplicationContextAware
                     def file = it?.toFile()
                     if (file?.isFile() && file.name != filename)
                     {
-                            File fileToRemove = file as File 
+                            File fileToRemove = file as File
                             if (fileToRemove.canWrite())
                             {
                                 if (fileToRemove.isDirectory())
@@ -641,7 +654,7 @@ class RasterDataSetService implements ApplicationContextAware
 
     def getDistinctValues (def params) {
         def results = []
-        
+
         def criteria = {
             projections {
                 property('name')
@@ -674,5 +687,34 @@ class RasterDataSetService implements ApplicationContextAware
         }
 
         return results
+    }
+
+    /**
+     * Creates a text file with the image file name and path,
+     * and the reason the stage/ingest was not successful.  This file
+     * can be used troubleshoot, and help to restage the image at a later time.
+     *
+     * @param filename The image file name
+     * @param message Http status message
+     * @param status Http status code
+     */
+    def createErrorFile (String filename, String message, Integer status) {
+        def errorFileDir = grailsApplication.config.getProperty('stager.errorFile.directory', String, "/tmp/omar-stager/errors-test/")
+
+        String pattern = "yyyy-MM-dd-HH-mm-ss-"
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern)
+        String datePrefix = simpleDateFormat.format(new Date())
+
+        File errorDir = errorFileDir as File
+        errorDir.mkdirs()
+
+        File errorFileName = File.createTempFile("stager-${datePrefix}", ".txt", errorDir)
+
+        errorFileName.withWriter { out ->
+            out.println "filename: ${filename}"
+            out.println "message: ${message}"
+            out.println "status: ${status}"
+
+        }
     }
 }
