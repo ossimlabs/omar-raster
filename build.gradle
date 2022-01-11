@@ -17,22 +17,25 @@ plugins {
     id "org.sonarqube" version "3.1"
 }
 
-project.getDependencies().constraints(constraints -> {
-    constraints.add("implementation", "org.apache.logging.log4j:log4j-core", c -> {
-        c.version(v -> {
-            v.strictly("[2.17, 3[");
-            v.prefer("2.17.0");
-        });
-        c.because("CVE-2021-44228, CVE-2021-45046, CVE-2021-45105: Log4j vulnerable to remote code execution and other critical security vulnerabilities");
-    });
-    constraints.add("implementation", "ch.qos.logback:logback-core", c -> {
-        c.version(v -> {
-            v.strictly("[1.2.10, 3[");
-            v.prefer("1.2.10");
-        });
-        c.because("LogBack vulnerable to remote code execution and other critical security vulnerabilities");
-    });
-});
+dependencies {
+    compile "ch.qos.logback:logback-classic:1.2.10"
+    compile "ch.qos.logback:logback-core:1.2.10"
+    
+    constraints {
+      implementation('org.apache.logging.log4j:log4j-core:2.17.1') {
+        because 'Log4j vulnerable to remote code execution and other critical security vulnerabilities'
+      }
+      implementation('org.apache.logging.log4j:log4j-api:2.17.1') {
+        because 'Log4j vulnerable to remote code execution and other critical security vulnerabilities'
+      }
+      implementation('ch.qos.logback:logback-classic:1.2.10') {
+        because 'Logback vulnerable to remote code execution and other critical security vulnerabilities'
+      }
+      implementation('ch.qos.logback:logback-core:1.2.10') {
+        because 'Logback vulnerable to remote code execution and other critical security vulnerabilities'
+      }
+    }
+}
 
 subprojects { project ->
 	boolean isGrailsApp = project.name.endsWith( '-app' )
