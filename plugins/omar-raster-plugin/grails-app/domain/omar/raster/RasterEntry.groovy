@@ -461,6 +461,25 @@ class RasterEntry
       rasterEntry.filename = filename
     }
 
+    initRasterEntryMetadata( metadataNode, rasterEntry )
+
+    if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
+    {
+      initRasterEntryOtherTagsXml( rasterEntry )
+    }
+
+    if ( !rasterEntry.indexId )
+    {
+      def indexIdKey = "${rasterEntry.entryId}-${filename}"
+      def indexIdValue = indexIdKey.encodeAsSHA256()
+      // println "${indexIdKey}=${indexIdValue}"
+      rasterEntry.indexId = indexIdValue
+    }
+    if ( rasterEntry.validModel == null )
+    {
+      rasterEntry.validModel = false
+    }
+
     /* HACK ALERT - START */
     def omdFile = "${FilenameUtils.removeExtension( filename )}.omd" as File
 
@@ -476,28 +495,13 @@ class RasterEntry
           rasterEntry?.groundGeom = new WKTReader().read( kwl["ground_geom_${rasterEntry?.entryId}"]  )
         }               
 
+        if ( kwl["mission_id"]  ) {          
+          rasterEntry?.missionId =  kwl["mission_id"] 
+          rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: rasterEntry?.missionId)
+        }               
     }    
     /* HACK ALERT - END */
 
-    initRasterEntryMetadata( metadataNode, rasterEntry )
-
-    if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
-    {
-      initRasterEntryOtherTagsXml( rasterEntry )
-    }
-
-
-    if ( !rasterEntry.indexId )
-    {
-      def indexIdKey = "${rasterEntry.entryId}-${filename}"
-      def indexIdValue = indexIdKey.encodeAsSHA256()
-      // println "${indexIdKey}=${indexIdValue}"
-      rasterEntry.indexId = indexIdValue
-    }
-    if ( rasterEntry.validModel == null )
-    {
-      rasterEntry.validModel = false
-    }
     return rasterEntry
   }
 
