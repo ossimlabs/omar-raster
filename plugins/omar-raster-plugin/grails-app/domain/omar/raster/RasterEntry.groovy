@@ -23,6 +23,9 @@ import omar.raster.tags.TargetIdTag
 
 import groovy.util.logging.Slf4j
 
+import org.apache.commons.io.FilenameUtils
+
+
 @Slf4j
 class RasterEntry
 {
@@ -409,6 +412,7 @@ class RasterEntry
       rasterEntry.gsdY = ( dy != "nan" ) ? dy?.toDouble() : null
       rasterEntry.gsdUnit = gsdUnit
     }
+    
     rasterEntry.groundGeom = initGroundGeom( rasterEntryNode?.groundGeom )
     rasterEntry.acquisitionDate = initAcquisitionDate( rasterEntryNode )
 
@@ -456,13 +460,13 @@ class RasterEntry
     { 
       rasterEntry.filename = filename
     }
+
     initRasterEntryMetadata( metadataNode, rasterEntry )
 
     if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
     {
       initRasterEntryOtherTagsXml( rasterEntry )
     }
-
 
     if ( !rasterEntry.indexId )
     {
@@ -475,6 +479,29 @@ class RasterEntry
     {
       rasterEntry.validModel = false
     }
+
+    /* HACK ALERT - START */
+    def omdFile = "${FilenameUtils.removeExtension( filename )}.omd" as File
+
+    if ( omdFile?.exists() ) {      
+        def kwl = omdFile?.readLines()?.inject([:]) { a, b ->
+          def c = b.split( ':' )?.collect { it.trim() }
+
+          a[c[0]] = c[1]
+          a
+        }
+
+        if ( kwl["ground_geom_${rasterEntry?.entryId}"]  ) {          
+          rasterEntry?.groundGeom = new WKTReader().read( kwl["ground_geom_${rasterEntry?.entryId}"]  )
+        }               
+
+        if ( kwl["mission_id"]  ) {          
+          rasterEntry?.missionId =  kwl["mission_id"] 
+          rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: rasterEntry?.missionId)
+        }               
+    }    
+    /* HACK ALERT - END */
+
     return rasterEntry
   }
 
