@@ -493,7 +493,7 @@ class RasterEntry
 
         if ( kwl["ground_geom_${rasterEntry?.entryId}"]  ) {          
           rasterEntry?.groundGeom = new WKTReader().read( kwl["ground_geom_${rasterEntry?.entryId}"]  )
-          groundGeom.setSRID( 4326 )
+          rasterEntry?.groundGeom.setSRID( 4326 )
         }               
 
         if ( kwl["mission_id"]  ) {          
