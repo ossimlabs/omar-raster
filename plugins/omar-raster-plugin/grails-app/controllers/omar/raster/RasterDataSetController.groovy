@@ -260,7 +260,7 @@ The service api **getRasterFiles**
 	}
 
 	@ApiOperation(
-			value = "Given the indexID of a SIDD,  determine whether a corresponding SIDC exists",
+			value = "Given the indexID of a SIDD,  determine whether a corresponding SICD exists",
 			produces = 'application/json',
 			httpMethod = 'GET'
 	)
