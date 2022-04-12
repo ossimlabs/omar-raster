@@ -710,4 +710,12 @@ class RasterDataSetService implements ApplicationContextAware
         return results
     }
 
+    Boolean hasSICD(String indexId) {
+        RasterEntry sidd = RasterEntry.findByIndexId( indexId )
+
+        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( { 
+            it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/ } as FileFilter )
+
+        sicdFiles?.size() > 0
+    }
 }
