@@ -203,7 +203,7 @@ class RasterDataSetService implements ApplicationContextAware
             if (!testFile?.exists())
             {
                 httpStatusMessage?.status = HttpStatus.NOT_FOUND // 404
-                httpStatusMessage?.message = "Not Found: ${filename}"
+                httpStatusMessage?.message = "File Not Found"
 
                 log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                 ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
@@ -211,7 +211,7 @@ class RasterDataSetService implements ApplicationContextAware
             else if (!testFile?.canRead())
             {
                 httpStatusMessage?.status = HttpStatus.FORBIDDEN //403
-                httpStatusMessage?.message = "Not Readable ${filename}"
+                httpStatusMessage?.message = "File Not Readable"
 
                 log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                 ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
@@ -238,7 +238,7 @@ class RasterDataSetService implements ApplicationContextAware
                 // else we can put in a method that makes sense
                 if (!xml)
                 {
-                    httpStatusMessage?.message = "Unable to get information on file ${filename}"
+                    httpStatusMessage?.message = "Unable to get information on file."
                     httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE // 415
 
                     log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
@@ -338,7 +338,7 @@ class RasterDataSetService implements ApplicationContextAware
                         if (rasterDataSets?.size() < 1)
                         {
                             httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                            httpStatusMessage?.message = "Not a raster file: ${filename}"
+                            httpStatusMessage?.message = "Not a raster file"
 
                             log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                             ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
@@ -379,7 +379,7 @@ class RasterDataSetService implements ApplicationContextAware
                                     {
                                         savedRaster = false
                                         httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                                        httpStatusMessage?.message = "Unable to save image ${filename}, image probably already exists"
+                                        httpStatusMessage?.message = "Unable to save image, image probably already exists"
 
                                         log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                                         ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
@@ -389,8 +389,8 @@ class RasterDataSetService implements ApplicationContextAware
                                 catch (Exception e)
                                 {
                                     httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                                    httpStatusMessage?.message = "Unable to save image ${filename}, image probably already exists\n${e?.message}"
-                                    log.error(httpStatusMessage?.message)
+                                    httpStatusMessage?.message = "${e?.message}"
+                                    log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                                     ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
                                 }
                             }
