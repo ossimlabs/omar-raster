@@ -131,6 +131,7 @@ class RasterDataSetService implements ApplicationContextAware
                             result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                             result?.message = "Unable to save XML, data probably already exists"
                             log.error(result?.message)
+                            ingestService.writeErrors(filename, result?.message, result?.status)
                         }
                     }
                     catch (Exception e)
@@ -138,6 +139,7 @@ class RasterDataSetService implements ApplicationContextAware
                         result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                         result?.message = "Unable to save XML: ${e}"
                         log.error(result?.message)
+                        ingestService.writeErrors(filename, result?.message, result?.status)
                     }
                 }
                 else
@@ -145,6 +147,7 @@ class RasterDataSetService implements ApplicationContextAware
                     result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                     result?.message = "No raster entries found for ${filename} - check for ground geom!"
                     log.error(result?.message)
+                    ingestService.writeErrors(filename, result?.message, result?.status)
                 }
             }
             oms = null
@@ -153,6 +156,8 @@ class RasterDataSetService implements ApplicationContextAware
         {
             result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
             result?.message = "Unable to process XML: ${e}"
+            log.error(e)
+            ingestService.writeErrors(filename, result?.message, result?.status)
 
         }
         finally
@@ -190,7 +195,7 @@ class RasterDataSetService implements ApplicationContextAware
         def sensorids
         def fileTypes
         def filenames
-        def errorFileEnabled = grailsApplication.config.getProperty('stager.errorFile.enabled', Boolean, false)
+        def isFileStaged = RasterFile.findByName(filename)
 
         if (!scheme || (scheme == "file"))
         {
@@ -198,125 +203,66 @@ class RasterDataSetService implements ApplicationContextAware
             if (!testFile?.exists())
             {
                 httpStatusMessage?.status = HttpStatus.NOT_FOUND // 404
-                httpStatusMessage?.message = "Not Found: ${filename}"
+                httpStatusMessage?.message = "File Not Found"
 
                 log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
-
-                if (errorFileEnabled) {
-                    ingestService.createErrorFile(filename, httpStatusMessage?.message, httpStatusMessage?.status)
-                }
+                ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
             }
             else if (!testFile?.canRead())
             {
                 httpStatusMessage?.status = HttpStatus.FORBIDDEN //403
-                httpStatusMessage?.message = "Not Readable ${filename}"
+                httpStatusMessage?.message = "File Not Readable"
 
                 log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
-
-                if (errorFileEnabled) {
-                    ingestService.createErrorFile(filename, httpStatusMessage?.message, httpStatusMessage?.status)
-                }
+                ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
             }
         }
 
         if (httpStatusMessage?.status == HttpStatus.OK)
         {
-            def xml = dataInfoService.getInfo(filename)
-            def background = true;
-            try
-            {
-                background = params?.background
-            }
-            catch (Exception e)
-            {
-                log.error(e)
-            }
-
-            // We will add a return here temporarily but we need to refactor
-            // and put the hashmap generator in a method and anything
-            // else we can put in a method that makes sense
-            if (!xml)
-            {
-                httpStatusMessage?.message = "Unable to get information on file ${filename}"
-                httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE // 415
-
-                log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
-
-                if (errorFileEnabled) {
-                    ingestService.createErrorFile(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+            if (!isFileStaged) {
+                def xml = dataInfoService.getInfo(filename)
+                def background = true;
+                try
+                {
+                    background = params?.background
+                }
+                catch (Exception e)
+                {
+                    log.error(e)
+                    ingestService.writeErrors(filename, e, httpStatusMessage?.status)
                 }
 
-                return httpStatusMessage
-            }
-
-            def oms = new XmlSlurper().parseText(xml)
-            def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
-            def repository = ingestService?.findRepositoryForFile(filename)
-            def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
-
-            if (background)
-            {
-                def result = stagerService.addFileToStage(filename, params.properties)
-
-                httpStatusMessage.status = result.status
-                httpStatusMessage.message = result.message
-
-                if (rasterDataSets?.size() > 0)
+                // We will add a return here temporarily but we need to refactor
+                // and put the hashmap generator in a method and anything
+                // else we can put in a method that makes sense
+                if (!xml)
                 {
-                    rasterDataSets?.each { rasterDataSet ->
-                        def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                        missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                        imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                        sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                        fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                        filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
-                        acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
-                        ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+                    httpStatusMessage?.message = "Unable to get information on file."
+                    httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE // 415
 
-                        raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
-                                requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-                                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+                    log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                    ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
 
-                        log.info raster_logs.toString()
-                    }
-
+                    return httpStatusMessage
                 }
 
+                def oms = new XmlSlurper().parseText(xml)
+                def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
+                def repository = ingestService?.findRepositoryForFile(filename)
+                def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
 
-            }
-            else
-            {
-                Boolean fileStaged = false
-
-                if (params.buildOverviews || params.buildHistograms)
+                if (background)
                 {
-                    def result = stagerService.stageFileJni([filename               : params.filename,
-                                                             buildThumbnails        : params.buildThumbnails,
-                                                             buildOverviews         : params.buildOverviews,
-                                                             buildHistograms        : params.buildHistograms,
-                                                             overviewCompressionType: params.overviewCompressionType,
-                                                             buildHistogramsWithR0  : params.buildHistogramsWithR0,
-                                                             useFastHistogramStaging: params.useFastHistogramStaging,
-                                                             overviewType           : params.overviewType,
-                                                             thumbnailSize          : params.thumbnailSize,
-                                                             thumbnailType          : params.thumbnailType,
-                                                             thumbnailStretchType   : params.thumbnailStretchType
-                    ])
-                    if (result?.status >= 300)
-                    {
+                    def result = stagerService.addFileToStage(filename, params.properties)
 
-                        log.error(result?.message)
-                    }
                     httpStatusMessage.status = result.status
                     httpStatusMessage.message = result.message
 
                     if (rasterDataSets?.size() > 0)
                     {
                         rasterDataSets?.each { rasterDataSet ->
-                            //httpStatusMessage?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                            //httpStatusMessage?.message = "Added raster ${ids}:${filename}"
                             missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
                             imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
                             sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
@@ -332,76 +278,129 @@ class RasterDataSetService implements ApplicationContextAware
 
                             log.info raster_logs.toString()
                         }
+
                     }
+
+
                 }
                 else
                 {
-                    if (rasterDataSets?.size() < 1)
+                    Boolean fileStaged = false
+
+                    if (params.buildOverviews || params.buildHistograms)
                     {
-                        httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                        httpStatusMessage?.message = "Not a raster file: ${filename}"
+                        def result = stagerService.stageFileJni([filename               : params.filename,
+                                                                buildThumbnails        : params.buildThumbnails,
+                                                                buildOverviews         : params.buildOverviews,
+                                                                buildHistograms        : params.buildHistograms,
+                                                                overviewCompressionType: params.overviewCompressionType,
+                                                                buildHistogramsWithR0  : params.buildHistogramsWithR0,
+                                                                useFastHistogramStaging: params.useFastHistogramStaging,
+                                                                overviewType           : params.overviewType,
+                                                                thumbnailSize          : params.thumbnailSize,
+                                                                thumbnailType          : params.thumbnailType,
+                                                                thumbnailStretchType   : params.thumbnailStretchType
+                        ])
+                        if (result?.status >= 300)
+                        {
 
-                        log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                            log.error(result?.message)
+                            ingestService.writeErrors(filename, result?.message, result?.status)
+                        }
+                        httpStatusMessage.status = result.status
+                        httpStatusMessage.message = result.message
 
-                        if (errorFileEnabled) {
-                            ingestService.createErrorFile(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                        if (rasterDataSets?.size() > 0)
+                        {
+                            rasterDataSets?.each { rasterDataSet ->
+                                //httpStatusMessage?.status = HttpStatus.OK
+                                def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+                                //httpStatusMessage?.message = "Added raster ${ids}:${filename}"
+                                missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                                imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                                sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                                fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                                filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                                acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
+                                ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+
+                                raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+                                        requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
+                                        filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                        ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+
+                                log.info raster_logs.toString()
+                            }
                         }
                     }
                     else
                     {
-                        rasterDataSets?.each { rasterDataSet ->
-                            def savedRaster = true
-                            try
-                            {
-                                if (rasterDataSet.save())
+                        if (rasterDataSets?.size() < 1)
+                        {
+                            httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                            httpStatusMessage?.message = "Not a raster file"
+
+                            log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                            ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                        }
+                        else
+                        {
+                            rasterDataSets?.each { rasterDataSet ->
+                                def savedRaster = true
+                                try
                                 {
+                                    if (rasterDataSet.save())
+                                    {
 
-                                    //stagerHandler.processSuccessful(filename, xml)
-                                    //httpStatusMessage?.status = HttpStatus.OK
-                                    def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                                    httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
-                                    acquisitionDates = rasterDataSet?.rasterEntries.collect {
-                                        it.acquisitionDate
-                                    }.join(",")
-                                    ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+                                        //stagerHandler.processSuccessful(filename, xml)
+                                        //httpStatusMessage?.status = HttpStatus.OK
+                                        def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
+                                        httpStatusMessage?.message = "Added raster ${ids}:${filename}"
+                                        missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
+                                        imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
+                                        sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
+                                        fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
+                                        filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                                        acquisitionDates = rasterDataSet?.rasterEntries.collect {
+                                            it.acquisitionDate
+                                        }.join(",")
+                                        ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 
-                                    // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
-                                    // if the image has already been staged
-                                    raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
-                                            requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
-                                            filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-                                            ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
+                                        // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
+                                        // if the image has already been staged
+                                        raster_logs = new JsonBuilder(timestamp: DateUtil.formatUTC(startTime), requestType: requestType,
+                                                requestMethod: requestMethod, httpStatus: httpStatusMessage?.status, message: httpStatusMessage?.message,
+                                                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
+                                                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
 
-                                    log.info raster_logs.toString()
-                                }
-                                else
-                                {
-                                    savedRaster = false
-                                    httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                                    httpStatusMessage?.message = "Unable to save image ${filename}, image probably already exists"
-
-                                    log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
-
-                                    if (errorFileEnabled) {
-                                        ingestService.createErrorFile(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                                        log.info raster_logs.toString()
                                     }
+                                    else
+                                    {
+                                        savedRaster = false
+                                        httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                                        httpStatusMessage?.message = "Unable to save image, image probably already exists"
 
+                                        log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                                        ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+
+                                    }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                                httpStatusMessage?.message = "Unable to save image ${filename}, image probably already exists\n${e?.message}"
-                                log.error(httpStatusMessage?.message)
+                                catch (Exception e)
+                                {
+                                    httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                                    httpStatusMessage?.message = "${e?.message}"
+                                    log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                                    ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                                }
                             }
                         }
                     }
                 }
+            }
+            else
+            {
+                log.info("${filename} is already staged.")
             }
         }
 
@@ -563,6 +562,7 @@ class RasterDataSetService implements ApplicationContextAware
             httpStatusMessage?.status = HttpStatus.NOT_FOUND
             httpStatusMessage?.message = "Raster file does not exist in the database: ${filename}"
             log.error(httpStatusMessage?.message)
+            ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
         }
     }
 
