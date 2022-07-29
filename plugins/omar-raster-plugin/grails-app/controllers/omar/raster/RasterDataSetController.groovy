@@ -126,7 +126,12 @@ to the URL.  The format supported:
 			bindData( cmd, requestParams )
 
 			def httpStatusMessage = new HttpStatusMessage()
-			def status = rasterDataSetService.addRaster( httpStatusMessage, cmd )
+			try{
+				def status = rasterDataSetService.addRaster( httpStatusMessage, cmd )
+			}
+			catch (e){
+				httpStatusMessage.message = e.message
+			}
 
 			response.status = httpStatusMessage.status
 			render( httpStatusMessage.message )

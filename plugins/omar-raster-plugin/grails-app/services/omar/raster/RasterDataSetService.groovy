@@ -34,6 +34,7 @@ class RasterDataSetService implements ApplicationContextAware
     def ingestService
     def stagerService
     def ingestMetricsService
+    def sessionFactory
     ApplicationContext applicationContext
 
     def deleteFromRepository(Repository repository)
@@ -391,7 +392,16 @@ class RasterDataSetService implements ApplicationContextAware
                                     httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                                     httpStatusMessage?.message = "${e?.message}"
                                     log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                                    def session = sessionFactory.currentSession
+                                    def transaction = session.getCurrentTransaction()
+                                    if (transaction.isActive())
+                                    {
+                                        log.info("Initiating transaction rollback due to Exception.")
+                                        transaction.rollback()
+                                    }
                                     ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                                    throw new Exception(e)
+
                                 }
                             }
                         }
