@@ -1,6 +1,7 @@
 package omar.raster
 
 import omar.core.Repository
+import java.util.UUID
 
 class RasterDataSet
 {
@@ -21,7 +22,7 @@ class RasterDataSet
         cache true
         id generator: 'identity'
         repository index: 'raster_data_set_repository_idx'
-        catId index: 'raster_data_set_cat_id_idx'
+        catId index: 'raster_data_set_cat_id_idx', unique: true
     }
 
     static RasterDataSet initRasterDataSet(rasterDataSetNode, rasterDataSet = null)
@@ -46,7 +47,15 @@ class RasterDataSet
             }
         }
 
+        initCatId(rasterDataSet)
+
         return rasterDataSet
+    }
+
+    static void initCatId(RasterDataSet rasterDataSet) {
+        if ( ! rasterDataSet?.catId ) {
+            rasterDataSet?.catId = UUID.randomUUID()
+        }
     }
 
     def getMainFile()

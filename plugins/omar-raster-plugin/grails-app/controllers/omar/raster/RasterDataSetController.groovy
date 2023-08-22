@@ -271,10 +271,26 @@ The service api **getRasterFiles**
         render contentType: "application/json", text: rasterDataSetService?.hasSICD(indexId)
 	}
 
+	@ApiOperation(
+			value = "Given the catId of a RasterDataSet,  return the metadata associatated with it",
+			produces = 'application/json',
+			httpMethod = 'GET'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'catId', value = 'The catId of the RasterDataSet', dataType = 'string', paramType = "query", required = true )
+	])
 	def findByCatId(String catId) {
 		render rasterDataSetService.findByCatId(catId)
 	}
 
+	@ApiOperation(
+			value = "Given the filePath of a RasterDataSet,  return the metadata associatated with it",
+			produces = 'application/json',
+			httpMethod = 'GET'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'filePath', value = 'The filePath of the RasterDataSet', dataType = 'string', paramType = "query", required = true )
+	])
 	def findByFilePath(String filePath) {
 		render rasterDataSetService.findByFilePath(filePath)
 	}
