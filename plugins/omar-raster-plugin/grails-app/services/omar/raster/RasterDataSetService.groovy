@@ -22,7 +22,7 @@ import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
 import grails.gorm.transactions.Transactional
 import grails.core.GrailsApplication
-
+import grails.converters.JSON 
 
 @Slf4j
 @Transactional
@@ -717,5 +717,27 @@ class RasterDataSetService implements ApplicationContextAware
             it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/ } as FileFilter )
 
         sicdFiles?.size() > 0
+    }
+
+    def findByCatId(String catId) {
+        RasterDataSet rasterDataSet = RasterDataSet.findByCatId(catId)
+
+        def json = [
+            filePath: rasterDataSet?.mainFile?.name            
+        ] as JSON
+
+        [contentType: 'application/json', text: json]
+    }
+
+    def findByFilePath(String filePath) {
+        def rasterDataSet = RasterFile.where {
+            name == filePath && type == 'main'
+        }.find()?.rasterDataSet
+
+        def json = [
+            catId: rasterDataSet?.catId             
+        ] as JSON
+
+        [contentType: 'application/json', text: json]        
     }
 }

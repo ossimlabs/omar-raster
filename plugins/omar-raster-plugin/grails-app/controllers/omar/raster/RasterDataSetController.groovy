@@ -271,4 +271,12 @@ The service api **getRasterFiles**
         render contentType: "application/json", text: rasterDataSetService?.hasSICD(indexId)
 	}
 
+	def findByCatId(String catId) {
+		render rasterDataSetService.findByCatId(catId)
+	}
+
+	def findByFilePath(String filePath) {
+		render rasterDataSetService.findByFilePath(filePath)
+	}
+
 }

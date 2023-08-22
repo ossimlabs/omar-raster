@@ -10,13 +10,18 @@ class RasterDataSet
 
     Repository repository
 
+    String catId
+
     static constraints = {
         repository(nullable: true)
+        catId(nullable: true, blank: false)
     }
+
     static mapping = {
         cache true
         id generator: 'identity'
         repository index: 'raster_data_set_repository_idx'
+        catId index: 'raster_data_set_cat_id_idx'
     }
 
     static RasterDataSet initRasterDataSet(rasterDataSetNode, rasterDataSet = null)
