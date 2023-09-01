@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import groovy.sql.Sql
 
 import omar.raster.tags.CountryCodeTag
 import omar.raster.tags.FileTypeTag
@@ -31,6 +32,7 @@ class RasterDataSetService implements ApplicationContextAware
     GrailsApplication grailsApplication
 
     def dataInfoService
+    def dataSource
     def ingestService
     def stagerService
     def ingestMetricsService
@@ -720,14 +722,22 @@ class RasterDataSetService implements ApplicationContextAware
     }
 
     def findByCatId(String catId) {
-        RasterDataSet rasterDataSet = RasterDataSet.findByCatId(catId)
+        def sql = Sql.newInstance(dataSource)
 
-        def json = [
-            filePath: rasterDataSet?.mainFile?.name            
-        ] as JSON
+        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area" 
+                from raster_entry re, raster_data_set rds 
+                where re.raster_data_set_id=rds.id and cat_id=?"""
 
-        [contentType: 'application/json', text: json]
-    }
+        def results = sql.firstRow(query, catId)
+        def json = results as JSON
+
+        if ( ! json ) {
+            json = [message: "No RasterDataSet found for catId: ${catId}"] as JSON
+        }        
+
+        sql?.close()
+        json
+    }   
 
     def findByFilePath(String filePath) {
         def rasterDataSet = RasterFile.where {
