@@ -783,17 +783,17 @@ class RasterDataSetService implements ApplicationContextAware
                     ],
                     collection: rasterEntry.missionId,
                     properties: [
-                        datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate),
-                        gsd: rasterEntry.gsdY,
-                        title: rasterEntry.imageId ?: rasterEntry.title,
+                        datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
+                        gsd: rasterEntry.gsdY ?: 0,
+                        title: rasterEntry.imageId ?: rasterEntry.title ?: '',
                         'eo:bands': (1..rasterEntry?.numberOfBands)?.collect { b -> [
-                        name: String.valueOf( b )  
+                            name: String.valueOf( b )  
                         ] },
-                        'eo:cloud_cover': rasterEntry?.cloudCover,
-                        'view:azimuth': rasterEntry?.azimuthAngle,
-                        'view:off_nadir': 90 - rasterEntry?.grazingAngle,
-                        'view:sun_azimuth': rasterEntry?.sunAzimuth,
-                        'view:sun_elevation': rasterEntry?.sunElevation,
+                        'eo:cloud_cover': rasterEntry?.cloudCover ?: 0,
+                        'view:azimuth': rasterEntry?.azimuthAngle ?: 0,
+                        'view:off_nadir': 90 - ( rasterEntry?.grazingAngle ?: 90 ),
+                        'view:sun_azimuth': rasterEntry?.sunAzimuth ?: 0,
+                        'view:sun_elevation': rasterEntry?.sunElevation ?: 0,
                     ],
                     stac_version: '1.0.0',
                     stac_extensions: [
