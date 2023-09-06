@@ -1,26 +1,31 @@
 package omar.raster
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.util.logging.Slf4j
+
 import omar.core.Repository
 import omar.core.HttpStatus
 import omar.core.DateUtil
-import java.sql.Timestamp
-
-import omar.stager.core.OmarStageFile
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
-import groovy.sql.Sql
-
 import omar.raster.tags.CountryCodeTag
 import omar.raster.tags.FileTypeTag
 import omar.raster.tags.MissionIdTag
 import omar.raster.tags.ProductIdTag
 import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
+import omar.stager.core.OmarStageFile
+
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.Instant
+
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+
 import grails.gorm.transactions.Transactional
 import grails.core.GrailsApplication
 import grails.converters.JSON 
@@ -744,10 +749,64 @@ class RasterDataSetService implements ApplicationContextAware
             name == filePath && type == 'main'
         }.find()?.rasterDataSet
 
-        def json = [
-            catId: rasterDataSet?.catId             
-        ] as JSON
+        def json
+
+        if ( rasterDataSet ) {
+            json = formatAsStacCollection( rasterDataSet )
+        } else {
+            json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
+        }
 
         [contentType: 'application/json', text: json]        
+    }
+
+    def formatAsStacCollection(RasterDataSet rasterDataSet) {
+        def data = [ 
+            type: 'FeatureCollection',
+            features: rasterDataSet?.rasterEntries?.collect { rasterEntry -> 
+                def coords = rasterEntry?.groundGeom?.envelope?.coordinates
+                
+                [
+                    id: rasterEntry?.rasterDataSet?.catId,
+                    bbox: [
+                        coords?.x?.min(),
+                        coords?.y?.min(),
+                        coords?.x?.max(),
+                        coords?.y?.max(),
+                    ],
+                    type: 'Feature',
+                    links: [],
+                    assets: [],
+                    geometry: [
+                        type: rasterEntry?.groundGeom?.geometryType,
+                        coordinates: rasterEntry?.groundGeom?.coordinates?.collect { [ it.x, it.y ] }
+                    ],
+                    collection: rasterEntry.missionId,
+                    properties: [
+                        datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate),
+                        gsd: rasterEntry.gsdY,
+                        title: rasterEntry.imageId ?: rasterEntry.title,
+                        'eo:bands': (1..rasterEntry?.numberOfBands)?.collect { b -> [
+                        name: String.valueOf( b )  
+                        ] },
+                        'eo:cloud_cover': rasterEntry?.cloudCover,
+                        'view:azimuth': rasterEntry?.azimuthAngle,
+                        'view:off_nadir': 90 - rasterEntry?.grazingAngle,
+                        'view:sun_azimuth': rasterEntry?.sunAzimuth,
+                        'view:sun_elevation': rasterEntry?.sunElevation,
+                    ],
+                    stac_version: '1.0.0',
+                    stac_extensions: [
+                        'https://stac-extensions.github.io/eo/v1.0.0/schema.json',
+                        'https://stac-extensions.github.io/view/v1.0.0/schema.json'            
+                    ]					        
+                ] 
+            },        
+            numberReturned: rasterDataSet?.rasterEntries?.size(),
+            timestamp: Instant.now() as String,
+            links: [],    
+        ]
+
+        JsonOutput.prettyPrint( JsonOutput.toJson( data ) )        
     }
 }
