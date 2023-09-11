@@ -30,6 +30,8 @@ import grails.gorm.transactions.Transactional
 import grails.core.GrailsApplication
 import grails.converters.JSON 
 
+import org.locationtech.jts.io.geojson.GeoJsonWriter
+
 @Slf4j
 @Transactional
 class RasterDataSetService implements ApplicationContextAware
@@ -765,6 +767,7 @@ class RasterDataSetService implements ApplicationContextAware
             type: 'FeatureCollection',
             features: rasterDataSet?.rasterEntries?.collect { rasterEntry -> 
                 def coords = rasterEntry?.groundGeom?.envelope?.coordinates
+                def geoJsonWriter = new GeoJsonWriter()	
                 
                 [
                     id: rasterEntry?.rasterDataSet?.catId,
@@ -776,11 +779,8 @@ class RasterDataSetService implements ApplicationContextAware
                     ],
                     type: 'Feature',
                     links: [],
-                    assets: [],
-                    geometry: [
-                        type: rasterEntry?.groundGeom?.geometryType,
-                        coordinates: rasterEntry?.groundGeom?.coordinates?.collect { [ it.x, it.y ] }
-                    ],
+                    assets: [:],
+                    geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
                     collection: rasterEntry.missionId,
                     properties: [
                         datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
