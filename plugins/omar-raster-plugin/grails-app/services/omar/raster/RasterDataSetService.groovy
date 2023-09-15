@@ -751,15 +751,16 @@ class RasterDataSetService implements ApplicationContextAware
             name == filePath && type == 'main'
         }.find()?.rasterDataSet
 
-        def json
-
+        def status = HttpStatus.OK
+        def HttpStatus
         if ( rasterDataSet ) {
-            json = formatAsStacCollection( rasterDataSet )
+            json = body: formatAsStacCollection( rasterDataSet )
         } else {
             json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
+            status = HttpStatus.NOT_FOUND
         }
 
-        [contentType: 'application/json', text: json]        
+        [contentType: 'application/json', text: json, status: status]        
     }
 
     def formatAsStacCollection(RasterDataSet rasterDataSet) {
