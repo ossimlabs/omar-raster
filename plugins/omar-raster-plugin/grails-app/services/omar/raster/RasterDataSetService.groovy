@@ -762,6 +762,10 @@ class RasterDataSetService implements ApplicationContextAware
         [contentType: 'application/json', text: json]        
     }
 
+    def kebabCaseFromCamelCase(String str) {
+        return str.replaceAll(/([a-z0-9])([A-Z])/, '$1-$2').toLowerCase()
+    }
+
     def formatAsStacCollection(RasterDataSet rasterDataSet) {
         def data = [ 
             type: 'FeatureCollection',
@@ -781,7 +785,7 @@ class RasterDataSetService implements ApplicationContextAware
                     links: [],
                     assets: [:],
                     geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
-                    collection: rasterEntry.missionId,
+                    collection: kebabCaseFromCamelCase(rasterEntry.missionId),
                     properties: [
                         datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
                         gsd: rasterEntry.gsdY ?: 0,
