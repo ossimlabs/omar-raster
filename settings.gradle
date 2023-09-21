@@ -30,7 +30,8 @@ if ( System.getenv( 'O2_INLINE_BUILD' ) ) {
             'omar-core',
             'omar-hibernate-spatial',
             'omar-oms',
-            'omar-stager-core'
+            'omar-stager-core',
+            'mgp-catid-generator'
     ]
 
     modules?.each { module ->

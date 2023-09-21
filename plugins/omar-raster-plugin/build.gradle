@@ -4,6 +4,8 @@ plugins {
 
 dependencies {
   api 'io.ossim.omar.plugins:omar-stager-core-plugin:+'
+  api 'io.ossim.omar.plugins:mgp-catid-generator-plugin:+'
+
 }
 
 assets {

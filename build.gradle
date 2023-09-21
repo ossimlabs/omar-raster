@@ -99,6 +99,7 @@ subprojects { project ->
       implementation( "org.springframework.boot:spring-boot-starter-logging" )
       implementation( "org.springframework.boot:spring-boot-starter-tomcat" )
       implementation( "org.springframework.boot:spring-boot-starter-validation" )
+      implementation( "org.locationtech.jts.io:jts-io-common:1.19.0")
       compileOnly( "io.micronaut:micronaut-inject-groovy" )
       runtimeOnly( "com.bertramlabs.plugins:asset-pipeline-grails:${ assetPipelineVersion }" )
       runtimeOnly( "com.h2database:h2" )
