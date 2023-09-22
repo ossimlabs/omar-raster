@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationContextAware
 
 import grails.gorm.transactions.Transactional
 import grails.core.GrailsApplication
-import grails.converters.JSON 
+import grails.converters.JSON
 
 import org.locationtech.jts.io.geojson.GeoJsonWriter
 
@@ -44,6 +44,7 @@ class RasterDataSetService implements ApplicationContextAware
     def stagerService
     def ingestMetricsService
     ApplicationContext applicationContext
+    def catalogIdService
 
     def deleteFromRepository(Repository repository)
     {
@@ -378,6 +379,8 @@ class RasterDataSetService implements ApplicationContextAware
                                         it.acquisitionDate
                                     }.join(",")
                                     ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+
+                                   generateCatalogId(filename)
 
                                     // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
                                     // if the image has already been staged
@@ -722,7 +725,7 @@ class RasterDataSetService implements ApplicationContextAware
     Boolean hasSICD(String indexId) {
         RasterEntry sidd = RasterEntry.findByIndexId( indexId )
 
-        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( { 
+        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( {
             it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/ } as FileFilter )
 
         sicdFiles?.size() > 0
@@ -740,11 +743,11 @@ class RasterDataSetService implements ApplicationContextAware
 
         if ( ! json ) {
             json = [message: "No RasterDataSet found for catId: ${catId}"] as JSON
-        }        
+        }
 
         sql?.close()
         json
-    }   
+    }
 
     def findByFilePath(String filePath) {
         def rasterDataSet = RasterFile.where {
@@ -759,16 +762,16 @@ class RasterDataSetService implements ApplicationContextAware
             json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
         }
 
-        [contentType: 'application/json', text: json]        
+        [contentType: 'application/json', text: json]
     }
 
     def formatAsStacCollection(RasterDataSet rasterDataSet) {
-        def data = [ 
+        def data = [
             type: 'FeatureCollection',
-            features: rasterDataSet?.rasterEntries?.collect { rasterEntry -> 
+            features: rasterDataSet?.rasterEntries?.collect { rasterEntry ->
                 def coords = rasterEntry?.groundGeom?.envelope?.coordinates
-                def geoJsonWriter = new GeoJsonWriter()	
-                
+                def geoJsonWriter = new GeoJsonWriter()
+
                 [
                     id: rasterEntry?.rasterDataSet?.catId,
                     bbox: [
@@ -781,13 +784,13 @@ class RasterDataSetService implements ApplicationContextAware
                     links: [],
                     assets: [:],
                     geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
-                    collection: rasterEntry.missionId,
+                    collection: rasterEntry.missionId.toLowerCase(),
                     properties: [
                         datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
                         gsd: rasterEntry.gsdY ?: 0,
                         title: rasterEntry.imageId ?: rasterEntry.title ?: '',
                         'eo:bands': (1..rasterEntry?.numberOfBands)?.collect { b -> [
-                            name: String.valueOf( b )  
+                            name: String.valueOf( b )
                         ] },
                         'eo:cloud_cover': rasterEntry?.cloudCover ?: 0,
                         'view:azimuth': rasterEntry?.azimuthAngle ?: 0,
@@ -798,15 +801,40 @@ class RasterDataSetService implements ApplicationContextAware
                     stac_version: '1.0.0',
                     stac_extensions: [
                         'https://stac-extensions.github.io/eo/v1.0.0/schema.json',
-                        'https://stac-extensions.github.io/view/v1.0.0/schema.json'            
-                    ]					        
-                ] 
-            },        
+                        'https://stac-extensions.github.io/view/v1.0.0/schema.json'
+                    ]
+                ]
+            },
             numberReturned: rasterDataSet?.rasterEntries?.size(),
             timestamp: Instant.now() as String,
-            links: [],    
+            links: [],
         ]
 
-        JsonOutput.prettyPrint( JsonOutput.toJson( data ) )        
+        JsonOutput.prettyPrint( JsonOutput.toJson( data ) )
+    }
+
+    def generateCatalogId(String filename) {
+
+        def rasterDataSet = RasterFile.where {
+            name == filename && type == 'main'
+        }.find()?.rasterDataSet
+
+        if (!rasterDataSet?.catId) {
+
+            def selectedRaster = RasterEntry.findByFilename(filename)
+
+            if (selectedRaster) {
+
+                def isorce = selectedRaster?.isorce
+                def missionId = selectedRaster?.missionId
+
+                def catId = catalogIdService.generateCatId(missionId, isorce, filename)
+
+                if (catId) {
+                    // Get the rasterDataSet to update the catId
+                    RasterDataSet.updateCatId(rasterDataSet, catId)
+                }
+            }
+        }
     }
 }

@@ -47,7 +47,7 @@ class RasterDataSet
             }
         }
 
-        initCatId(rasterDataSet)
+        //initCatId(rasterDataSet)
 
         return rasterDataSet
     }
@@ -56,6 +56,10 @@ class RasterDataSet
         if ( ! rasterDataSet?.catId ) {
             rasterDataSet?.catId = UUID.randomUUID()
         }
+    }
+
+    static void updateCatId(RasterDataSet rasterDataSet, String catId){
+        rasterDataSet?.catId = catId
     }
 
     def getMainFile()
