@@ -813,28 +813,47 @@ class RasterDataSetService implements ApplicationContextAware
         JsonOutput.prettyPrint( JsonOutput.toJson( data ) )
     }
 
+    def getSatelliteIdAndMissionIdByFilename(String filename)
+    {
+        def selectedRaster = RasterEntry.findByFilename(filename)
+
+        if (!selectedRaster){
+            return [missionId: null]
+        }
+        def isorce = selectedRaster?.isorce
+        def missionId = selectedRaster?.missionId
+
+        [missionId: missionId, satelliteId: isorce]
+    }
+
     def generateCatalogId(String filename) {
 
-        def rasterDataSet = RasterFile.where {
-            name == filename && type == 'main'
-        }.find()?.rasterDataSet
+        try {
+            def rasterDataSet = RasterFile.where {
+                name == filename && type == 'main'
+            }.find()?.rasterDataSet
 
-        if (!rasterDataSet?.catId) {
+            if (!rasterDataSet?.catId) {
 
-            def selectedRaster = RasterEntry.findByFilename(filename)
+                def selectedRaster = RasterEntry.findByFilename(filename)
 
-            if (selectedRaster) {
+                if (selectedRaster) {
 
-                def isorce = selectedRaster?.isorce
-                def missionId = selectedRaster?.missionId
+                    def isorce = selectedRaster?.isorce
+                    def missionId = selectedRaster?.missionId
 
-                def catId = catalogIdService.generateCatId(missionId, isorce, filename)
+                    def catId = catalogIdService.generateCatId(missionId, isorce, filename)
 
-                if (catId) {
-                    // Get the rasterDataSet to update the catId
-                    RasterDataSet.updateCatId(rasterDataSet, catId)
+                    if (catId) {
+                        // Get the rasterDataSet to update the catId
+                        RasterDataSet.updateCatId(rasterDataSet, catId)
+                    }
                 }
             }
         }
+        catch(Exception e){
+            log.error("Hit an error generating catalogId. ${e.message}")
+        }
+
     }
 }
