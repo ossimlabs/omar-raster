@@ -778,7 +778,7 @@ class RasterDataSetService implements ApplicationContextAware
         }.find()?.rasterDataSet
 
         def json
-        File jsonFile = "${FilenameUtils.removeExtension(filename)}_discovery.json" as File
+        File jsonFile = "${filename}_discovery.json" as File
 
         if ( rasterDataSet ) {
             json = formatAsStacCollection( rasterDataSet )
