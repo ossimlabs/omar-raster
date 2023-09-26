@@ -18,6 +18,7 @@ import omar.raster.tags.ProductIdTag
 import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
 import omar.stager.core.OmarStageFile
+import org.apache.commons.io.FilenameUtils
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -363,24 +364,26 @@ class RasterDataSetService implements ApplicationContextAware
                             def savedRaster = true
                             try
                             {
-                                if (rasterDataSet.save())
-                                {
+                                if (rasterDataSet.save()) {
 
                                     //stagerHandler.processSuccessful(filename, xml)
                                     //httpStatusMessage?.status = HttpStatus.OK
                                     def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                                     httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId } ?: []
+                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId } ?: []
+                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId } ?: []
+                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType } ?: []
+                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename } ?: []
                                     acquisitionDates = rasterDataSet?.rasterEntries.collect {
                                         it.acquisitionDate
                                     }.join(",")
                                     ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 
-                                   generateCatalogId(filename)
+                                    generateCatalogId(filename)
+
+                                    // Write out the stac spec
+                                    writeStacJson(filename)
 
                                     // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
                                     // if the image has already been staged
@@ -429,6 +432,9 @@ class RasterDataSetService implements ApplicationContextAware
 
         // Print logs in JSON for ElasticSearch and Kibana parsing
         println new JsonBuilder(logsJson).toString()
+
+
+
 
 //        if (httpStatusMessage?.status != 200)
 //        {
@@ -501,7 +507,7 @@ class RasterDataSetService implements ApplicationContextAware
                 }
 
                 files.each() {
-                    def file = it?.toFile()
+                    def file = it as File
                     if (file?.isFile() && file.name != filename)
                     {
                         File fileToRemove = file as File
@@ -537,7 +543,7 @@ class RasterDataSetService implements ApplicationContextAware
                 def files = rasterFile?.rasterDataSet?.fileObjects?.grep { it.type != 'main' }
 
                 files.each() {
-                    def file = it?.toFile()
+                    def file = it as File
                     if (file?.isFile() && file.name != filename)
                     {
                             File fileToRemove = file as File
@@ -567,8 +573,9 @@ class RasterDataSetService implements ApplicationContextAware
                     }
                 }
             }
+            def catId = rasterFile?.rasterDataSet?.getCatId()
             rasterFile?.rasterDataSet?.delete(flush: true)
-            httpStatusMessage?.message = "removed raster ${ids}:${filename}"
+            httpStatusMessage?.message = "removed raster ${catId} - ${ids}:${filename}"
         }
         else
         {
@@ -763,6 +770,24 @@ class RasterDataSetService implements ApplicationContextAware
         }
 
         [contentType: 'application/json', text: json]
+    }
+
+    def writeStacJson(String filename){
+        def rasterDataSet = RasterFile.where {
+            name == filename && type == 'main'
+        }.find()?.rasterDataSet
+
+        def json
+        File jsonFile = "${FilenameUtils.removeExtension(filename)}_discovery.json" as File
+
+        if ( rasterDataSet ) {
+            json = formatAsStacCollection( rasterDataSet )
+            jsonFile.withWriter { Writer out ->
+                out.println json
+            }
+        } else {
+            log.info("Couldn't find rasterDataset for ${filename}")
+        }
     }
 
     def formatAsStacCollection(RasterDataSet rasterDataSet) {
