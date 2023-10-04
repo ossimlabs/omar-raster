@@ -47,7 +47,7 @@ class RasterDataSet
             }
         }
 
-        //initCatId(rasterDataSet)
+        initCatId(rasterDataSet)
 
         return rasterDataSet
     }
