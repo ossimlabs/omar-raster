@@ -1,28 +1,37 @@
 package omar.raster
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import groovy.util.logging.Slf4j
+
 import omar.core.Repository
 import omar.core.HttpStatus
 import omar.core.DateUtil
-import java.sql.Timestamp
-
-import omar.stager.core.OmarStageFile
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
-
 import omar.raster.tags.CountryCodeTag
 import omar.raster.tags.FileTypeTag
 import omar.raster.tags.MissionIdTag
 import omar.raster.tags.ProductIdTag
 import omar.raster.tags.SensorIdTag
 import omar.raster.tags.TargetIdTag
+import omar.stager.core.OmarStageFile
+import org.apache.commons.io.FilenameUtils
+
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.Instant
+
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+
 import grails.gorm.transactions.Transactional
 import grails.core.GrailsApplication
+import grails.converters.JSON
 
+import org.locationtech.jts.io.geojson.GeoJsonWriter
 
 @Slf4j
 @Transactional
@@ -31,10 +40,12 @@ class RasterDataSetService implements ApplicationContextAware
     GrailsApplication grailsApplication
 
     def dataInfoService
+    def dataSource
     def ingestService
     def stagerService
     def ingestMetricsService
     ApplicationContext applicationContext
+    def catalogIdService
 
     def deleteFromRepository(Repository repository)
     {
@@ -353,22 +364,26 @@ class RasterDataSetService implements ApplicationContextAware
                             def savedRaster = true
                             try
                             {
-                                if (rasterDataSet.save())
-                                {
+                                if (rasterDataSet.save()) {
 
                                     //stagerHandler.processSuccessful(filename, xml)
                                     //httpStatusMessage?.status = HttpStatus.OK
                                     def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                                     httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                                    missionids = rasterDataSet?.rasterEntries.collect { it.missionId } ?: []
+                                    imageids = rasterDataSet?.rasterEntries.collect { it.imageId } ?: []
+                                    sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId } ?: []
+                                    fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType } ?: []
+                                    filenames = rasterDataSet?.rasterEntries.collect { it.filename } ?: []
                                     acquisitionDates = rasterDataSet?.rasterEntries.collect {
                                         it.acquisitionDate
                                     }.join(",")
                                     ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
+
+                                    generateCatalogId(filename)
+
+                                    // Write out the stac spec
+                                    writeStacJson(filename)
 
                                     // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
                                     // if the image has already been staged
@@ -417,6 +432,9 @@ class RasterDataSetService implements ApplicationContextAware
 
         // Print logs in JSON for ElasticSearch and Kibana parsing
         println new JsonBuilder(logsJson).toString()
+
+
+
 
 //        if (httpStatusMessage?.status != 200)
 //        {
@@ -489,7 +507,7 @@ class RasterDataSetService implements ApplicationContextAware
                 }
 
                 files.each() {
-                    def file = it?.toFile()
+                    def file = it as File
                     if (file?.isFile() && file.name != filename)
                     {
                         File fileToRemove = file as File
@@ -525,7 +543,7 @@ class RasterDataSetService implements ApplicationContextAware
                 def files = rasterFile?.rasterDataSet?.fileObjects?.grep { it.type != 'main' }
 
                 files.each() {
-                    def file = it?.toFile()
+                    def file = it as File
                     if (file?.isFile() && file.name != filename)
                     {
                             File fileToRemove = file as File
@@ -555,8 +573,9 @@ class RasterDataSetService implements ApplicationContextAware
                     }
                 }
             }
+            def catId = rasterFile?.rasterDataSet?.getCatId()
             rasterFile?.rasterDataSet?.delete(flush: true)
-            httpStatusMessage?.message = "removed raster ${ids}:${filename}"
+            httpStatusMessage?.message = "removed raster ${catId} - ${ids}:${filename}"
         }
         else
         {
@@ -713,9 +732,153 @@ class RasterDataSetService implements ApplicationContextAware
     Boolean hasSICD(String indexId) {
         RasterEntry sidd = RasterEntry.findByIndexId( indexId )
 
-        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( { 
+        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( {
             it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/ } as FileFilter )
 
         sicdFiles?.size() > 0
+    }
+
+    def findByCatId(String catId) {
+        def sql = Sql.newInstance(dataSource)
+
+        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area" 
+                from raster_entry re, raster_data_set rds 
+                where re.raster_data_set_id=rds.id and cat_id=?"""
+
+        def results = sql.firstRow(query, catId)
+        def json = results as JSON
+
+        if ( ! json ) {
+            json = [message: "No RasterDataSet found for catId: ${catId}"] as JSON
+        }
+
+        sql?.close()
+        json
+    }
+
+    def findByFilePath(String filePath) {
+        def rasterDataSet = RasterFile.where {
+            name == filePath && type == 'main'
+        }.find()?.rasterDataSet
+
+        def json
+
+        if ( rasterDataSet ) {
+            json = formatAsStacCollection( rasterDataSet )
+        } else {
+            json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
+        }
+
+        [contentType: 'application/json', text: json]
+    }
+
+    def writeStacJson(String filename){
+        def rasterDataSet = RasterFile.where {
+            name == filename && type == 'main'
+        }.find()?.rasterDataSet
+
+        def json
+        File jsonFile = "${filename}_discovery.json" as File
+
+        if ( rasterDataSet ) {
+            json = formatAsStacCollection( rasterDataSet )
+            jsonFile.withWriter { Writer out ->
+                out.println json
+            }
+        } else {
+            log.info("Couldn't find rasterDataset for ${filename}")
+        }
+    }
+
+    def formatAsStacCollection(RasterDataSet rasterDataSet) {
+        def data = [
+            type: 'FeatureCollection',
+            features: rasterDataSet?.rasterEntries?.collect { rasterEntry ->
+                def coords = rasterEntry?.groundGeom?.envelope?.coordinates
+                def geoJsonWriter = new GeoJsonWriter()
+
+                [
+                    id: rasterEntry?.rasterDataSet?.catId,
+                    bbox: [
+                        coords?.x?.min(),
+                        coords?.y?.min(),
+                        coords?.x?.max(),
+                        coords?.y?.max(),
+                    ],
+                    type: 'Feature',
+                    links: [],
+                    assets: [:],
+                    geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
+                    collection: rasterEntry.missionId.toLowerCase(),
+                    properties: [
+                        datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
+                        gsd: rasterEntry.gsdY ?: 0,
+                        title: rasterEntry.imageId ?: rasterEntry.title ?: '',
+                        'eo:bands': (1..rasterEntry?.numberOfBands)?.collect { b -> [
+                            name: String.valueOf( b )
+                        ] },
+                        'eo:cloud_cover': rasterEntry?.cloudCover ?: 0,
+                        'view:azimuth': rasterEntry?.azimuthAngle ?: 0,
+                        'view:off_nadir': 90 - ( rasterEntry?.grazingAngle ?: 90 ),
+                        'view:sun_azimuth': rasterEntry?.sunAzimuth ?: 0,
+                        'view:sun_elevation': rasterEntry?.sunElevation ?: 0,
+                    ],
+                    stac_version: '1.0.0',
+                    stac_extensions: [
+                        'https://stac-extensions.github.io/eo/v1.0.0/schema.json',
+                        'https://stac-extensions.github.io/view/v1.0.0/schema.json'
+                    ]
+                ]
+            },
+            numberReturned: rasterDataSet?.rasterEntries?.size(),
+            timestamp: Instant.now() as String,
+            links: [],
+        ]
+
+        JsonOutput.prettyPrint( JsonOutput.toJson( data ) )
+    }
+
+    def getSatelliteIdAndMissionIdByFilename(String filename)
+    {
+        def selectedRaster = RasterEntry.findByFilename(filename)
+
+        if (!selectedRaster){
+            return [missionId: null]
+        }
+        def isorce = selectedRaster?.isorce
+        def missionId = selectedRaster?.missionId
+
+        [missionId: missionId, satelliteId: isorce]
+    }
+
+    def generateCatalogId(String filename) {
+
+        try {
+            def rasterDataSet = RasterFile.where {
+                name == filename && type == 'main'
+            }.find()?.rasterDataSet
+
+            if (!rasterDataSet?.catId) {
+
+                def selectedRaster = RasterEntry.findByFilename(filename)
+
+                if (selectedRaster) {
+
+                    def isorce = selectedRaster?.isorce
+                    def missionId = selectedRaster?.missionId
+
+                    def catId = catalogIdService.generateCatId(missionId, isorce, filename)
+
+                    if (catId) {
+                        // Get the rasterDataSet to update the catId
+                        RasterDataSet.updateCatId(rasterDataSet, catId)
+                    }
+                }
+            }
+        }
+        catch(Exception e){
+            log.error("Hit an error generating catalogId. ${e.message}")
+        }
+
     }
 }

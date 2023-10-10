@@ -106,10 +106,10 @@ class RasterEntry
 
   Collection fileObjects
 
-  CountryCodeTag countryCodeTag 
+  CountryCodeTag countryCodeTag
   FileTypeTag fileTypeTag
-  MissionIdTag missionIdTag 
-  ProductIdTag productIdTag 
+  MissionIdTag missionIdTag
+  ProductIdTag productIdTag
   SensorIdTag sensorIdTag
   TargetIdTag targetIdTag
 
@@ -412,7 +412,7 @@ class RasterEntry
       rasterEntry.gsdY = ( dy != "nan" ) ? dy?.toDouble() : null
       rasterEntry.gsdUnit = gsdUnit
     }
-    
+
     rasterEntry.groundGeom = initGroundGeom( rasterEntryNode?.groundGeom )
     rasterEntry.acquisitionDate = initAcquisitionDate( rasterEntryNode )
 
@@ -457,7 +457,7 @@ class RasterEntry
     def filename = mainFile?.name?.trim()
 
     if ( !rasterEntry.filename && filename )
-    { 
+    {
       rasterEntry.filename = filename
     }
 
@@ -483,7 +483,7 @@ class RasterEntry
     /* HACK ALERT - START */
     def omdFile = "${FilenameUtils.removeExtension( filename )}.omd" as File
 
-    if ( omdFile?.exists() ) {      
+    if ( omdFile?.exists() ) {
         def kwl = omdFile?.readLines()?.inject([:]) { a, b ->
           def c = b.split( ':' )?.collect { it.trim() }
 
@@ -491,17 +491,24 @@ class RasterEntry
           a
         }
 
-        if ( kwl["ground_geom_${rasterEntry?.entryId}"]  ) {          
+        if ( kwl["ground_geom_${rasterEntry?.entryId}"]  ) {
           rasterEntry?.groundGeom = new WKTReader().read( kwl["ground_geom_${rasterEntry?.entryId}"]  )
           rasterEntry?.groundGeom.setSRID( 4326 )
-        }               
+        }
 
-        if ( kwl["mission_id"]  ) {          
-          rasterEntry?.missionId =  kwl["mission_id"] 
+        if ( kwl["mission_id"]  ) {
+          rasterEntry?.missionId =  kwl["mission_id"]
           rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: rasterEntry?.missionId)
-        }               
-    }    
+        }
+    }
     /* HACK ALERT - END */
+
+    if ( rasterEntry?.missionId == 'SkySat') {
+      def skysatFile = filename as File
+      def (_, scid) = (skysatFile.name =~ /_(ssc\d*)_/)[0]
+      def isorce = scid.toUpperCase()
+      rasterEntry?.isorce = isorce
+    }
 
     return rasterEntry
   }
@@ -943,13 +950,13 @@ class RasterEntry
 
     def csdida = metadataNode.NITF?.CSDIDA
 
-    if ( csdida ) 
+    if ( csdida )
     {
       if ( ! rasterEntry.missionId  )
       {
         def missionId =  "${csdida?.platform_code?.text()}${csdida?.vehicle_id?.text()}"
 
-        if ( missionId ) 
+        if ( missionId )
         {
           rasterEntry.missionId = missionId
           rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: missionId)
@@ -960,7 +967,7 @@ class RasterEntry
       {
         def sensorId =  csdida?.sensor_id?.text()
 
-        if ( sensorId ) 
+        if ( sensorId )
         {
           rasterEntry.sensorId = sensorId
           rasterEntry.sensorIdTag = SensorIdTag.findOrSaveWhere(name: sensorId)
@@ -971,7 +978,7 @@ class RasterEntry
       {
         def time = csdida?.time?.text() + 'Z'
 
-        if ( time ) 
+        if ( time )
         {
           rasterEntry.acquisitionDate = DateUtil.parseDate(time)
         }
@@ -982,7 +989,7 @@ class RasterEntry
     {
       def securityCode = metadataNode?.NTIF?.fsclas?.text()
 
-      if ( securityCode ) 
+      if ( securityCode )
       {
         rasterEntry.securityCode = securityCode
 
@@ -1006,13 +1013,13 @@ class RasterEntry
     }
 
 
-    // if ( ! rasterEntry.fileType ) 
+    // if ( ! rasterEntry.fileType )
     // {
     //   if  ( metadataNode?.NITF )
     //   {
     //     rasterEntry.fileType = 'nitf'
     //   }
-    //   else if ( metadataNode?.TIFF ) 
+    //   else if ( metadataNode?.TIFF )
     //   {
     //     rasterEntry.fileType = 'tiff'
     //   }
