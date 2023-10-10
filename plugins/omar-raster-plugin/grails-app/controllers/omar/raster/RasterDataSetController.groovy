@@ -10,9 +10,9 @@ import groovy.json.JsonSlurper
 import org.springframework.http.HttpStatus
 
 @Api( value = "dataManager",
-     produces = 'application/json',
-     consumes = 'application/json',
-		description = "DataManager Support"
+	produces = 'application/json',
+	consumes = 'application/json',
+	description = "DataManager Support"
 )
 class RasterDataSetController
 {
@@ -175,9 +175,10 @@ to the URL.  The format supported:
 		render( httpStatusMessage.message )
 	}
 
-	@ApiOperation( value = "Returns the processing status of the raster files",
-			         produces = 'application/json',
-			         httpMethod = 'GET' )
+	@ApiOperation( 
+		value = "Returns the processing status of the raster files",
+		produces = 'application/json',
+		httpMethod = 'GET' )
 	@ApiImplicitParams( [
 			@ApiImplicitParam(name = 'offset', value = 'Process Id', required=false, paramType = 'query', dataType = 'integer'),
 			@ApiImplicitParam(name = 'limit', value = 'Process status', defaultValue = '', paramType = 'query', dataType = 'integer'),
@@ -262,4 +263,41 @@ The service api **getRasterFiles**
 
         render contentType: "application/json", text: "${updatedRasters.join(",")}"
 	}
+
+	@ApiOperation(
+			value = "Given the indexID of a SIDD,  determine whether a corresponding SICD exists",
+			produces = 'application/json',
+			httpMethod = 'GET'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'indexId', value = 'The indexId of the SIDD', dataType = 'string', paramType = "query", required = true )
+	])
+	def hasSICD(String indexId) {
+        render contentType: "application/json", text: rasterDataSetService?.hasSICD(indexId)
+	}
+
+	@ApiOperation(
+			value = "Given the catId of a RasterDataSet,  return the metadata associatated with it",
+			produces = 'application/json',
+			httpMethod = 'GET'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'catId', value = 'The catId of the RasterDataSet', dataType = 'string', paramType = "query", required = true )
+	])
+	def findByCatId(String catId) {
+		render rasterDataSetService.findByCatId(catId)
+	}
+
+	@ApiOperation(
+			value = "Given the filePath of a RasterDataSet,  return the metadata associatated with it",
+			produces = 'application/json',
+			httpMethod = 'GET'
+	)
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'filePath', value = 'The filePath of the RasterDataSet', dataType = 'string', paramType = "query", required = true )
+	])
+	def findByFilePath(String filePath) {
+		render rasterDataSetService.findByFilePath(filePath)
+	}
+
 }

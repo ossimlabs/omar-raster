@@ -1,6 +1,7 @@
 package omar.raster
 
 import omar.core.Repository
+import java.util.UUID
 
 class RasterDataSet
 {
@@ -10,13 +11,18 @@ class RasterDataSet
 
     Repository repository
 
+    String catId
+
     static constraints = {
         repository(nullable: true)
+        catId(nullable: true, blank: false)
     }
+
     static mapping = {
         cache true
         id generator: 'identity'
         repository index: 'raster_data_set_repository_idx'
+        catId index: 'raster_data_set_cat_id_idx', unique: true
     }
 
     static RasterDataSet initRasterDataSet(rasterDataSetNode, rasterDataSet = null)
@@ -41,7 +47,19 @@ class RasterDataSet
             }
         }
 
+        initCatId(rasterDataSet)
+
         return rasterDataSet
+    }
+
+    static void initCatId(RasterDataSet rasterDataSet) {
+        if ( ! rasterDataSet?.catId ) {
+            rasterDataSet?.catId = UUID.randomUUID()
+        }
+    }
+
+    static void updateCatId(RasterDataSet rasterDataSet, String catId){
+        rasterDataSet?.catId = catId
     }
 
     def getMainFile()
