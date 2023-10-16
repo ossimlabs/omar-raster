@@ -862,6 +862,9 @@ class RasterDataSetService implements ApplicationContextAware
                         // Get the rasterDataSet to update the catId
                         RasterDataSet.updateCatId(rasterDataSet, catId)
                     }
+                    else{
+                        RasterDataSet.initCatId(rasterDataSet)
+                    }
                 }
             }
         }
