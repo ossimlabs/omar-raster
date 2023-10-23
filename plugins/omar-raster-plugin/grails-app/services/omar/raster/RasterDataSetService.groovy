@@ -751,8 +751,9 @@ class RasterDataSetService implements ApplicationContextAware
         }.find()?.rasterDataSet
 
         def json
+        def results = getSatelliteIdAndMissionIdByFilename(filename)
 
-        if ( rasterDataSet ) {
+        if ( rasterDataSet && results?.missionId) {
             json = formatAsStacCollection( rasterDataSet )
         } else {
             json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
@@ -769,7 +770,9 @@ class RasterDataSetService implements ApplicationContextAware
         def json
         File jsonFile = "${filename}_discovery.json" as File
 
-        if ( rasterDataSet ) {
+        def results = getSatelliteIdAndMissionIdByFilename(filename)
+
+        if ( rasterDataSet && results?.missionId) {
             json = formatAsStacCollection( rasterDataSet )
             jsonFile.withWriter { Writer out ->
                 out.println json
@@ -798,7 +801,7 @@ class RasterDataSetService implements ApplicationContextAware
                     links: [],
                     assets: [:],
                     geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
-                    collection: rasterEntry.missionId.toLowerCase(),
+                    collection: rasterEntry?.missionId?.toLowerCase(),
                     properties: [
                         datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
                         gsd: rasterEntry.gsdY ?: 0,
