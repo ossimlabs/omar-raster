@@ -380,10 +380,6 @@ class RasterDataSetService implements ApplicationContextAware
                                     }.join(",")
                                     ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 
-                                    generateCatalogId(filename)
-
-                                    // Write out the stac spec
-                                    writeStacJson(filename)
 
                                     // TODO: This get set to a 200 status, but in reality it can fail as it is really running in the background, and could fail
                                     // if the image has already been staged
@@ -433,7 +429,10 @@ class RasterDataSetService implements ApplicationContextAware
         // Print logs in JSON for ElasticSearch and Kibana parsing
         println new JsonBuilder(logsJson).toString()
 
+        generateCatalogId(filename)
 
+        // Write out the stac spec
+        writeStacJson(filename)
 
 
 //        if (httpStatusMessage?.status != 200)
@@ -774,22 +773,27 @@ class RasterDataSetService implements ApplicationContextAware
     }
 
     def writeStacJson(String filename){
-        def rasterDataSet = RasterFile.where {
-            name == filename && type == 'main'
-        }.find()?.rasterDataSet
+        try {
+            def rasterDataSet = RasterFile.where {
+                name == filename && type == 'main'
+            }.find()?.rasterDataSet
 
-        def json
-        File jsonFile = "${filename}_discovery.json" as File
+            def json
+            File jsonFile = "${filename}_discovery.json" as File
 
-        def results = getSatelliteIdAndMissionIdByFilename(filename)
+            def results = getSatelliteIdAndMissionIdByFilename(filename)
 
-        if ( rasterDataSet && results?.missionId) {
-            json = formatAsStacCollection( rasterDataSet )
-            jsonFile.withWriter { Writer out ->
-                out.println json
+            if (rasterDataSet && results?.missionId) {
+                json = formatAsStacCollection(rasterDataSet)
+                jsonFile.withWriter { Writer out ->
+                    out.println json
+                }
+            } else {
+                log.info("Couldn't find rasterDataset for ${filename}")
             }
-        } else {
-            log.info("Couldn't find rasterDataset for ${filename}")
+        }
+        catch(Exception e){
+            log.error("Failed to write STAC spec for ${filename}. ${e.message}")
         }
     }
 
@@ -857,32 +861,40 @@ class RasterDataSetService implements ApplicationContextAware
     def generateCatalogId(String filename) {
 
         try {
-            def rasterDataSet = RasterFile.where {
-                name == filename && type == 'main'
-            }.find()?.rasterDataSet
+            RasterDataSet.withTransaction {
+                def rasterDataSet = RasterFile.where {
+                    name == filename && type == 'main'
+                }.find()?.rasterDataSet
 
-            if (!rasterDataSet?.catId) {
+                if (!rasterDataSet?.catId) {
 
-                def selectedRaster = RasterEntry.findByFilename(filename)
+                    def selectedRaster = RasterEntry.findByFilename(filename)
 
-                if (selectedRaster) {
+                    if (selectedRaster) {
 
-                    def isorce = selectedRaster?.isorce
-                    def missionId = selectedRaster?.missionId
+                        def isorce = selectedRaster?.isorce
+                        def missionId = selectedRaster?.missionId
 
-                    def catId = catalogIdService.generateCatId(missionId, isorce, filename)
+                        if (missionId && isorce) {
+                            def catId = catalogIdService.generateCatId(missionId, isorce, filename)
 
-                    if (catId) {
-                        // Get the rasterDataSet to update the catId
-                        RasterDataSet.updateCatId(rasterDataSet, catId)
-                    }
-                    else{
-                        RasterDataSet.initCatId(rasterDataSet)
+                            if (catId) {
+                                // Get the rasterDataSet to update the catId
+
+                                rasterDataSet.setCatId(catId)
+                                rasterDataSet.save(flush: true, failOnError: true)
+
+                            } else {
+                                RasterDataSet.initCatId(rasterDataSet)
+                            }
+                        } else {
+                            RasterDataSet.initCatId(rasterDataSet)
+                        }
                     }
                 }
             }
         }
-        catch(Exception e){
+        catch(Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
         }
 
