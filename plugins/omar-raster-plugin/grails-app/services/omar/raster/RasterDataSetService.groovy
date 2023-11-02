@@ -35,8 +35,7 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter
 
 @Slf4j
 @Transactional
-class RasterDataSetService implements ApplicationContextAware
-{
+class RasterDataSetService implements ApplicationContextAware {
     GrailsApplication grailsApplication
 
     def dataInfoService
@@ -48,42 +47,34 @@ class RasterDataSetService implements ApplicationContextAware
     ApplicationContext applicationContext
     def catalogIdService
 
-    def deleteFromRepository(Repository repository)
-    {
+    def deleteFromRepository(Repository repository) {
         def rasterDataSets = RasterDataSet.findAllByRepository(repository)
 
         rasterDataSets?.each { it.delete() }
     }
-    private Timestamp convertToTimestamp(def v)
-    {
-      Timestamp result
-      if(v instanceof String)
-      {
-         result = DateUtil.parseDate(v)?.toTimestamp()
-      }
-      else if(v instanceof Date)
-      {
-         result = v.toTimestamp()
-      }
-      else if(v instanceof Timestamp)
-      {
-         result = v
-      }
+
+    private Timestamp convertToTimestamp(def v) {
+        Timestamp result
+        if (v instanceof String) {
+            result = DateUtil.parseDate(v)?.toTimestamp()
+        } else if (v instanceof Date) {
+            result = v.toTimestamp()
+        } else if (v instanceof Timestamp) {
+            result = v
+        }
     }
-    void applyOverrideToRasterEntry(RasterEntry rasterEntry, HashMap overrides)
-    {
-        overrides?.each{k,v->
-            switch(k)
-            {
+
+    void applyOverrideToRasterEntry(RasterEntry rasterEntry, HashMap overrides) {
+        overrides?.each { k, v ->
+            switch (k) {
                 case "receiveDate":
-                  rasterEntry?.receiveDate = convertToTimestamp(v)
-                  break
+                    rasterEntry?.receiveDate = convertToTimestamp(v)
+                    break
                 default:
-                   if(rasterEntry?.hasProperty(k))
-                   {
-                      rasterEntry?."${k}" = v;
-                   }
-                   break
+                    if (rasterEntry?.hasProperty(k)) {
+                        rasterEntry?."${k}" = v;
+                    }
+                    break
             }
         }
 
@@ -91,8 +82,7 @@ class RasterDataSetService implements ApplicationContextAware
     /**
      * Should for now only call with one embedded raster dataset
      */
-    def addRasterXml(def xml, HashMap overrides=null)
-    {
+    def addRasterXml(def xml, HashMap overrides = null) {
         def requestType = "POST"
         def requestMethod = "addRasterXml"
         HashMap result = [status   : HttpStatus.OK,
@@ -101,8 +91,7 @@ class RasterDataSetService implements ApplicationContextAware
                           endTime  : new Date(),
                           metadata : [:]
         ]
-        try
-        {
+        try {
             Date startTime = new Date()
             def oms = new XmlSlurper().parseText(xml)
             def omsInfoParser = applicationContext?.getBean("rasterInfoParser")
@@ -111,51 +100,42 @@ class RasterDataSetService implements ApplicationContextAware
             String filename
 
             rasterDataSets?.each { rasterDataSet ->
-		        filename = rasterDataSet.mainFile?.name
-                if (rasterDataSet.rasterEntries.size() > 0)
-                {
-                    try
-                    {
-                        if (overrides)
-                        {
+                filename = rasterDataSet.mainFile?.name
+                if (rasterDataSet.rasterEntries.size() > 0) {
+                    try {
+                        if (overrides) {
                             rasterDataSet.rasterEntries.each { rasterEntry ->
                                 applyOverrideToRasterEntry(rasterEntry, overrides)
                             }
                         }
-                        if (rasterDataSet.save())
-                        {
+                        if (rasterDataSet.save()) {
                             //stagerHandler.processSuccessful(filename, xml)
                             result?.status = HttpStatus.OK
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                            result?.message                  = "Added raster ${ids}:${filename}"
-                            result.metadata.missionids       = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                            result.metadata.imageids         = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                            result.metadata.sensorids        = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                            result.metadata.fileTypes        = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                            result.metadata.filenames        = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
-                            result.metadata.entryIds         = rasterDataSet?.rasterEntries.collect { it.entryId }?:[]
-                            result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate?DateUtil.formatUTC(it.acquisitionDate).toString():"" }.join(",")
-                            result.metadata.ingestDates      = rasterDataSet?.rasterEntries.collect { it.ingestDate?DateUtil.formatUTC(it.ingestDate).toString():"" }.join(",")
-                            result.metadata.bes              = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
-                        }
-                        else
-                        {
+                            result?.message = "Added raster ${ids}:${filename}"
+                            result.metadata.missionids = rasterDataSet?.rasterEntries.collect { it.missionId } ?: []
+                            result.metadata.imageids = rasterDataSet?.rasterEntries.collect { it.imageId } ?: []
+                            result.metadata.sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId } ?: []
+                            result.metadata.fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType } ?: []
+                            result.metadata.filenames = rasterDataSet?.rasterEntries.collect { it.filename } ?: []
+                            result.metadata.entryIds = rasterDataSet?.rasterEntries.collect { it.entryId } ?: []
+                            result.metadata.acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate ? DateUtil.formatUTC(it.acquisitionDate).toString() : "" }.join(",")
+                            result.metadata.ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate ? DateUtil.formatUTC(it.ingestDate).toString() : "" }.join(",")
+                            result.metadata.bes = rasterDataSet?.rasterEntries.collect { it.beNumber }.join(",")
+                        } else {
                             result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                             result?.message = "Unable to save XML, data probably already exists"
                             log.error(result?.message)
                             ingestService.writeErrors(filename, result?.message, result?.status)
                         }
                     }
-                    catch (Exception e)
-                    {
+                    catch (Exception e) {
                         result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                         result?.message = "Unable to save XML: ${e}"
                         log.error(result?.message)
                         ingestService.writeErrors(filename, result?.message, result?.status)
                     }
-                }
-                else
-                {
+                } else {
                     result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                     result?.message = "No raster entries found for ${filename} - check for ground geom!"
                     log.error(result?.message)
@@ -164,16 +144,14 @@ class RasterDataSetService implements ApplicationContextAware
             }
             oms = null
         }
-        catch (e)
-        {
+        catch (e) {
             result?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
             result?.message = "Unable to process XML: ${e}"
             log.error(e)
             ingestService.writeErrors(filename, result?.message, result?.status)
 
         }
-        finally
-        {
+        finally {
             result.endTime = new Date()
             result.duration = (result.endTime.time - result.startTime.time)
         }
@@ -189,8 +167,7 @@ class RasterDataSetService implements ApplicationContextAware
      *                          header paramters that need to be added to the response.
      * @param filename is the file you wish to add to the OMAR tables
      */
-    def addRaster(def httpStatusMessage, AddRasterCommand params)
-    {
+    def addRaster(def httpStatusMessage, AddRasterCommand params) {
         String filename = params?.filename
         httpStatusMessage?.status = HttpStatus.OK
         httpStatusMessage?.message = "Added raster ${filename}"
@@ -209,19 +186,15 @@ class RasterDataSetService implements ApplicationContextAware
         def filenames
         def isFileStaged = RasterFile.findByName(filename)
 
-        if (!scheme || (scheme == "file"))
-        {
+        if (!scheme || (scheme == "file")) {
             File testFile = filename as File
-            if (!testFile?.exists())
-            {
+            if (!testFile?.exists()) {
                 httpStatusMessage?.status = HttpStatus.NOT_FOUND // 404
                 httpStatusMessage?.message = "File Not Found"
 
                 log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
                 ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
-            }
-            else if (!testFile?.canRead())
-            {
+            } else if (!testFile?.canRead()) {
                 httpStatusMessage?.status = HttpStatus.FORBIDDEN //403
                 httpStatusMessage?.message = "File Not Readable"
 
@@ -230,17 +203,14 @@ class RasterDataSetService implements ApplicationContextAware
             }
         }
 
-        if (httpStatusMessage?.status == HttpStatus.OK)
-        {
+        if (httpStatusMessage?.status == HttpStatus.OK) {
             if (!isFileStaged) {
                 def xml = dataInfoService.getInfo(filename)
                 def background = true;
-                try
-                {
+                try {
                     background = params?.background
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     log.error(e)
                     ingestService.writeErrors(filename, e, httpStatusMessage?.status)
                 }
@@ -248,8 +218,7 @@ class RasterDataSetService implements ApplicationContextAware
                 // We will add a return here temporarily but we need to refactor
                 // and put the hashmap generator in a method and anything
                 // else we can put in a method that makes sense
-                if (!xml)
-                {
+                if (!xml) {
                     httpStatusMessage?.message = "Unable to get information on file."
                     httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE // 415
 
@@ -264,22 +233,20 @@ class RasterDataSetService implements ApplicationContextAware
                 def repository = ingestService?.findRepositoryForFile(filename)
                 def rasterDataSets = omsInfoParser?.processDataSets(oms, repository)
 
-                if (background)
-                {
+                if (background) {
                     def result = stagerService.addFileToStage(filename, params.properties)
 
                     httpStatusMessage.status = result.status
                     httpStatusMessage.message = result.message
 
-                    if (rasterDataSets?.size() > 0)
-                    {
+                    if (rasterDataSets?.size() > 0) {
                         rasterDataSets?.each { rasterDataSet ->
                             def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
-                            missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                            imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                            sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                            fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                            filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                            missionids = rasterDataSet?.rasterEntries.collect { it.missionId } ?: []
+                            imageids = rasterDataSet?.rasterEntries.collect { it.imageId } ?: []
+                            sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId } ?: []
+                            fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType } ?: []
+                            filenames = rasterDataSet?.rasterEntries.collect { it.filename } ?: []
                             acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                             ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 
@@ -294,27 +261,23 @@ class RasterDataSetService implements ApplicationContextAware
                     }
 
 
-                }
-                else
-                {
+                } else {
                     Boolean fileStaged = false
 
-                    if (params.buildOverviews || params.buildHistograms)
-                    {
+                    if (params.buildOverviews || params.buildHistograms) {
                         def result = stagerService.stageFileJni([filename               : params.filename,
-                                                                buildThumbnails        : params.buildThumbnails,
-                                                                buildOverviews         : params.buildOverviews,
-                                                                buildHistograms        : params.buildHistograms,
-                                                                overviewCompressionType: params.overviewCompressionType,
-                                                                buildHistogramsWithR0  : params.buildHistogramsWithR0,
-                                                                useFastHistogramStaging: params.useFastHistogramStaging,
-                                                                overviewType           : params.overviewType,
-                                                                thumbnailSize          : params.thumbnailSize,
-                                                                thumbnailType          : params.thumbnailType,
-                                                                thumbnailStretchType   : params.thumbnailStretchType
+                                                                 buildThumbnails        : params.buildThumbnails,
+                                                                 buildOverviews         : params.buildOverviews,
+                                                                 buildHistograms        : params.buildHistograms,
+                                                                 overviewCompressionType: params.overviewCompressionType,
+                                                                 buildHistogramsWithR0  : params.buildHistogramsWithR0,
+                                                                 useFastHistogramStaging: params.useFastHistogramStaging,
+                                                                 overviewType           : params.overviewType,
+                                                                 thumbnailSize          : params.thumbnailSize,
+                                                                 thumbnailType          : params.thumbnailType,
+                                                                 thumbnailStretchType   : params.thumbnailStretchType
                         ])
-                        if (result?.status >= 300)
-                        {
+                        if (result?.status >= 300) {
 
                             log.error(result?.message)
                             ingestService.writeErrors(filename, result?.message, result?.status)
@@ -322,17 +285,16 @@ class RasterDataSetService implements ApplicationContextAware
                         httpStatusMessage.status = result.status
                         httpStatusMessage.message = result.message
 
-                        if (rasterDataSets?.size() > 0)
-                        {
+                        if (rasterDataSets?.size() > 0) {
                             rasterDataSets?.each { rasterDataSet ->
                                 //httpStatusMessage?.status = HttpStatus.OK
                                 def ids = rasterDataSet?.rasterEntries.collect { it.id }.join(",")
                                 //httpStatusMessage?.message = "Added raster ${ids}:${filename}"
-                                missionids = rasterDataSet?.rasterEntries.collect { it.missionId }?:[]
-                                imageids = rasterDataSet?.rasterEntries.collect { it.imageId }?:[]
-                                sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId }?:[]
-                                fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType }?:[]
-                                filenames = rasterDataSet?.rasterEntries.collect { it.filename }?:[]
+                                missionids = rasterDataSet?.rasterEntries.collect { it.missionId } ?: []
+                                imageids = rasterDataSet?.rasterEntries.collect { it.imageId } ?: []
+                                sensorids = rasterDataSet?.rasterEntries.collect { it.sensorId } ?: []
+                                fileTypes = rasterDataSet?.rasterEntries.collect { it.fileType } ?: []
+                                filenames = rasterDataSet?.rasterEntries.collect { it.filename } ?: []
                                 acquisitionDates = rasterDataSet?.rasterEntries.collect { it.acquisitionDate }.join(",")
                                 ingestDates = rasterDataSet?.rasterEntries.collect { it.ingestDate }.join(",")
 
@@ -344,13 +306,10 @@ class RasterDataSetService implements ApplicationContextAware
                                 log.info raster_logs.toString()
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         rasterDataSets?.each { rasterDataSet ->
                             def savedRaster = true
-                            try
-                            {
+                            try {
                                 if (rasterDataSet.save()) {
 
                                     //stagerHandler.processSuccessful(filename, xml)
@@ -377,29 +336,25 @@ class RasterDataSetService implements ApplicationContextAware
 
                                     log.info raster_logs.toString()
                                 }
-                                catch (Exception e)
-                                {
-                                    httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                                    httpStatusMessage?.message = "${e?.message}"
-                                    log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
-                                    def session = sessionFactory.currentSession
-                                    def transaction = session.getCurrentTransaction()
-                                    if (transaction.isActive())
-                                    {
-                                        log.info("Initiating transaction rollback due to Exception.")
-                                        transaction.rollback()
-                                    }
-                                    ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
-                                    throw new Exception(e)
-
+                            }
+                            catch (Exception e) {
+                                httpStatusMessage?.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                                httpStatusMessage?.message = "${e?.message}"
+                                log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage?.message}")
+                                def session = sessionFactory.currentSession
+                                def transaction = session.getCurrentTransaction()
+                                if (transaction.isActive()) {
+                                    log.info("Initiating transaction rollback due to Exception.")
+                                    transaction.rollback()
                                 }
+                                ingestService.writeErrors(filename, httpStatusMessage?.message, httpStatusMessage?.status)
+                                throw new Exception(e)
+
                             }
                         }
                     }
                 }
-            }
-            else
-            {
+            } else {
                 log.info("${filename} is already staged.")
             }
         }
@@ -431,8 +386,7 @@ class RasterDataSetService implements ApplicationContextAware
         httpStatusMessage
     }
 
-    private static double convertDurationToSeconds(TimeDuration duration)
-    {
+    private static double convertDurationToSeconds(TimeDuration duration) {
         return duration.toMilliseconds() / 1000
     }
 
@@ -442,13 +396,11 @@ class RasterDataSetService implements ApplicationContextAware
      * This method assumes the current time is when the pipeline is completed.
      * @param logsJson This param must be a JSON log containing the {@code ACQUISITION_DATE_KEY}
      */
-    private static void addTotalTimeFromAcquisitionToLogs(logsJson)
-    {
+    private static void addTotalTimeFromAcquisitionToLogs(logsJson) {
         // Calculate total time (acq-time to now)
         Date pipelineFinishTime = new Date()
 
-        if (logsJson[ACQUISITION_DATE_KEY])
-        {
+        if (logsJson[ACQUISITION_DATE_KEY]) {
             Date imageAcquiredTime = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", logsJson[ACQUISITION_DATE_KEY])
             TimeDuration totalTimeFromAcquisition = TimeCategory.minus(pipelineFinishTime, imageAcquiredTime)
             logsJson["time_from_acquisition"] = convertDurationToSeconds(totalTimeFromAcquisition)
@@ -461,32 +413,27 @@ class RasterDataSetService implements ApplicationContextAware
      * This method assumes the current time is when the pipeline is completed.
      * @param logsJson This param must be a JSON log containing the {@code PIPELINE_START_DATE_KEY}
      */
-    private static void addTotalStageTimeToLogs(logsJson)
-    {
+    private static void addTotalStageTimeToLogs(logsJson) {
         // Calculate stage time (total time in all three apps)
         Date pipelineFinishTime = new Date()
 
-        if (logsJson[PIPELINE_START_DATE_KEY])
-        {
+        if (logsJson[PIPELINE_START_DATE_KEY]) {
             Date pipelineStartTime = new Date().parse("yyyy-MM-dd HH:mm:ss.SSS", logsJson[PIPELINE_START_DATE_KEY])
             TimeDuration totalStagingTime = TimeCategory.minus(pipelineFinishTime, pipelineStartTime)
             logsJson["staging_time"] = convertDurationToSeconds(totalStagingTime)
         }
     }
 
-    def removeRaster(def httpStatusMessage, def params)
-    {
+    def removeRaster(def httpStatusMessage, def params) {
         def status = false
         String filename = params?.filename //as File
 
         def rasterFile = RasterFile.findByNameAndType(filename, "main")
-        if (rasterFile)
-        {
+        if (rasterFile) {
             httpStatusMessage?.status = HttpStatus.OK
             def ids = rasterFile?.rasterDataSet?.rasterEntries?.collect { it?.id }?.join(",")
 
-            if (params.deleteFiles?.toBoolean())
-            {
+            if (params.deleteFiles?.toBoolean()) {
                 def files = []
                 rasterFile?.rasterDataSet?.fileObjects.each() { files << it.name }
                 rasterFile?.rasterDataSet?.rasterEntries.each() {
@@ -495,77 +442,54 @@ class RasterDataSetService implements ApplicationContextAware
 
                 files.each() {
                     def file = it as File
-                    if (file?.isFile() && file.name != filename)
-                    {
+                    if (file?.isFile() && file.name != filename) {
                         File fileToRemove = file as File
-                        if (fileToRemove.canWrite())
-                        {
-                            if (fileToRemove.isDirectory())
-                            {
+                        if (fileToRemove.canWrite()) {
+                            if (fileToRemove.isDirectory()) {
                                 fileToRemove.deleteDir()
-                            }
-                            else
-                            {
+                            } else {
                                 fileToRemove.delete()
                             }
-                            if (!fileToRemove.exists())
-                            {
+                            if (!fileToRemove.exists()) {
                                 log.info("Deleted ${file}")
-                            }
-                            else
-                            {
+                            } else {
                                 log.info("Unable to delete ${file}")
                             }
                         }
-                    }
-                    else
-                    {
-			log.info("Don't have permissions to delete ${file}")
+                    } else {
+                        log.info("Don't have permissions to delete ${file}")
                     }
                 }
             }
 
-            if (params.deleteSupportFiles?.toBoolean())
-            {
+            if (params.deleteSupportFiles?.toBoolean()) {
                 def files = rasterFile?.rasterDataSet?.fileObjects?.grep { it.type != 'main' }
 
                 files.each() {
                     def file = it as File
-                    if (file?.isFile() && file.name != filename)
-                    {
-                            File fileToRemove = file as File
-                            if (fileToRemove.canWrite())
-                            {
-                                if (fileToRemove.isDirectory())
-                                {
-                                    fileToRemove.deleteDir()
-                                }
-                                else
-                                {
-                                    fileToRemove.delete()
-                                }
-                                if (!fileToRemove.exists())
-                                {
-                                    log.info("Deleted ${file.name}")
-                                }
-                                else
-                                {
-                                    log.info("Unable to delete ${file.name}")
-                                }
+                    if (file?.isFile() && file.name != filename) {
+                        File fileToRemove = file as File
+                        if (fileToRemove.canWrite()) {
+                            if (fileToRemove.isDirectory()) {
+                                fileToRemove.deleteDir()
+                            } else {
+                                fileToRemove.delete()
                             }
-                    }
-                    else
-                    {
-			log.info("Don't have permissions to delete ${file.name}")
+                            if (!fileToRemove.exists()) {
+                                log.info("Deleted ${file.name}")
+                            } else {
+                                log.info("Unable to delete ${file.name}")
+                            }
+                        }
+                    } else {
+                        log.info("Don't have permissions to delete ${file.name}")
                     }
                 }
             }
             def catId = rasterFile?.rasterDataSet?.getCatId()
             rasterFile?.rasterDataSet?.delete(flush: true)
             httpStatusMessage?.message = "removed raster ${catId} - ${ids}:${filename}"
-        }
-        else
-        {
+        } else {
             httpStatusMessage?.status = HttpStatus.NOT_FOUND
             httpStatusMessage?.message = "Raster file does not exist in the database: ${filename}"
             log.error(httpStatusMessage?.message)
@@ -574,14 +498,12 @@ class RasterDataSetService implements ApplicationContextAware
     }
 
 
-    def deleteRaster(def httpStatusMessage, def params)
-    {
+    def deleteRaster(def httpStatusMessage, def params) {
         removeRaster(httpStatusMessage, params)
     }
 
 
-    def getFileProcessingStatus(GetRasterFilesProcessingCommand cmd)
-    {
+    def getFileProcessingStatus(GetRasterFilesProcessingCommand cmd) {
         HashMap result = [
                 results   : [],
                 pagination: [
@@ -591,8 +513,7 @@ class RasterDataSetService implements ApplicationContextAware
                 ]
         ]
 
-        try
-        {
+        try {
             result.pagination.count = OmarStageFile.count()
             result.pagination.offset = cmd.offset ?: 0
             Integer limit = cmd.limit ?: result.pagination.count
@@ -620,8 +541,7 @@ class RasterDataSetService implements ApplicationContextAware
 
             result.pagination.limit = limit
         }
-        catch (e)
-        {
+        catch (e) {
             result.status = HttpStatus.BAD_REQUEST
             result.message = e.toString()
             result.remove("results")
@@ -631,19 +551,18 @@ class RasterDataSetService implements ApplicationContextAware
         result
     }
 
-    def getRasterFiles(GetRasterFilesCommand cmd)
-    {
-        HashMap result = [ results:[] ]
+    def getRasterFiles(GetRasterFilesCommand cmd) {
+        HashMap result = [results: []]
 
         def files = RasterEntry.compositeId(cmd.id)
 
         RasterEntry entry = files?.get()
         def fileList = []
-        if(entry) {
-            entry.fileObjects.each{fileObject->
+        if (entry) {
+            entry.fileObjects.each { fileObject ->
                 fileList << [name: fileObject.name, type: fileObject.type]
             }
-            entry?.rasterDataSet?.fileObjects.each{ fileObject->
+            entry?.rasterDataSet?.fileObjects.each { fileObject ->
                 fileList << [name: fileObject.name, type: fileObject.type]
             }
         }
@@ -652,7 +571,7 @@ class RasterDataSetService implements ApplicationContextAware
         result
     }
 
-	List<String> updateAccessDates(List<String> rasterEntryIds) {
+    List<String> updateAccessDates(List<String> rasterEntryIds) {
         List<String> updatedRasters = []
         rasterEntryIds.forEach {
             RasterEntry re = RasterEntry.get(it)
@@ -660,27 +579,27 @@ class RasterDataSetService implements ApplicationContextAware
         }
         println "DEBUG: Updated rasters = $updatedRasters"
         return updatedRasters
-	}
+    }
 
-	private static boolean updateLastAccess(RasterEntry re) {
-		if (re.accessDate == null) {
-			re.accessDate = new Timestamp(System.currentTimeMillis())
+    private static boolean updateLastAccess(RasterEntry re) {
+        if (re.accessDate == null) {
+            re.accessDate = new Timestamp(System.currentTimeMillis())
             re.save()
             return true
-		}
+        }
 
-		long oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
-		long millisecondsSinceAccessed = System.currentTimeMillis() - re.accessDate.getTime()
+        long oneDay = new TimeDuration(1, 0, 0, 0, 0).toMilliseconds()
+        long millisecondsSinceAccessed = System.currentTimeMillis() - re.accessDate.getTime()
 
-		if (millisecondsSinceAccessed > oneDay) {
-			re.accessDate = new Timestamp(System.currentTimeMillis())
+        if (millisecondsSinceAccessed > oneDay) {
+            re.accessDate = new Timestamp(System.currentTimeMillis())
             re.save()
             return true
-		}
+        }
         return false
-	}
+    }
 
-    def getDistinctValues (def params) {
+    def getDistinctValues(def params) {
         def results = []
 
         def criteria = {
@@ -690,38 +609,38 @@ class RasterDataSetService implements ApplicationContextAware
             order('name')
         }
 
-        switch ( RasterEntryDistinctValues.findByValue( params?.property ) )
-        {
-        case RasterEntryDistinctValues.COUNTRY_CODE:
-            results = CountryCodeTag.withCriteria(criteria)
-            break
-        case RasterEntryDistinctValues.FILE_TYPE:
-            results = FileTypeTag.withCriteria(criteria)
-            break
-        case RasterEntryDistinctValues.MISSION_ID:
-            results = MissionIdTag.withCriteria(criteria)
-            break
-        case RasterEntryDistinctValues.PRODUCT_ID:
-            results = ProductIdTag.withCriteria(criteria)
-            break
-        case RasterEntryDistinctValues.SENSOR_ID:
-            results = SensorIdTag.withCriteria(criteria)
-            break
-        case RasterEntryDistinctValues.TARGET_ID:
-            results = TargetIdTag.withCriteria(criteria)
-            break
-        default:
-			log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
+        switch (RasterEntryDistinctValues.findByValue(params?.property)) {
+            case RasterEntryDistinctValues.COUNTRY_CODE:
+                results = CountryCodeTag.withCriteria(criteria)
+                break
+            case RasterEntryDistinctValues.FILE_TYPE:
+                results = FileTypeTag.withCriteria(criteria)
+                break
+            case RasterEntryDistinctValues.MISSION_ID:
+                results = MissionIdTag.withCriteria(criteria)
+                break
+            case RasterEntryDistinctValues.PRODUCT_ID:
+                results = ProductIdTag.withCriteria(criteria)
+                break
+            case RasterEntryDistinctValues.SENSOR_ID:
+                results = SensorIdTag.withCriteria(criteria)
+                break
+            case RasterEntryDistinctValues.TARGET_ID:
+                results = TargetIdTag.withCriteria(criteria)
+                break
+            default:
+                log.warn("Invalid property for getDistinctValues. Value passed: ${params.property}")
         }
 
         return results
     }
 
     Boolean hasSICD(String indexId) {
-        RasterEntry sidd = RasterEntry.findByIndexId( indexId )
+        RasterEntry sidd = RasterEntry.findByIndexId(indexId)
 
-        List<File> sicdFiles = new File( sidd.filename)?.parentFile?.listFiles( {
-            it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/ } as FileFilter )
+        List<File> sicdFiles = new File(sidd.filename)?.parentFile?.listFiles({
+            it?.name?.toUpperCase() ==~ /.*SICD.*\.NTF/
+        } as FileFilter)
 
         sicdFiles?.size() > 0
     }
@@ -736,7 +655,7 @@ class RasterDataSetService implements ApplicationContextAware
         def results = sql.firstRow(query, catId)
         def json = results as JSON
 
-        if ( ! json ) {
+        if (!json) {
             json = [message: "No RasterDataSet found for catId: ${catId}"] as JSON
         }
 
@@ -752,8 +671,8 @@ class RasterDataSetService implements ApplicationContextAware
         def json
         def results = getSatelliteIdAndMissionIdByFilename(filename)
 
-        if ( rasterDataSet && results?.missionId) {
-            json = formatAsStacCollection( rasterDataSet )
+        if (rasterDataSet && results?.missionId) {
+            json = formatAsStacCollection(rasterDataSet)
         } else {
             json = [message: "No RasterDataSet found for filePath: ${filePath}"] as JSON
         }
@@ -781,7 +700,7 @@ class RasterDataSetService implements ApplicationContextAware
                 log.info("Couldn't find rasterDataset for ${filename}")
             }
         }
-        catch(Exception e){
+        catch (Exception e) {
             log.error("Failed to write STAC spec for ${filename}. ${e.message}")
             ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.ERROR)
         }
@@ -790,57 +709,58 @@ class RasterDataSetService implements ApplicationContextAware
 
     def formatAsStacCollection(RasterDataSet rasterDataSet) {
         def data = [
-            type: 'FeatureCollection',
-            features: rasterDataSet?.rasterEntries?.collect { rasterEntry ->
-                def coords = rasterEntry?.groundGeom?.envelope?.coordinates
-                def geoJsonWriter = new GeoJsonWriter()
+                type          : 'FeatureCollection',
+                features      : rasterDataSet?.rasterEntries?.collect { rasterEntry ->
+                    def coords = rasterEntry?.groundGeom?.envelope?.coordinates
+                    def geoJsonWriter = new GeoJsonWriter()
 
-                [
-                    id: rasterEntry?.rasterDataSet?.catId,
-                    bbox: [
-                        coords?.x?.min(),
-                        coords?.y?.min(),
-                        coords?.x?.max(),
-                        coords?.y?.max(),
-                    ],
-                    type: 'Feature',
-                    links: [],
-                    assets: [:],
-                    geometry: new JsonSlurper().parseText( geoJsonWriter.write( rasterEntry.groundGeom ) ),
-                    collection: rasterEntry?.missionId?.toLowerCase(),
-                    properties: [
-                        datetime: new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
-                        gsd: rasterEntry.gsdY ?: 0,
-                        title: rasterEntry.imageId ?: rasterEntry.title ?: '',
-                        'eo:bands': (1..rasterEntry?.numberOfBands)?.collect { b -> [
-                            name: String.valueOf( b )
-                        ] },
-                        'eo:cloud_cover': rasterEntry?.cloudCover ?: 0,
-                        'view:azimuth': rasterEntry?.azimuthAngle ?: 0,
-                        'view:off_nadir': 90 - ( rasterEntry?.grazingAngle ?: 90 ),
-                        'view:sun_azimuth': rasterEntry?.sunAzimuth ?: 0,
-                        'view:sun_elevation': rasterEntry?.sunElevation ?: 0,
-                    ],
-                    stac_version: '1.0.0',
-                    stac_extensions: [
-                        'https://stac-extensions.github.io/eo/v1.0.0/schema.json',
-                        'https://stac-extensions.github.io/view/v1.0.0/schema.json'
+                    [
+                            id             : rasterEntry?.rasterDataSet?.catId,
+                            bbox           : [
+                                    coords?.x?.min(),
+                                    coords?.y?.min(),
+                                    coords?.x?.max(),
+                                    coords?.y?.max(),
+                            ],
+                            type           : 'Feature',
+                            links          : [],
+                            assets         : [:],
+                            geometry       : new JsonSlurper().parseText(geoJsonWriter.write(rasterEntry.groundGeom)),
+                            collection     : rasterEntry?.missionId?.toLowerCase(),
+                            properties     : [
+                                    datetime            : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
+                                    gsd                 : rasterEntry.gsdY ?: 0,
+                                    title               : rasterEntry.imageId ?: rasterEntry.title ?: '',
+                                    'eo:bands'          : (1..rasterEntry?.numberOfBands)?.collect { b ->
+                                        [
+                                                name: String.valueOf(b)
+                                        ]
+                                    },
+                                    'eo:cloud_cover'    : rasterEntry?.cloudCover ?: 0,
+                                    'view:azimuth'      : rasterEntry?.azimuthAngle ?: 0,
+                                    'view:off_nadir'    : 90 - (rasterEntry?.grazingAngle ?: 90),
+                                    'view:sun_azimuth'  : rasterEntry?.sunAzimuth ?: 0,
+                                    'view:sun_elevation': rasterEntry?.sunElevation ?: 0,
+                            ],
+                            stac_version   : '1.0.0',
+                            stac_extensions: [
+                                    'https://stac-extensions.github.io/eo/v1.0.0/schema.json',
+                                    'https://stac-extensions.github.io/view/v1.0.0/schema.json'
+                            ]
                     ]
-                ]
-            },
-            numberReturned: rasterDataSet?.rasterEntries?.size(),
-            timestamp: Instant.now() as String,
-            links: [],
+                },
+                numberReturned: rasterDataSet?.rasterEntries?.size(),
+                timestamp     : Instant.now() as String,
+                links         : [],
         ]
 
-        JsonOutput.prettyPrint( JsonOutput.toJson( data ) )
+        JsonOutput.prettyPrint(JsonOutput.toJson(data))
     }
 
-    def getSatelliteIdAndMissionIdByFilename(String filename)
-    {
+    def getSatelliteIdAndMissionIdByFilename(String filename) {
         def selectedRaster = RasterEntry.findByFilename(filename)
 
-        if (!selectedRaster){
+        if (!selectedRaster) {
             return [missionId: null]
         }
         def isorce = selectedRaster?.isorce
@@ -875,15 +795,14 @@ class RasterDataSetService implements ApplicationContextAware
                             } else {
                                 RasterDataSet.initCatId(rasterDataSet)
                             }
-                        }
-                        else {
+                        } else {
                             RasterDataSet.initCatId(rasterDataSet)
                         }
                     }
                 }
             }
         }
-        catch(Exception e){
+        catch (Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
             ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.ERROR)
         }
