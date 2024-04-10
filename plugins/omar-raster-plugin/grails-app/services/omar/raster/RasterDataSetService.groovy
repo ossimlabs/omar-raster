@@ -648,7 +648,8 @@ class RasterDataSetService implements ApplicationContextAware {
     def findByCatId(String catId) {
         def sql = Sql.newInstance(dataSource)
 
-        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area" 
+        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area",
+                st_astext(ground_geom) as geometry 
                 from raster_entry re, raster_data_set rds 
                 where re.raster_data_set_id=rds.id and cat_id=?"""
 
@@ -702,7 +703,7 @@ class RasterDataSetService implements ApplicationContextAware {
         }
         catch (Exception e) {
             log.error("Failed to write STAC spec for ${filename}. ${e.message}")
-            ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.ERROR)
+            ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -804,7 +805,7 @@ class RasterDataSetService implements ApplicationContextAware {
         }
         catch (Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
-            ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.ERROR)
+            ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
     }

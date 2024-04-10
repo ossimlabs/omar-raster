@@ -386,8 +386,7 @@ class RasterEntry
     result
   }
 
-  static RasterEntry initRasterEntry(def rasterEntryNode, RasterEntry rasterEntry = null)
-  {
+  static RasterEntry initRasterEntry(def rasterEntryNode, RasterEntry rasterEntry = null) {
     rasterEntry = rasterEntry ?: new RasterEntry()
 
     rasterEntry.entryId = rasterEntryNode.entryId?.text()?.trim()
@@ -397,24 +396,22 @@ class RasterEntry
     rasterEntry.numberOfResLevels = rasterEntryNode?.numberOfResLevels?.toInteger()
     rasterEntry.bitDepth = rasterEntryNode?.bitDepth?.toInteger()
     rasterEntry.dataType = rasterEntryNode?.dataType
-    if ( rasterEntryNode?.TiePointSet )
-    {
-      rasterEntry.tiePointSet = "<TiePointSet><Image><coordinates>${rasterEntryNode?.TiePointSet.Image.coordinates.text().replaceAll( "\n", "" )}</coordinates></Image>"
-      rasterEntry.tiePointSet += "<Ground><coordinates>${rasterEntryNode?.TiePointSet.Ground.coordinates.text().replaceAll( "\n", "" )}</coordinates></Ground></TiePointSet>"
+    if (rasterEntryNode?.TiePointSet) {
+      rasterEntry.tiePointSet = "<TiePointSet><Image><coordinates>${rasterEntryNode?.TiePointSet.Image.coordinates.text().replaceAll("\n", "")}</coordinates></Image>"
+      rasterEntry.tiePointSet += "<Ground><coordinates>${rasterEntryNode?.TiePointSet.Ground.coordinates.text().replaceAll("\n", "")}</coordinates></Ground></TiePointSet>"
     }
     def gsdNode = rasterEntryNode?.gsd
     def dx = gsdNode?.@dx?.text()
     def dy = gsdNode?.@dy?.text()
     def gsdUnit = gsdNode?.@unit.text()
-    if ( dx && dy && gsdUnit )
-    {
-      rasterEntry.gsdX = ( dx != "nan" ) ? dx?.toDouble() : null
-      rasterEntry.gsdY = ( dy != "nan" ) ? dy?.toDouble() : null
+    if (dx && dy && gsdUnit) {
+      rasterEntry.gsdX = (dx != "nan") ? dx?.toDouble() : null
+      rasterEntry.gsdY = (dy != "nan") ? dy?.toDouble() : null
       rasterEntry.gsdUnit = gsdUnit
     }
 
-    rasterEntry.groundGeom = initGroundGeom( rasterEntryNode?.groundGeom )
-    rasterEntry.acquisitionDate = initAcquisitionDate( rasterEntryNode )
+    rasterEntry.groundGeom = initGroundGeom(rasterEntryNode?.groundGeom)
+    rasterEntry.acquisitionDate = initAcquisitionDate(rasterEntryNode)
 
 /*
     if ( rasterEntry.groundGeom && !rasterEntry.tiePointSet )
@@ -439,78 +436,88 @@ class RasterEntry
       }
     }
     */
-    for ( def rasterEntryFileNode in rasterEntryNode.fileObjects?.RasterEntryFile )
-    {
+    for (def rasterEntryFileNode in rasterEntryNode.fileObjects?.RasterEntryFile) {
       def obj = rasterEntry?.fileObjects?.find { it.name == rasterEntryFileNode?.name?.text() }
-      if ( !obj )
-      {
-        RasterEntryFile rasterEntryFile = RasterEntryFile.initRasterEntryFile( rasterEntryFileNode )
-        if ( rasterEntryFile )
-        {
-          rasterEntry.addToFileObjects( rasterEntryFile )
+      if (!obj) {
+        RasterEntryFile rasterEntryFile = RasterEntryFile.initRasterEntryFile(rasterEntryFileNode)
+        if (rasterEntryFile) {
+          rasterEntry.addToFileObjects(rasterEntryFile)
         }
       }
     }
     def metadataNode = rasterEntryNode.metadata
-    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects( "main" )
+    def mainFile = rasterEntry.rasterDataSet.getFileFromObjects("main")
 
     def filename = mainFile?.name?.trim()
 
-    if ( !rasterEntry.filename && filename )
-    {
+    if (!rasterEntry.filename && filename) {
       rasterEntry.filename = filename
     }
 
-    initRasterEntryMetadata( metadataNode, rasterEntry )
+    initRasterEntryMetadata(metadataNode, rasterEntry)
 
-    if(rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags)
-    {
-      initRasterEntryOtherTagsXml( rasterEntry )
+    if (rasterEntry?.grailsApplication?.config?.stager?.includeOtherTags) {
+      initRasterEntryOtherTagsXml(rasterEntry)
     }
 
-    if ( !rasterEntry.indexId )
-    {
+    if (!rasterEntry.indexId) {
       def indexIdKey = "${rasterEntry.entryId}-${filename}"
       def indexIdValue = indexIdKey.encodeAsSHA256()
       // println "${indexIdKey}=${indexIdValue}"
       rasterEntry.indexId = indexIdValue
     }
-    if ( rasterEntry.validModel == null )
-    {
+    if (rasterEntry.validModel == null) {
       rasterEntry.validModel = false
     }
 
     /* HACK ALERT - START */
-    def omdFile = "${FilenameUtils.removeExtension( filename )}.omd" as File
+    def omdFile = "${FilenameUtils.removeExtension(filename)}.omd" as File
 
-    if ( omdFile?.exists() ) {
-        def kwl = omdFile?.readLines()?.inject([:]) { a, b ->
-          def c = b.split( ':' )?.collect { it.trim() }
+    if (omdFile?.exists()) {
+      def kwl = omdFile?.readLines()?.inject([:]) { a, b ->
+        def c = b.split(':')?.collect { it.trim() }
 
-          a[c[0]] = c[1]
-          a
-        }
+        a[c[0]] = c[1]
+        a
+      }
 
-        if ( kwl["ground_geom_${rasterEntry?.entryId}"]  ) {
-          rasterEntry?.groundGeom = new WKTReader().read( kwl["ground_geom_${rasterEntry?.entryId}"]  )
-          rasterEntry?.groundGeom.setSRID( 4326 )
-        }
+      if (kwl["ground_geom_${rasterEntry?.entryId}"]) {
+        rasterEntry?.groundGeom = new WKTReader().read(kwl["ground_geom_${rasterEntry?.entryId}"])
+        rasterEntry?.groundGeom.setSRID(4326)
+      }
 
-        if ( kwl["mission_id"]  ) {
-          rasterEntry?.missionId =  kwl["mission_id"]
-          rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: rasterEntry?.missionId)
-        }
+      if (kwl["mission_id"]) {
+        rasterEntry?.missionId = kwl["mission_id"]
+        rasterEntry.missionIdTag = MissionIdTag.findOrSaveWhere(name: rasterEntry?.missionId)
+      }
     }
     /* HACK ALERT - END */
 
-    if ( rasterEntry?.missionId == 'SkySat') {
+    if (rasterEntry?.missionId == 'SkySat') {
       def skysatFile = filename as File
-      def (_, scid) = (skysatFile.name =~ /_(ssc\d*)_/)[0]
-      def isorce = scid.toUpperCase()
-      rasterEntry?.isorce = isorce
+      try {
+        def hasScid = skysatFile?.name =~ /(ss[c]?)0*([0-9]?[1-9]?[0-9]+)/
+
+        if (hasScid.find()) {
+          def scid = hasScid.group(1) + hasScid.group(2)
+
+          if (!scid?.contains("c")) {
+
+            scid = "ssc${hasScid.group(2)}"
+          }
+
+          scid.toUpperCase()
+        } else {
+          System.err.println("Can't get the isorce for ${filename}")
+        }
+      }
+      catch (Exception e) {
+        System.err.println("Can't get the isorce for ${filename}")
+      }
+
+      return rasterEntry
     }
 
-    return rasterEntry
   }
 
   static Geometry initGroundGeom(def groundGeomNode)
