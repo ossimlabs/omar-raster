@@ -369,15 +369,13 @@ class RasterDataSetService implements ApplicationContextAware {
         logsJson["ingest_status"] = httpStatusMessage?.status
         logsJson["file_name"] = filename
 
-        // Print logs in JSON for ElasticSearch and Kibana parsing
-        println new JsonBuilder(logsJson).toString()
-
-
-        generateCatalogId(filename)
-
+        def catId = generateCatalogId(filename)
         // Write out the stac spec
         writeStacJson(filename)
+        logsJson["catId"] = catId
 
+        // Print logs in JSON for ElasticSearch and Kibana parsing
+        println new JsonBuilder(logsJson).toString()
 //        if (httpStatusMessage?.status != 200)
 //        {
 //            log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage.message}")
@@ -772,6 +770,7 @@ class RasterDataSetService implements ApplicationContextAware {
 
     def generateCatalogId(String filename) {
 
+        def catId
         try {
             RasterDataSet.withTransaction {
                 def rasterDataSet = RasterFile.where {
@@ -787,12 +786,12 @@ class RasterDataSetService implements ApplicationContextAware {
                         def isorce = selectedRaster?.isorce
                         def missionId = selectedRaster?.missionId
                         if (missionId && isorce) {
-                            def catId = catalogIdService.generateCatId(missionId, isorce, filename)
+                            catId = catalogIdService.generateCatId(missionId, isorce, filename)
 
                             if (catId) {
                                 // Get the rasterDataSet to update the catId
                                 rasterDataSet.setCatId(catId)
-                                rasterDataSet.save(flush: true, failOnError: true)
+                                rasterDataSet.save(flush: true)
                             } else {
                                 RasterDataSet.initCatId(rasterDataSet)
                             }
@@ -800,13 +799,13 @@ class RasterDataSetService implements ApplicationContextAware {
                             RasterDataSet.initCatId(rasterDataSet)
                         }
                     }
-                }
             }
+        }
         }
         catch (Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
             ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.INTERNAL_SERVER_ERROR)
         }
-
+        catId
     }
 }
