@@ -505,12 +505,29 @@ class RasterEntry
 
     if ( rasterEntry?.missionId == 'SkySat') {
       def skysatFile = filename as File
-      def (_, scid) = (skysatFile.name =~ /_(ssc\d*)_/)[0]
-      def isorce = scid.toUpperCase()
-      rasterEntry?.isorce = isorce
+      try {
+        def hasScid = skysatFile?.name =~ /(ss[c]?)0*([0-9]?[1-9]?[0-9]+)/
+
+        if (hasScid.find()) {
+          def scid = hasScid.group(1) + hasScid.group(2)
+
+          if (!scid?.contains("c")) {
+
+            scid = "ssc${hasScid.group(2)}"
+          }
+
+          rasterEntry?.isorce = scid?.toUpperCase()
+        } else {
+          System.err.println("Can't get the isorce for ${filename}")
+        }
+      }
+      catch (Exception e) {
+        System.err.println("Can't get the isorce for ${filename}")
+      }
+
+      return rasterEntry
     }
 
-    return rasterEntry
   }
 
   static Geometry initGroundGeom(def groundGeomNode)
