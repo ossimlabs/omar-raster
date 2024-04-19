@@ -772,35 +772,33 @@ class RasterDataSetService implements ApplicationContextAware {
 
         def catId
         try {
-            RasterDataSet.withTransaction {
-                def rasterDataSet = RasterFile.where {
-                    name == filename && type == 'main'
-                }.find()?.rasterDataSet
+            def rasterDataSet = RasterFile.where {
+                name == filename && type == 'main'
+            }.find()?.rasterDataSet
+            rasterDataSet?.lock()
+            if (!rasterDataSet?.catId) {
 
-                if (!rasterDataSet?.catId) {
+                def selectedRaster = RasterEntry.findByFilename(filename)
 
-                    def selectedRaster = RasterEntry.findByFilename(filename)
+                if (selectedRaster) {
 
-                    if (selectedRaster) {
-
-                        def isorce = selectedRaster?.isorce
-                        def missionId = selectedRaster?.missionId
-                        if (missionId && isorce) {
+                    def isorce = selectedRaster?.isorce
+                    def missionId = selectedRaster?.missionId
+                    if (missionId && isorce) {
                             catId = catalogIdService.generateCatId(missionId, isorce, filename)
 
-                            if (catId) {
-                                // Get the rasterDataSet to update the catId
-                                rasterDataSet.setCatId(catId)
+                        if (catId) {
+                            // Get the rasterDataSet to update the catId
+                            rasterDataSet.setCatId(catId)
                                 rasterDataSet.save(flush: true)
-                            } else {
-                                RasterDataSet.initCatId(rasterDataSet)
-                            }
                         } else {
                             RasterDataSet.initCatId(rasterDataSet)
                         }
+                    } else {
+                        RasterDataSet.initCatId(rasterDataSet)
                     }
+                }
             }
-        }
         }
         catch (Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
