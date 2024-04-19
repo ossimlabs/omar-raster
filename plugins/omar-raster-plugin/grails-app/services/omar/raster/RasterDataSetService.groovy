@@ -369,15 +369,13 @@ class RasterDataSetService implements ApplicationContextAware {
         logsJson["ingest_status"] = httpStatusMessage?.status
         logsJson["file_name"] = filename
 
-        // Print logs in JSON for ElasticSearch and Kibana parsing
-        println new JsonBuilder(logsJson).toString()
-
-
-        generateCatalogId(filename)
-
+        def catId = generateCatalogId(filename)
         // Write out the stac spec
         writeStacJson(filename)
+        logsJson["catId"] = catId
 
+        // Print logs in JSON for ElasticSearch and Kibana parsing
+        println new JsonBuilder(logsJson).toString()
 //        if (httpStatusMessage?.status != 200)
 //        {
 //            log.error("🚩 Error: ${filename} ${httpStatusMessage?.status} ${httpStatusMessage.message}")
@@ -648,7 +646,8 @@ class RasterDataSetService implements ApplicationContextAware {
     def findByCatId(String catId) {
         def sql = Sql.newInstance(dataSource)
 
-        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area" 
+        def query = """select re.mission_id, re.filename, st_area( ground_geom::geography ) / 1000^2 as "area",
+                st_astext(ground_geom) as geometry 
                 from raster_entry re, raster_data_set rds 
                 where re.raster_data_set_id=rds.id and cat_id=?"""
 
@@ -702,7 +701,7 @@ class RasterDataSetService implements ApplicationContextAware {
         }
         catch (Exception e) {
             log.error("Failed to write STAC spec for ${filename}. ${e.message}")
-            ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.ERROR)
+            ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -771,41 +770,40 @@ class RasterDataSetService implements ApplicationContextAware {
 
     def generateCatalogId(String filename) {
 
+        def catId
         try {
-            RasterDataSet.withTransaction {
-                def rasterDataSet = RasterFile.where {
-                    name == filename && type == 'main'
-                }.find()?.rasterDataSet
+            def rasterDataSet = RasterFile.where {
+                name == filename && type == 'main'
+            }.find()?.rasterDataSet
+            rasterDataSet?.lock()
+            if (!rasterDataSet?.catId) {
 
-                if (!rasterDataSet?.catId) {
+                def selectedRaster = RasterEntry.findByFilename(filename)
 
-                    def selectedRaster = RasterEntry.findByFilename(filename)
+                if (selectedRaster) {
 
-                    if (selectedRaster) {
+                    def isorce = selectedRaster?.isorce
+                    def missionId = selectedRaster?.missionId
+                    if (missionId && isorce) {
+                            catId = catalogIdService.generateCatId(missionId, isorce, filename)
 
-                        def isorce = selectedRaster?.isorce
-                        def missionId = selectedRaster?.missionId
-                        if (missionId && isorce) {
-                            def catId = catalogIdService.generateCatId(missionId, isorce, filename)
-
-                            if (catId) {
-                                // Get the rasterDataSet to update the catId
-                                rasterDataSet.setCatId(catId)
-                                rasterDataSet.save(flush: true, failOnError: true)
-                            } else {
-                                RasterDataSet.initCatId(rasterDataSet)
-                            }
+                        if (catId) {
+                            // Get the rasterDataSet to update the catId
+                            rasterDataSet.setCatId(catId)
+                                rasterDataSet.save(flush: true)
                         } else {
                             RasterDataSet.initCatId(rasterDataSet)
                         }
+                    } else {
+                        RasterDataSet.initCatId(rasterDataSet)
                     }
                 }
             }
         }
         catch (Exception e) {
             log.error("Hit an error generating catalogId. ${e.message}")
-            ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.ERROR)
+            ingestService.writeErrors(filename, "Failed generating catalogId", HttpStatus.INTERNAL_SERVER_ERROR)
         }
-
+        catId
     }
 }
