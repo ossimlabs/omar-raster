@@ -300,4 +300,14 @@ The service api **getRasterFiles**
 		render rasterDataSetService.findByFilePath(filePath)
 	}
 
+	@ApiOperation( value = "Create a STAC spec json from a given Raster in the database",
+			produces = 'application/json',
+			httpMethod = 'POST' )
+	@ApiImplicitParams([
+			@ApiImplicitParam( name = 'filename', value = 'The Path of the file', dataType = 'string', paramType = "query", required = true )
+	])
+	def writeStacJson(String filename) {
+		render rasterDataSetService.writeStacJson(filename)
+	}
+
 }

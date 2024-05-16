@@ -680,13 +680,14 @@ class RasterDataSetService implements ApplicationContextAware {
     }
 
     def writeStacJson(String filename) {
+        File jsonFile = "${filename}_discovery.json" as File
+        def returnJson = [:]
         try {
             def rasterDataSet = RasterFile.where {
                 name == filename && type == 'main'
             }.find()?.rasterDataSet
 
             def json
-            File jsonFile = "${filename}_discovery.json" as File
 
             def results = getSatelliteIdAndMissionIdByFilename(filename)
 
@@ -695,14 +696,19 @@ class RasterDataSetService implements ApplicationContextAware {
                 jsonFile.withWriter { Writer out ->
                     out.println json
                 }
+                log.info("Created STAC spec: ${jsonFile}")
+                returnJson.text = "Successfully created ${jsonFile}."
             } else {
-                log.info("Couldn't find rasterDataset for ${filename}")
+                log.error("Error creating STAC. Couldn't find rasterDataset: ${filename}")
+                returnJson.error = "Couldn't find rasterDataset: ${filename}"
             }
         }
         catch (Exception e) {
             log.error("Failed to write STAC spec for ${filename}. ${e.message}")
             ingestService.writeErrors(filename, "Failed to write STAC Spec", HttpStatus.INTERNAL_SERVER_ERROR)
+            returnJson.error = "Failed to write STAC spec for ${filename}. ${e.message}"
         }
+        return JsonOutput.toJson(returnJson)
     }
 
 
