@@ -10,5 +10,6 @@ class OmarRasterUrlMappings {
         "/dataManager/getRasterFiles"(controller: 'rasterDataSet', action: 'getRasterFiles')
         "/dataManager/updateAccessDates"(controller: 'rasterDataSet', action: 'updateAccessDates')
         "/dataManager/hasSICD"(controller: 'rasterDataSet', action: 'hasSICD')
+        "/dataManager/writeStacJson"(controller: 'rasterDataSet', action: 'writeStacJson')
     }
 }
