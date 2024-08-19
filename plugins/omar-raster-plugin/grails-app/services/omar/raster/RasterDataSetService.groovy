@@ -729,7 +729,7 @@ class RasterDataSetService implements ApplicationContextAware {
                             properties     : [
                                     datetime            : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")?.format(rasterEntry?.acquisitionDate) ?: '',
                                     gsd                 : rasterEntry.gsdY ?: 0,
-                                    title               : rasterEntry.imageId ?: rasterEntry.title ?: '',
+                                    title               : (rasterEntry.imageId && rasterEntry.imageId != "SIDD: Unknown") ? rasterEntry.imageId : rasterEntry.title ?: '',
                                     'eo:bands'          : (1..rasterEntry?.numberOfBands)?.collect { b ->
                                         [
                                                 name: String.valueOf(b)
