@@ -835,7 +835,7 @@ class RasterEntry
             case "title":
             case "ititle":
             case "iid2":
-              if ( value && !rasterEntry.title )
+              if ( value && !rasterEntry.title && !(value == "SIDD: Unknown"))
               {
                 rasterEntry.title = value
               }
