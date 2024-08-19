@@ -17,3 +17,4 @@ prodDb.mv.db
 bin
 plugins/omar-raster-plugin/bin
 .vscode/
+/lib/
